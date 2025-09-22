@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>[Beckwards] — Official Site</title>
+  <meta name="description" content="[Beckwards] — music, shows, news." />
+  <meta property="og:title" content="[Beckwards]" />
+  <meta property="og:description" content="New music + shows." />
+  <meta property="og:image" content="assets/og-image.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="assets/under-construction.gif" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page">
+
+    <header>
+      <h1><span class="star">★</span> [Beckwards] <span class="star">★</span></h1>
+      <marquee behavior="scroll" direction="left" scrollamount="4" class="marq">
+        new single out now • tour soon • sign the guestbook • tell your friends
+      </marquee>
+      <nav class="nav">
+        <a href="#music">music</a> ·
+        <a href="#video">video</a> ·
+        <a href="#shows">shows</a> ·
+        <a href="#contact">contact</a> ·
+        <a href="#guestbook">guestbook</a>
+      </nav>
+    </header>
+
+    <main>
+      <section id="music">
+        <h2>music</h2>
+        <!-- Option A: embed a streaming player -->
+        <!-- Spotify example -->
+        <iframe style="border-radius:0" src="https://open.spotify.com/embed/artist/INSERT_ARTIST_ID?utm_source=generator"
+                width="100%" height="152" frameborder="0" allow="clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+
+        <!-- Bandcamp single/album embed works great too -->
+        <!-- <iframe style="border:0;width:100%;height:120px" src="https://bandcamp.com/EmbeddedPlayer/album=XXXX/size=large/bgcol=ffffff/linkcol=333333/artwork=small/transparent=true/" seamless>
+             <a href="https://yourartist.bandcamp.com/album/your-album">Your Album by Your Artist</a>
+           </iframe> -->
+
+        <p class="links">
+          <a href="https://open.spotify.com/artist/..." target="_blank">spotify</a> /
+          <a href="https://music.apple.com/artist/..." target="_blank">apple</a> /
+          <a href="https://yourartist.bandcamp.com" target="_blank">bandcamp</a> /
+          <a href="https://soundcloud.com/..." target="_blank">soundcloud</a>
+        </p>
+      </section>
+
+      <section id="video">
+        <h2>video</h2>
+        <div class="video-wrap">
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/VIDEO_ID"
+            title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+          </iframe>
+        </div>
+      </section>
+
+      <section id="shows">
+        <h2>shows</h2>
+        <table class="shows">
+          <tr><th>date</th><th>city</th><th>venue</th><th>tickets</th></tr>
+          <tr><td>2025-10-12</td><td>Charlotte, NC</td><td>Neighborhood Theatre</td><td><a href="#">buy</a></td></tr>
+          <tr><td>2025-11-02</td><td>Atlanta, GA</td><td>Terminal West</td><td><a href="#">buy</a></td></tr>
+        </table>
+        <p class="tiny">(* all dates subject to change)</p>
+      </section>
+
+      <section id="contact">
+        <h2>contact</h2>
+        <p>booking: <a href="mailto:booking@example.com">booking@example.com</a></p>
+        <p>press: <a href="mailto:press@example.com">press@example.com</a></p>
+        <p>mgmt: <a href="mailto:mgmt@example.com">mgmt@example.com</a></p>
+      </section>
+
+      <section id="guestbook">
+        <h2>guestbook</h2>
+        <!-- Minimal form using Formspree (no backend needed). Replace with your endpoint. -->
+        <form action="https://formspree.io/f/yourid" method="POST" class="guestbook">
+          <label>name <input name="name" required></label>
+          <label>message <textarea name="message" rows="3" required></textarea></label>
+          <button type="submit">sign</button>
+        </form>
+        <p class="tiny">by signing you agree to our vibes</p>
+      </section>
+    </main>
+
+    <footer>
+      <img src="assets/under-construction.gif" alt="under construction" class="uc" />
+      <div class="hit-counter">hits: <span id="hits">000042</span></div>
+      <p>© <span id="year"></span> [Beckwards]. built with love on the web.</p>
+    </footer>
+  </div>
+
+  <script>
+    // tiny bits of “jank”
+    document.getElementById('year').textContent = new Date().getFullYear();
+    // fake hit counter that increments per visit (localStorage)
+    const key = 'hit-count';
+    let n = Number(localStorage.getItem(key) || '41') + 1;
+    localStorage.setItem(key, String(n));
+    document.getElementById('hits').textContent = String(n).padStart(6,'0');
+  </script>
+</body>
+</html>

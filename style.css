@@ -1,0 +1,47 @@
+:root {
+  --bg: #fff;
+  --fg: #000;
+  --link: #0000ee;       /* classic blue link */
+  --visited: #551a8b;    /* classic purple visited */
+  --accent: #ffef00;     /* playful highlight */
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --sys: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+}
+
+html, body { background: var(--bg); color: var(--fg); }
+body { margin: 0; font: 16px/1.4 var(--sys); }
+.page { max-width: 760px; margin: 24px auto; padding: 8px 14px; border: 3px double #000; }
+
+h1, h2 { font-family: var(--mono); text-transform: lowercase; margin: 0.2em 0; }
+h1 { font-size: 28px; text-align: center; letter-spacing: 1px; }
+h2 { font-size: 20px; border-bottom: 1px dashed #000; padding-bottom: 4px; }
+
+.nav { text-align: center; margin: 8px 0 18px; }
+.nav a { text-decoration: underline; }
+a { color: var(--link); }
+a:visited { color: var(--visited); }
+
+.marq { font-family: var(--mono); background: var(--accent); padding: 4px; border: 1px solid #000; margin: 8px 0 6px; }
+
+section { margin: 24px 0; }
+.links a { margin-right: 8px; }
+
+.video-wrap { position: relative; aspect-ratio: 16/9; border: 2px solid #000; }
+.video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.shows { width: 100%; border-collapse: collapse; font-family: var(--mono); }
+.shows th, .shows td { border: 1px solid #000; padding: 6px; }
+.tiny { font-size: 12px; opacity: 0.8; }
+
+.guestbook { display: grid; gap: 6px; max-width: 420px; }
+.guestbook input, .guestbook textarea { width: 100%; border: 1px solid #000; padding: 6px; font-family: var(--sys); }
+.guestbook button { border: 2px outset #000; background: #eee; padding: 6px 10px; cursor: pointer; }
+
+footer { text-align: center; font-family: var(--mono); margin-top: 24px; }
+.uc { width: 64px; height: 64px; image-rendering: pixelated; }
+.star { display: inline-block; transform: rotate(6deg); }
+
+@media (prefers-reduced-motion: no-preference) {
+  h1 .star { animation: wobble 1.6s infinite ease-in-out; }
+}
+@keyframes wobble { 0%,100%{ transform: rotate(6deg)} 50%{ transform: rotate(-6deg)} }
