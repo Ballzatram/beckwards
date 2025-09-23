@@ -23,24 +23,29 @@
     <!-- top title + subtitle -->
     <header class="top">
       <h1>BECKWARDS</h1>
-      <p class="subtitle">Claw Machine</p>
+      <p class="subtitle">new music, out now</p>
     </header>
 
     <!-- two-column stage: left links, center video -->
     <main class="stage">
       <aside class="left-links" aria-label="site pages">
         <ul>
-            <li><a href="music.html">Music</a></li>
-            <li><a href="lyrics.html">Lyrics</a></li>
-            <li><a href="store.html">Store</a></li>
-            <li><a href="live.html">Live</a></li>
-            <li><a href="digital.html">Digital Madness</a></li>
+          <!-- HOME should link to / so the URL shows no filename -->
+          <li><a href="/">Home</a></li>
+          <li><a href="music.html">Music</a></li>
+          <li><a href="lyrics.html">Lyrics</a></li>
+          <li><a href="store.html">Store</a></li>
+          <li><a href="live.html">Live</a></li>
+          <li><a href="digital.html">Digital Madness</a></li>
         </ul>
       </aside>
 
       <section class="center-visual" aria-label="hero video">
         <div class="hero-frame">
-          <video class="hero-video" autoplay loop muted playsinline preload="metadata" poster="assets/og-image.jpg">
+          <video class="hero-video"
+                 autoplay loop muted playsinline
+                 preload="auto"
+                 poster="assets/og-image.jpg">
             <source src="assets/lil.mp4" type="video/mp4" />
             Sorry—your browser doesn’t support embedded video. <a href="assets/lil.mp4">Watch the mp4</a>.
           </video>
@@ -64,14 +69,29 @@
   </div>
 
   <script>
-    // year
+    // Set year
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // best-effort auto-play if mobile blocks it
+    // Seamless loop fix: jump back just before the last frame to avoid a black flash
     const v = document.querySelector('.hero-video');
-    if (v && v.paused) {
+    const EPS = 0.08; // seconds to skip before the end (tweak if needed)
+
+    // best-effort autoplay (mobile may block)
+    v?.play?.().catch(() => {});
+
+    v?.addEventListener('timeupdate', () => {
+      if (!v.duration) return;
+      if (v.duration - v.currentTime < EPS) {
+        // jump just before start; small offset avoids some browsers showing the first black frame
+        v.currentTime = 0.001;
+      }
+    });
+
+    // Fallback: if 'ended' fires anyway, restart immediately
+    v?.addEventListener('ended', () => {
+      v.currentTime = 0.001;
       v.play().catch(() => {});
-    }
+    });
   </script>
 </body>
 </html>
