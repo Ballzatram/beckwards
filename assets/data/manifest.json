@@ -1,0 +1,87 @@
+{
+  "meta": { "version": 1 },
+  "images": [
+    { "id": "bg",          "src": "assets/sprites/bg/bg_back.png" },
+    { "id": "bezel",       "src": "assets/sprites/bg/cabinet_bezel.png" },
+    { "id": "chute",       "src": "assets/sprites/bg/chute.png" },
+
+    { "id": "rail",        "src": "assets/sprites/claw/rail.png" },
+    { "id": "carriage",    "src": "assets/sprites/claw/carriage.png" },
+    { "id": "cable",       "src": "assets/sprites/claw/cable.png" },
+    { "id": "claw_open",   "src": "assets/sprites/claw/claw_open.png" },
+    { "id": "claw_closed", "src": "assets/sprites/claw/claw_closed.png" },
+
+    { "id": "prize_star",  "src": "assets/sprites/prizes/plush_star.png" },
+    { "id": "prize_duck",  "src": "assets/sprites/prizes/duck.png" },
+    { "id": "prize_box",   "src": "assets/sprites/prizes/mystery_box.png" },
+
+    { "id": "glass",       "src": "assets/sprites/bg/glass_overlay_soft.png" }
+  ],
+  "audio": [
+    {
+      "id": "motor_loop",
+      "src": [
+        "assets/audio/motor_loop.ogg",
+        "assets/audio/motor_loop.mp3",
+        "assets/audio/motor_loop.wav"
+      ],
+      "loop": true
+    },
+    {
+      "id": "ui_click",
+      "src": [
+        "assets/audio/ui_click.ogg",
+        "assets/audio/ui_click.mp3",
+        "assets/audio/ui_click.wav"
+      ]
+    },
+    {
+      "id": "claw_open_sfx",
+      "src": [
+        "assets/audio/claw_open.ogg",
+        "assets/audio/claw_open.mp3",
+        "assets/audio/claw_open.wav"
+      ]
+    },
+    {
+      "id": "claw_close_sfx",
+      "src": [
+        "assets/audio/claw_close.ogg",
+        "assets/audio/claw_close.mp3",
+        "assets/audio/claw_close.wav"
+      ]
+    },
+    {
+      "id": "glass_bonk",
+      "src": [
+        "assets/audio/glass_bonk.ogg",
+        "assets/audio/glass_bonk.mp3",
+        "assets/audio/glass_bonk.wav"
+      ]
+    },
+    {
+      "id": "prize_drop",
+      "src": [
+        "assets/audio/prize_drop.ogg",
+        "assets/audio/prize_drop.mp3",
+        "assets/audio/prize_drop.wav"
+      ]
+    },
+    {
+      "id": "win",
+      "src": [
+        "assets/audio/win.ogg",
+        "assets/audio/win.mp3",
+        "assets/audio/win.wav"
+      ]
+    },
+    {
+      "id": "fail",
+      "src": [
+        "assets/audio/fail.ogg",
+        "assets/audio/fail.mp3",
+        "assets/audio/fail.wav"
+      ]
+    }
+  ]
+}

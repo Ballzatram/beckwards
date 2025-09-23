@@ -1,0 +1,32 @@
+[
+  {
+    "id": "plush_star",
+    "sprite": "assets/sprites/prizes/plush_star.png",
+    "w": 40,
+    "h": 40,
+    "kg": 0.2,
+    "gripMod": 0.1,
+    "value": 100,
+    "rarity": 0.3
+  },
+  {
+    "id": "duck",
+    "sprite": "assets/sprites/prizes/duck.png",
+    "w": 48,
+    "h": 36,
+    "kg": 0.3,
+    "gripMod": 0.0,
+    "value": 80,
+    "rarity": 0.5
+  },
+  {
+    "id": "mystery_box",
+    "sprite": "assets/sprites/prizes/mystery_box.png",
+    "w": 36,
+    "h": 36,
+    "kg": 0.5,
+    "gripMod": -0.05,
+    "value": 150,
+    "rarity": 0.2
+  }
+]

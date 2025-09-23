@@ -1,0 +1,33 @@
+{
+  "bounds": {
+    "left": 16,
+    "right": 304
+  },
+  "speeds": {
+    "move": 140,
+    "return": 220
+  },
+  "drop": {
+    "maxDropMs": 1600,
+    "closeDelayMs": 240
+  },
+  "grip": {
+    "base": 0.55,
+    "liftBonusPerKg": -0.08
+  },
+  "rngSeed": 7,
+  "difficulty": [
+    {
+      "tries": 1,
+      "grip": 0.55
+    },
+    {
+      "tries": 3,
+      "grip": 0.48
+    }
+  ],
+  "canvas": {
+    "w": 320,
+    "h": 240
+  }
+}

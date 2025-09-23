@@ -1,154 +1,124 @@
-/* ===== Beckwards — chalk border + retro serif (with seamless video look) ===== */
-
+/* ===== Beckwards — base ===== */
 :root{
   --bg:#fff;
   --fg:#000;
-  --link:#000;       /* retro black links */
-  --visited:#000;    /* no color shift */
+  --link:#000;
+  --visited:#000;
   --serif:"Times New Roman", Times, Georgia, serif;
+
+  /* Coin-slot mouth hotspot geometry (home + overlay + console slot) */
+  --slot-hotspot-top: 38%;
+  --slot-hotspot-width: 76px;
+  --slot-hotspot-height: 50px;
+
+  /* Custom cursor (64x64) */
+  --coin-cursor-url: url('assets/cursors/robo-coin-cursor-64.png?v=1');
+  --coin-cursor-x: 32;
+  --coin-cursor-y: 32;
+
+  /* Cabinet sizing */
+  --cabinet-width: clamp(340px, 90vw, 1040px);
+  --cabinet-console-offset: 12px;    /* desktop bottom offset */
+  --cabinet-console-height: 180px;   /* body padding so footer isn’t covered */
 }
 
-*{box-sizing:border-box}
-html,body{height:100%}
-html,body{background:var(--bg); color:var(--fg)}
-body{
-  margin:0;
-  font:17px/1.5 var(--serif);
-}
+*{ box-sizing:border-box }
+html,body{ height:100% }
+html,body{ background:var(--bg); color:var(--fg) }
+body{ margin:0; font:17px/1.5 var(--serif) }
 
-/* Wrapper */
+/* ===== Layout / shared ===== */
 .wrap{
+  position: relative;
   max-width:1000px;
-  margin:24px auto 36px;
-  padding:0 16px 24px;
+  margin:18px auto 22px;
+  padding:0 16px 16px;
 }
 
-/* Title */
-.top{ text-align:center; margin:10px 0 18px }
-.top h1{
-  font-family:var(--serif);
-  font-size:42px;
-  margin:0 0 6px;
-}
-.subtitle{
-  margin:0;
-  font-size:20px;
-  font-style:italic;
-}
+.top{ text-align:center; margin:6px 0 12px }
+.top h1{ font-size:42px; margin:0 0 4px }
+.subtitle{ margin:0; font-size:20px; font-style:italic }
 
-/* Layout */
 .stage{
   display:grid;
-  grid-template-columns: 240px 1fr;
-  gap:40px;
+  grid-template-columns: 220px 1fr;
+  gap:32px;
   align-items:start;
-  margin-top:26px;
 }
 
-/* Left nav list */
-.left-links ul{
-  list-style:none;
-  padding:0;
-  margin:0;
-}
-.left-links li+li{ margin-top:14px }
-.left-links a{
-  text-decoration:underline;
-  font-size:22px;
-  color:var(--fg);
-}
-.left-links a:hover,
-.left-links a:focus-visible{
-  text-decoration-thickness:2px;
-  outline:none;
-}
+/* Left nav */
+.left-links ul{ list-style:none; padding:0; margin:0 }
+.left-links li+li{ margin-top:12px }
+.left-links a{ text-decoration:underline; font-size:22px; color:var(--fg) }
+.left-links a:hover, .left-links a:focus-visible{ text-decoration-thickness:2px; outline:none }
 
-/* Center video — chalky frame */
+/* ===== Hero video (compact with chalky frame) ===== */
 .hero-frame{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  margin:0 auto;
-  padding:6px;
-  background:#fff;
-
-  /* messy chalk-like shadow edges (both black) */
-  box-shadow:
-    3px 3px 0 #000,
-    -3px -3px 0 #000,
-    1px -2px 0 #000,
-    -2px 2px 0 #000;
-
+  display:flex; justify-content:center; align-items:center;
+  margin:0 auto 6px; padding:6px; background:#fff;
+  box-shadow: 3px 3px 0 #000, -3px -3px 0 #000, 1px -2px 0 #000, -2px 2px 0 #000;
   transform: rotate(-1.2deg);
-  filter: contrast(120%) brightness(95%) saturate(80%);
+  filter: contrast(115%) brightness(95%) saturate(85%);
 }
 .hero-video{
-  display:block;
-  max-width:100%;
-  width:720px;
-  max-height:70vh;
-  object-fit:cover;
-  background: transparent;   /* important: not black */
-  image-rendering:pixelated; /* rough pixelation vibe */
+  display:block; width:700px; max-width:100%; max-height:56vh;
+  object-fit:cover; image-rendering:pixelated; background:#000;
 }
 
-/* Bottom socials */
-.bottom-links{
-  margin:36px 0 10px;
-  text-align:center;
-  font-family:var(--serif);
+/* ===== Under-hero ===== */
+.under-hero{ margin-top:4px; }
+
+/* ===== Homepage coin slot (whole slot clickable) ===== */
+.coin-slot{
+  position: relative; width:180px; margin:8px 6px 0 auto; transform: rotate(-2deg);
+  user-select:none; background:none; padding:0; box-shadow:none; z-index:3;
+  cursor: var(--coin-cursor-url) var(--coin-cursor-x) var(--coin-cursor-y), pointer;
 }
+.coin-slot__img{ display:block; width:100%; height:auto; pointer-events:none }
+.coin-slot__hotspot{
+  position:absolute; left:50%; top:var(--slot-hotspot-top); transform:translateX(-50%);
+  width:var(--slot-hotspot-width); height:var(--slot-hotspot-height); background:transparent;
+  z-index:4; pointer-events:none;
+}
+
+/* Socials + Footer */
+.bottom-links{ margin:6px 0 4px; text-align:center }
 .bottom-links a{ text-decoration:none; color:var(--fg) }
 .bottom-links span{ margin:0 10px }
+.foot{ text-align:center; margin:0 auto 6px }
+.tiny{ font-size:12px; opacity:.9 }
 
-/* Shows table (live.html) */
-.shows{
-  width:100%;
-  border-collapse:collapse;
-  table-layout:fixed;
-  margin-top:8px;
-  font-family:var(--serif);
-  font-size:16px;
-}
-.shows th,
-.shows td{
-  border:1px solid #000;
-  padding:8px 6px;
-}
-.shows th{
-  text-align:left;
-  background:#f5f5f5;
-  font-weight:normal;
-  font-style:italic;
-}
-.shows tr:hover td{ background:#fafafa }
-.tiny{ font-size:12px; opacity:.9; }
-
-/* Footer */
-.foot{
-  text-align:center;
-  margin-top:8px;
-  font-family:var(--serif);
-}
-
-/* Accessibility */
 :focus-visible{ outline:1px dotted #000; outline-offset:2px }
 
-/* Small screens */
+/* ===== Coin animation (shared) ===== */
+.coin{
+  position:absolute; width:48px; height:48px;
+  background:url('assets/cursors/robo-coin-cursor-64.png') center/contain no-repeat;
+  transform: translateY(0); z-index:5;
+}
+.coin--into{ animation: coinInto .9s cubic-bezier(.2,.9,.3,1) forwards }
+@keyframes coinInto{
+  60% { transform: translateY(var(--dropY)); }
+  100%{ transform: translateY(calc(var(--dropY) + 2px)) scale(.9); opacity:.95; }
+}
+
+/* ===== Mobile tweaks ===== */
 @media (max-width:820px){
-  .stage{ grid-template-columns:1fr; gap:18px }
+  .stage{ grid-template-columns:1fr; gap:16px }
   .left-links{ order:2; text-align:center }
   .left-links li+li{ margin-top:10px }
   .left-links a{ font-size:20px }
-  .hero-video{ width:100%; max-height:54vh }
-  .hero-frame{
-    transform:rotate(0deg);
-    box-shadow:
-      2px 2px 0 #000,
-      -2px -2px 0 #000;
-  }
-  .top h1{ font-size:34px }
-  .subtitle{ font-size:18px }
+
+  .hero-frame{ transform:none; filter:none; }
+  .hero-video{ width:100%; max-height:50vh }
+
+  .coin-slot{ width:180px; margin:14px auto 0; transform: rotate(-1deg); }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .hero-frame{ transform:none; filter:none }
+  .coin--into{ animation:none }
 }
 
 /* Print */
@@ -156,3 +126,237 @@ body{
   .bottom-links{ display:none !important }
   a[href]:after{ content:" (" attr(href) ")"; font-size:12px }
 }
+
+/* =========================================================
+   Arcade page — cabinet + crisp canvas + console behavior
+   ========================================================= */
+
+/* Canvas: crisp pixel art */
+#game-canvas{
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  -ms-interpolation-mode: nearest-neighbor;
+  image-rendering: -moz-crisp-edges;
+}
+
+/* Ensure loading label positions correctly even before JS tweaks */
+#stage{ position: relative; }
+
+/* Prevent accidental blur from transforms */
+#stage, .game-stage { transform: none !important; will-change: auto; }
+
+/* Cabinet wrapper (matches arcade.html) */
+.cabinet{ width:var(--cabinet-width); margin:0 auto; }
+
+/* Window shell */
+.cabinet-window{
+  background:#262a2f;
+  border:2px solid #000;
+  box-shadow:4px 4px 0 #000,-2px -2px 0 #000,inset 0 0 0 3px #fff;
+  border-bottom:none; /* visually attaches to console below */
+}
+
+/* Stage size: allow 2–3x upscale of 320x240 */
+.game-stage{
+  margin:8px auto 10px;
+  width:clamp(320px, 85vw, 1000px);
+  height:clamp(360px, 70vh, 720px);
+  background:#0b0b0b;
+  border:2px solid #000;
+  box-shadow:4px 4px 0 #000,-2px -2px 0 #000,inset 0 0 0 3px #fff;
+  position:relative;
+}
+.stage-label{ position:absolute; top:8px; left:10px; font-size:12px; color:#eaeaea; opacity:.9; text-shadow:0 1px 0 #000 }
+
+/* Console panel that attaches to the window */
+.cabinet-console{
+  border:2px solid #000;
+  border-top:none;
+  background:linear-gradient(#1b1b1b,#0f0f0f);
+  box-shadow:4px 4px 0 #000,-2px -2px 0 #000;
+}
+
+/* Console internals */
+.console{
+  width:clamp(320px,72vw,640px);
+  margin:12px auto;
+  padding:14px 16px;
+  display:flex; align-items:center; justify-content:space-between; gap:18px;
+  background:repeating-linear-gradient(-25deg,rgba(255,255,255,.22) 0 6px,transparent 6px 16px),linear-gradient(#d72626,#b21818);
+  border:1px solid #000; border-radius:14px;
+  box-shadow:6px 6px 0 #000,-2px -2px 0 #000,inset 0 10px 18px rgba(255,255,255,.06);
+  position:relative;
+}
+.console-inner{position:relative;z-index:1;width:100%;display:flex;align-items:center;justify-content:space-between}
+
+/* Joystick (visual only) */
+.joy{display:grid;place-items:center;width:120px;height:100px;filter:drop-shadow(2px 2px 0 #000)}
+.joy-gate{
+  position:relative;width:78px;height:78px;border-radius:12px;
+  background:radial-gradient(68px 52px at 50% 40%,#151515,#0a0a0a);border:1px solid #000;
+  box-shadow:inset 0 8px 16px rgba(255,255,255,.06),inset 0 -6px 12px rgba(0,0,0,.6)
+}
+.joy-knob{
+  position:absolute;left:50%;top:50%;
+  width:24px;height:24px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,#ff4a4a,#b80e0e);border:2px solid #000;
+  transform:translate(-50%,-50%);touch-action:none;will-change:transform;
+}
+.joy-knob.spring{transition:transform .12s cubic-bezier(.2,.9,.3,1)}
+.joy-gate::after{
+  content:"";position:absolute;left:12px;right:12px;top:50%;height:2px;transform:translateY(-50%);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);pointer-events:none;
+}
+
+/* Button */
+.drop-wrap{display:grid;place-items:center;flex:1}
+.btn-drop{
+  width:64px;height:64px;border-radius:50%;background:#d21616;color:#fff;border:2px solid #000;
+  box-shadow:4px 4px 0 #000,inset 0 -6px 0 rgba(0,0,0,.35);font:bold 14px/1 "Times New Roman", Times, Georgia, serif;letter-spacing:.3px;
+}
+.btn-drop:active{transform:translate(1px,1px);box-shadow:3px 3px 0 #000,inset 0 -3px 0 rgba(0,0,0,.45)}
+
+/* ===== Permanent console coin slot (right side) ===== */
+.console-coin-slot{
+  position:relative;
+  width:120px;               /* fits nicely beside DROP */
+  height:84px;
+  border:1px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  border-radius:10px;
+  overflow:hidden;
+  transform: rotate(-1deg);
+  user-select:none;
+  display:grid;
+  place-items:center;
+  background:#222;
+}
+.console-coin-slot__img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  pointer-events:none;
+}
+.console-coin-slot__hotspot{
+  position:absolute;
+  left:50%;
+  top:var(--slot-hotspot-top);
+  transform:translateX(-50%);
+  width:var(--slot-hotspot-width);
+  height:var(--slot-hotspot-height);
+  pointer-events:none;     /* container is clickable */
+  z-index:2;
+}
+.console-coin-slot__badge{
+  position:absolute;
+  right:6px; bottom:6px;
+  font-size:10px;
+  background:#fff;
+  border:1px solid #000;
+  padding:2px 5px;
+  box-shadow:2px 2px 0 #000;
+}
+
+/* Enabled vs disabled (JS toggles .disabled) */
+.console-coin-slot:not(.disabled){
+  cursor: var(--coin-cursor-url) var(--coin-cursor-x) var(--coin-cursor-y), pointer;
+  filter:none;
+}
+.console-coin-slot.disabled{
+  cursor: not-allowed;
+  filter: grayscale(0.55) brightness(0.9);
+}
+.console-coin-slot.disabled .console-coin-slot__badge{
+  opacity:.85;
+}
+
+/* Keep any coin animation above the slot art */
+.console .coin{ z-index:3; }
+
+/* Footer */
+.arcade-sitefoot{margin-top:auto;padding:16px 12px 20px;text-align:center;color:#eaeaea;font-size:12px;text-shadow:0 1px 0 #000}
+
+/* ===== Behavior: sticky on mobile, fixed on desktop ===== */
+@media (max-width: 899px){
+  .cabinet-console{ position:sticky; bottom:12px; z-index:30; }
+  .game-stage{ height:clamp(320px, 52vh, 560px); }
+}
+
+@media (min-width: 900px){
+  .cabinet-console{
+    position:fixed;
+    left:50%; transform:translateX(-50%);
+    bottom:var(--cabinet-console-offset);
+    width:var(--cabinet-width);
+    z-index:50;
+  }
+  /* pad the page so the fixed console never covers the footer */
+  body{ padding-bottom: var(--cabinet-console-height); }
+}
+
+/* =========================================================
+   Arcade end-of-round overlay (mirrors homepage coin slot)
+   ========================================================= */
+.arcade-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+
+  /* ⬇ NEW: let clicks pass through the overlay dimmer */
+  pointer-events: none;
+}
+.arcade-card{
+  width: min(92vw, 520px);
+  background: #fff;
+  border: 2px solid #000;
+  box-shadow: 6px 6px 0 #000, -2px -2px 0 #000;
+  padding: 18px 18px 22px;
+  text-align: center;
+
+  /* ⬇ NEW: keep the centered card interactive */
+  pointer-events: auto;
+}
+.arcade-card h2{ margin: 0 0 6px; font-size: 28px; }
+.arcade-card p{ margin: 0 0 14px; }
+
+/* Overlay coin slot (optional) */
+.overlay-slot{
+  position: relative;
+  width: 200px;
+  height: 90px;
+  margin: 6px auto 0;
+  transform: rotate(-1.5deg);
+  user-select:none;
+  cursor: var(--coin-cursor-url) var(--coin-cursor-x) var(--coin-cursor-y), pointer;
+}
+.overlay-slot__img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  pointer-events:none;
+}
+.overlay-slot__hotspot{
+  position:absolute; left:50%; top:var(--slot-hotspot-top);
+  transform:translateX(-50%);
+  width:var(--slot-hotspot-width);
+  height:var(--slot-hotspot-height);
+  background:transparent;
+  pointer-events:none;
+  z-index:2;
+}
+.overlay-slot__label{
+  position: relative;
+  display:inline-block;
+  margin-top: 8px;
+  font-size: 12px;
+  background: #fff;
+  border: 1px solid #000;
+  padding: 2px 6px;
+  box-shadow: 2px 2px 0 #000;
+}
+/* Ensure overlay coin anim sits above */
+.arcade-overlay .coin{ z-index:3; }

@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Arcade — Beckwards</title>
+<link rel="icon" type="image/png" href="assets/thumbnails/1.png" />
+<link rel="stylesheet" href="style.css" />
+
+<style>
+  /* ===== Page steel backdrop ===== */
+  html,body{height:100%;margin:0;padding:0;background:none !important}
+  body{display:flex;flex-direction:column;min-height:100vh;color:#000}
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-1;
+    background:repeating-linear-gradient(-12deg,#d6d7d9 0 3px,#111 3px 80px);
+    background-size:200px 200px;
+  }
+  @supports(-webkit-touch-callout:none){body::before{position:absolute}} /* iOS bg fix */
+
+  /* ===== Header card ===== */
+  .arcade-wrap{
+    background:#fff;max-width:900px;width:calc(100% - 32px);
+    margin:40px auto 10px;padding:20px 22px;border:1px solid #000;
+    box-shadow:6px 6px 0 #000,-2px -2px 0 #000;
+  }
+  .arcade-topline{margin-bottom:10px;font-size:14px}
+  .arcade-topline a{color:#000;text-decoration:underline}
+  .arcade-title{margin:0 0 8px;font-size:36px;text-align:center}
+  .arcade-instructions{margin:0 auto;max-width:640px;text-align:center;font-size:16px}
+
+  /* =========================================================
+     CABINET (window + console are a single unit)
+     ========================================================= */
+  :root{
+    --cabinet-width: clamp(340px, 90vw, 1040px);
+    --console-offset: 12px;       /* bottom offset (desktop) */
+    --console-pad-desktop: 160px; /* body padding so footer isn't covered */
+  }
+
+  .cabinet{ width:var(--cabinet-width); margin:0 auto; }
+
+  /* Play window container (bezel-like shell) */
+  .cabinet-window{
+    background:#262a2f;
+    border:2px solid #000;
+    box-shadow:4px 4px 0 #000,-2px -2px 0 #000,inset 0 0 0 3px #fff;
+    border-bottom:none; /* visually attaches to console below */
+  }
+
+  /* Game stage (canvas injected here by scripts/game.js) */
+  .game-stage{
+    margin:8px auto 10px;
+    width:clamp(320px, 85vw, 1000px);
+    height:clamp(360px, 70vh, 720px); /* let 320x240 upscale 2–3x */
+    background:#0b0b0b;border:2px solid #000;
+    box-shadow:4px 4px 0 #000,-2px -2px 0 #000,inset 0 0 0 3px #fff;position:relative;
+  }
+  .stage-label{position:absolute;top:8px;left:10px;font-size:12px;color:#eaeaea;opacity:.9;text-shadow:0 1px 0 #000}
+
+  /* Canvas: crisp pixel art */
+  #game-canvas{
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  /* Console panel that’s physically attached to the window */
+  .cabinet-console{
+    border:2px solid #000;
+    border-top:none;
+    background:linear-gradient(#1b1b1b,#0f0f0f);
+    box-shadow:4px 4px 0 #000,-2px -2px 0 #000;
+  }
+
+  /* ===== Console internals ===== */
+  .console{
+    width:clamp(320px,72vw,640px);margin:12px auto;padding:14px 16px;
+    display:flex;align-items:center;justify-content:space-between;gap:18px;
+    background:repeating-linear-gradient(-25deg,rgba(255,255,255,.22) 0 6px,transparent 6px 16px),linear-gradient(#d72626,#b21818);
+    border:1px solid #000;border-radius:14px;
+    box-shadow:6px 6px 0 #000,-2px -2px 0 #000,inset 0 10px 18px rgba(255,255,255,.06);
+    position:relative;
+  }
+  .console-inner{position:relative;z-index:1;width:100%;display:flex;align-items:center;justify-content:space-between}
+
+  /* Joystick */
+  .joy{display:grid;place-items:center;width:120px;height:100px;filter:drop-shadow(2px 2px 0 #000)}
+  .joy-gate{
+    position:relative;width:78px;height:78px;border-radius:12px;
+    background:radial-gradient(68px 52px at 50% 40%,#151515,#0a0a0a);border:1px solid #000;
+    box-shadow:inset 0 8px 16px rgba(255,255,255,.06),inset 0 -6px 12px rgba(0,0,0,.6)
+  }
+  .joy-knob{
+    position:absolute;left:50%;top:50%;
+    width:24px;height:24px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%,#ff4a4a,#b80e0e);border:2px solid #000;
+    transform:translate(-50%,-50%);touch-action:none;will-change:transform;
+  }
+  .joy-knob.spring{transition:transform .12s cubic-bezier(.2,.9,.3,1)}
+  .joy-gate::after{
+    content:"";position:absolute;left:12px;right:12px;top:50%;height:2px;transform:translateY(-50%);
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);pointer-events:none;
+  }
+
+  /* Button */
+  .drop-wrap{display:grid;place-items:center;flex:1}
+  .btn-drop{
+    width:64px;height:64px;border-radius:50%;background:#d21616;color:#fff;border:2px solid #000;
+    box-shadow:4px 4px 0 #000,inset 0 -6px 0 rgba(0,0,0,.35);font:bold 14px/1 "Times New Roman", Times, Georgia, serif;letter-spacing:.3px;
+  }
+  .btn-drop:active{transform:translate(1px,1px);box-shadow:3px 3px 0 #000,inset 0 -3px 0 rgba(0,0,0,.45)}
+
+  /* Footer */
+  .arcade-sitefoot{margin-top:auto;padding:16px 12px 20px;text-align:center;color:#eaeaea;font-size:12px;text-shadow:0 1px 0 #000}
+
+  /* ===== Positioning behavior ===== */
+  /* Mobile/tablet: keep console sticky so it doesn't eat vertical space */
+  @media (max-width: 899px){
+    .cabinet-console{ position:sticky; bottom:12px; z-index:30; }
+    .game-stage{ height:clamp(320px, 52vh, 560px); }
+  }
+
+  /* Desktop: fix console at bottom and keep footer visible */
+  @media (min-width: 900px){
+    .cabinet-console{ position:fixed; left:50%; transform:translateX(-50%); bottom:var(--console-offset); width:var(--cabinet-width); z-index:50; }
+    body{ padding-bottom: var(--console-pad-desktop); } /* room so footer isn't covered */
+  }
+</style>
+</head>
+<body>
+  <!-- Info box -->
+  <div class="arcade-wrap">
+    <div class="arcade-topline"><a href="/" aria-label="Home">Home</a></div>
+    <header><h1 class="arcade-title">Claw Machine</h1></header>
+    <main><p class="arcade-instructions">Move with the joystick. Press the red button to drop.</p></main>
+  </div>
+
+  <!-- CABINET: window + console are one unit -->
+  <section class="cabinet">
+    <!-- Play window -->
+    <div class="cabinet-window">
+      <div class="game-stage" id="stage" aria-label="Game stage">
+        <span class="stage-label">loading game…</span>
+      </div>
+    </div>
+
+    <!-- Console panel physically attached to the window -->
+    <div class="cabinet-console">
+      <div class="console" aria-label="Arcade console">
+        <div class="console-inner">
+          <!-- Joystick -->
+          <div class="joy">
+            <div class="joy-gate" id="gate">
+              <div class="joy-knob spring" id="joy" aria-label="Joystick" role="slider" aria-valuemin="-1" aria-valuemax="1" aria-valuenow="0"></div>
+            </div>
+          </div>
+
+          <!-- DROP button -->
+          <div class="drop-wrap">
+            <button type="button" class="btn-drop" id="btn-drop" aria-label="Drop claw">DROP</button>
+          </div>
+
+          <!-- Permanent coin slot (right side in console) -->
+          <div class="console-coin-slot disabled" id="play-slot" aria-disabled="true" title="Insert coin after the round">
+            <!-- uses same art + 2x as homepage -->
+            <img
+              class="console-coin-slot__img"
+              src="assets/sprites/ui/coin-slot-128.png"
+              srcset="assets/sprites/ui/coin-slot-256.png 2x"
+              alt="Coin slot"
+            />
+            <span class="console-coin-slot__hotspot"></span>
+            <!-- identical sound as homepage -->
+            <audio id="coin-sfx" src="assets/audio/clink.wav" preload="auto"></audio>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="arcade-sitefoot">© <span id="year"></span> Beckwards</footer>
+
+  <!-- Game module (injects canvas; exposes window.GAME) -->
+  <script type="module" src="scripts/game.js"></script>
+
+  <!-- UI wiring for joystick + button + coin (home-matching) -->
+  <script>
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ===== Joystick control =====
+    (function(){
+      const knob = document.getElementById('joy');
+      const gate = document.getElementById('gate');
+      if(!knob || !gate) return;
+
+      const gateRect = ()=> gate.getBoundingClientRect();
+      function radiusPx(){
+        const r = Math.min(gateRect().width, gateRect().height)/2;
+        const knobR = knob.offsetWidth/2 + 4;
+        return Math.max(10, r - knobR);
+      }
+
+      let currentX = 0, dragging = false, raf=null, lastDir=0;
+
+      function setKnob(x){
+        const R = radiusPx();
+        const clamped = Math.max(-R, Math.min(R, x));
+        knob.style.transform = `translate(calc(-50% + ${clamped}px), -50%)`;
+        knob.setAttribute('aria-valuenow', (clamped/R).toFixed(2));
+        return clamped;
+      }
+      function dirFrom(x){
+        const R = radiusPx();
+        const t = x / R;
+        if (t <= -0.25) return -1;
+        if (t >=  0.25) return  1;
+        return 0;
+      }
+      function update(){
+        const dir = dirFrom(currentX);
+        if (dir !== lastDir){
+          if (dir === -1) window.GAME?.moveLeft();
+          else if (dir === 1) window.GAME?.moveRight();
+          else window.GAME?.stopMove();
+          lastDir = dir;
+        }
+        raf = requestAnimationFrame(update);
+      }
+      function onDown(e){
+        e.preventDefault();
+        knob.classList.remove('spring');
+        knob.setPointerCapture?.(e.pointerId);
+        dragging = true;
+        if (!raf) raf = requestAnimationFrame(update);
+        window.addEventListener('pointermove', onMove, {passive:false});
+        window.addEventListener('pointerup', onUp, {passive:false, once:true});
+        window.addEventListener('touchmove', onMove, {passive:false});
+        window.addEventListener('touchend', onUp, {passive:false, once:true});
+      }
+      function onMove(e){
+        if(!dragging) return;
+        const p = ('touches' in e) ? e.touches[0] : e;
+        const rect = gateRect();
+        currentX = p.clientX - (rect.left + rect.width/2);
+        setKnob(currentX);
+      }
+      function onUp(){
+        dragging = false;
+        cancelAnimationFrame(raf); raf=null;
+        currentX = 0;
+        knob.classList.add('spring');
+        setKnob(0);
+        window.GAME?.stopMove();
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('touchmove', onMove);
+      }
+      knob.addEventListener('pointerdown', onDown, {passive:false});
+      knob.addEventListener('touchstart', onDown, {passive:false});
+    })();
+
+    // ===== DROP button =====
+    document.getElementById('btn-drop')?.addEventListener('pointerdown',(e)=>{
+      e.preventDefault();
+      window.GAME?.drop();
+    });
+
+    // ===== Coin slot (home-identical animation + sound) =====
+    (function(){
+      const slot  = document.getElementById('play-slot');
+      const mouth = slot?.querySelector('.console-coin-slot__hotspot');
+      const sfx   = slot?.querySelector('#coin-sfx');
+
+      function triggerCoin(){
+        if (!slot || !mouth) return;
+        if (slot.classList.contains('disabled')) return; // locked during play
+
+        const slotRect  = slot.getBoundingClientRect();
+        const mouthRect = mouth.getBoundingClientRect();
+
+        const COIN_W = 48; // MUST match CSS .coin size
+        const coin = document.createElement('div');
+        coin.className = 'coin';
+        slot.appendChild(coin);
+
+        // x center on slot mouth
+        const x = (mouthRect.left - slotRect.left) + (mouthRect.width / 2) - (COIN_W / 2);
+        coin.style.left = `${x}px`;
+
+        // start above slot
+        coin.style.top = `-28px`;
+
+        // vertical drop to mouth center
+        const dropY = (mouthRect.top - slotRect.top) + (mouthRect.height / 2) - (COIN_W / 2);
+        coin.style.setProperty('--dropY', `${dropY}px`);
+
+        try { sfx.currentTime = 0; sfx.play().catch(()=>{}); } catch(_) {}
+
+        requestAnimationFrame(() => coin.classList.add('coin--into'));
+
+        // After animation completes, restart round (or fallback)
+        setTimeout(() => {
+          if (window.GAME?.restartRound) window.GAME.restartRound();
+          else if (window.GAME?.startRound) window.GAME.startRound();
+          else location.reload();
+        }, 950);
+      }
+
+      if (slot) {
+        // Both pointerdown + click to be robust across devices
+        slot.addEventListener('pointerdown', (e) => { e.preventDefault(); triggerCoin(); });
+        slot.addEventListener('click',        (e) => { e.preventDefault(); triggerCoin(); });
+      }
+    })();
+  </script>
+</body>
+</html>
