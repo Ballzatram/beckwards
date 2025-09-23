@@ -12,10 +12,26 @@
   <meta property="og:url" content="https://beckwards.com" />
   <meta name="twitter:card" content="summary_large_image" />
 
+  <!-- canonical (nice for SEO + avoids /index.html duplicates) -->
+  <link rel="canonical" href="https://www.beckwards.com/" />
+
   <!-- favicon / tab thumbnail -->
   <link rel="icon" type="image/png" href="assets/1.png" />
 
   <link rel="stylesheet" href="style.css" />
+
+  <script>
+    // --- Clean URL helper (runs ASAP) ---
+    // If someone hits /index.html, send them to /
+    (function () {
+      var p = location.pathname;
+      if (/\/index\.html$/i.test(p)) {
+        var root = location.origin + "/";
+        var tail = location.search + location.hash;
+        location.replace(root + tail);
+      }
+    })();
+  </script>
 </head>
 <body>
   <div class="wrap">
@@ -30,7 +46,7 @@
     <main class="stage">
       <aside class="left-links" aria-label="site pages">
         <ul>
-          <!-- HOME should link to / so the URL shows no filename -->
+          <!-- Home → root, so no filename shows -->
           <li><a href="/">Home</a></li>
           <li><a href="music.html">Music</a></li>
           <li><a href="lyrics.html">Lyrics</a></li>
@@ -82,12 +98,10 @@
     v?.addEventListener('timeupdate', () => {
       if (!v.duration) return;
       if (v.duration - v.currentTime < EPS) {
-        // jump just before start; small offset avoids some browsers showing the first black frame
-        v.currentTime = 0.001;
+        v.currentTime = 0.001; // start-of-clip nudge
       }
     });
 
-    // Fallback: if 'ended' fires anyway, restart immediately
     v?.addEventListener('ended', () => {
       v.currentTime = 0.001;
       v.play().catch(() => {});
