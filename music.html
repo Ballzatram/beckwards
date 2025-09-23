@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Music — Beckwards</title>
+  <link rel="icon" type="image/png" href="assets/1.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <nav class="home-link">
+        <a href="index.html">
+            <img src="assets/home.gif" alt="Home" />
+        </a>
+    </nav>
+    
+    <header class="top">
+      <h1>BECKWARDS</h1>
+      <p class="subtitle">music</p>
+    </header>
+
+    <main>
+      <section>
+        <iframe style="border-radius:0"
+          src="https://open.spotify.com/embed/artist/0urHGaFXBdSbrykH82Ferf?utm_source=generator"
+          width="100%" height="152" frameborder="0"
+          allow="clipboard-write; encrypted-media; fullscreen; picture-in-picture">
+        </iframe>
+        <p class="links">
+          <a href="https://open.spotify.com/artist/0urHGaFXBdSbrykH82Ferf" target="_blank">spotify</a> /
+          <a href="https://music.apple.com/us/album/the-call/1837441446?i=1837441447" target="_blank">apple</a> /
+          <a href="https://www.instagram.com/beckwardss/" target="_blank">instagram</a>
+        </p>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <p class="tiny">© <span id="year"></span> Beckwards</p>
+    </footer>
+  </div>
+  <script>document.getElementById('year').textContent=new Date().getFullYear()</script>
+</body>
+</html>
