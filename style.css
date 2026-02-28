@@ -153,7 +153,7 @@ body{ margin:0; font:17px/1.5 var(--serif) }
   background:#262a2f;
   border:2px solid #000;
   box-shadow:4px 4px 0 #000,-2px -2px 0 #000,inset 0 0 0 3px #fff;
-  border-bottom:none; /* visually attaches to console below */
+  border-bottom:none;
 }
 
 /* Stage size: allow 2–3x upscale of 320x240 */
@@ -288,77 +288,12 @@ body{ margin:0; font:17px/1.5 var(--serif) }
 }
 
 /* =========================================================
-   Arcade end-of-round overlay
-   ========================================================= */
-.arcade-overlay{
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.55);
-  display: grid;
-  place-items: center;
-  z-index: 1000;
-  pointer-events: none;
-}
-.arcade-card{
-  width: min(92vw, 520px);
-  background: #fff;
-  border: 2px solid #000;
-  box-shadow: 6px 6px 0 #000, -2px -2px 0 #000;
-  padding: 18px 18px 22px;
-  text-align: center;
-  pointer-events: auto;
-}
-.arcade-card h2{ margin: 0 0 6px; font-size: 28px; }
-.arcade-card p{ margin: 0 0 14px; }
-
-.overlay-slot{
-  position: relative;
-  width: 200px;
-  height: 90px;
-  margin: 6px auto 0;
-  transform: rotate(-1.5deg);
-  user-select:none;
-  cursor: var(--coin-cursor-url) var(--coin-cursor-x) var(--coin-cursor-y), pointer;
-}
-.overlay-slot__img{
-  display:block;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  pointer-events:none;
-}
-.overlay-slot__hotspot{
-  position:absolute; left:50%; top:var(--slot-hotspot-top);
-  transform:translateX(-50%);
-  width:var(--slot-hotspot-width);
-  height:var(--slot-hotspot-height);
-  background:transparent;
-  pointer-events:none;
-  z-index:2;
-}
-.overlay-slot__label{
-  position: relative;
-  display:inline-block;
-  margin-top: 8px;
-  font-size: 12px;
-  background: #fff;
-  border: 1px solid #000;
-  padding: 2px 6px;
-  box-shadow: 2px 2px 0 #000;
-}
-.arcade-overlay .coin{ z-index:3; }
-
-/* =========================================================
    QR LANDING (Claw Machine promo)
+   REQUIRES: <html class="qr-landing"> AND <body class="qr-landing">
    ========================================================= */
 
-/* IMPORTANT:
-   Put the background on BOTH html and body for iOS Safari.
-   This prevents the “black strip” when you scroll past content height. */
-html{
-  background:#000;
-}
-html:has(body.qr-landing),
+/* Put the same background on html AND body so iOS overscroll never shows black */
+html.qr-landing,
 body.qr-landing{
   background-color:#000;
   background-image: url("assets/QR/Background%20Large.png");
@@ -368,17 +303,16 @@ body.qr-landing{
   background-attachment: scroll;
 }
 
-/* Make QR pages behave like normal scroll pages (no flex centering) */
+/* QR page should scroll naturally */
 body.qr-landing{
   display:block;
   min-height: 100vh;
   min-height: 100svh;
   margin:0;
-  /* safe areas (notch + home bar) */
   padding: max(12px, env(safe-area-inset-top)) 0 max(18px, env(safe-area-inset-bottom));
 }
 
-/* grime overlay for QR page */
+/* grime overlay */
 body.qr-landing::before{
   content:"";
   position:fixed;
@@ -391,14 +325,18 @@ body.qr-landing::before{
   opacity:.65;
 }
 
-/* QR container */
+/* Center everything with a flex column wrapper */
 body.qr-landing .qr-wrap{
   width: min(860px, 92vw);
   margin: 0 auto;
-  text-align:center;
   padding: 14px 10px 28px;
+  text-align:center;
   position:relative;
   z-index:1;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;   /* hard center children */
 }
 
 /* Title/subtitle PNGs */
@@ -419,7 +357,7 @@ body.qr-landing .qr-subtitle{
   -webkit-user-drag:none;
 }
 
-/* Center artwork */
+/* Art */
 body.qr-landing .qr-art{
   width:min(360px, 70vw);
   aspect-ratio:1/1;
@@ -436,18 +374,17 @@ body.qr-landing .qr-art img{
   -webkit-user-drag:none;
 }
 
-/* Links: hard-center */
+/* Links container: single centered column width */
 body.qr-landing .qr-links{
   width: min(520px, 92vw);
   margin: 0 auto;
   display:flex;
   flex-direction:column;
   gap:16px;
-  align-items:stretch; /* full width */
-  justify-content:center;
+  align-items:center;     /* center pills */
 }
 
-/* Pill = full-width tap target, perfectly centered via parent width */
+/* Pill: explicit centering + no weird left drift */
 body.qr-landing .qr-pill{
   display:block;
   width:100%;
@@ -456,22 +393,25 @@ body.qr-landing .qr-pill{
   text-decoration:none;
   box-shadow:none !important;
   -webkit-tap-highlight-color: transparent;
+
+  /* in case any parent does weird text-align/layout */
+  transform: translateX(0);
 }
 
 body.qr-landing .qr-pill img{
   display:block;
   width:100%;
   height:auto;
+  margin:0 auto;
   user-select:none;
   -webkit-user-drag:none;
 }
 
-/* tap feedback */
 body.qr-landing .qr-pill:active{
   filter: brightness(.95);
 }
 
-/* Slight tuning for small phones */
+/* Small phone tuning */
 @media (max-width: 420px){
   body.qr-landing .qr-wrap{ padding: 12px 10px 26px; }
   body.qr-landing .qr-art{ width:min(320px, 82vw); }
