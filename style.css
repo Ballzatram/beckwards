@@ -456,6 +456,7 @@ body.qr-landing .qr-art{
   margin:10px auto 24px;
 
   /* ✅ thinner border */
+  border: none;
 
   overflow:hidden;
 }
