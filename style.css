@@ -153,7 +153,7 @@ body{ margin:0; font:17px/1.5 var(--serif) }
   background:#262a2f;
   border:2px solid #000;
   box-shadow:4px 4px 0 #000,-2px -2px 0 #000,inset 0 0 0 3px #fff;
-  border-bottom:none; /* visually attaches to console below */
+  border-bottom:none;
 }
 
 /* Stage size: allow 2–3x upscale of 320x240 */
@@ -219,7 +219,7 @@ body{ margin:0; font:17px/1.5 var(--serif) }
 /* ===== Permanent console coin slot (right side) ===== */
 .console-coin-slot{
   position:relative;
-  width:120px;               /* fits nicely beside DROP */
+  width:120px;
   height:84px;
   border:1px solid #000;
   box-shadow: 4px 4px 0 #000;
@@ -244,7 +244,7 @@ body{ margin:0; font:17px/1.5 var(--serif) }
   transform:translateX(-50%);
   width:var(--slot-hotspot-width);
   height:var(--slot-hotspot-height);
-  pointer-events:none;     /* container is clickable */
+  pointer-events:none;
   z-index:2;
 }
 .console-coin-slot__badge{
@@ -256,8 +256,6 @@ body{ margin:0; font:17px/1.5 var(--serif) }
   padding:2px 5px;
   box-shadow:2px 2px 0 #000;
 }
-
-/* Enabled vs disabled (JS toggles .disabled) */
 .console-coin-slot:not(.disabled){
   cursor: var(--coin-cursor-url) var(--coin-cursor-x) var(--coin-cursor-y), pointer;
   filter:none;
@@ -269,14 +267,10 @@ body{ margin:0; font:17px/1.5 var(--serif) }
 .console-coin-slot.disabled .console-coin-slot__badge{
   opacity:.85;
 }
-
-/* Keep any coin animation above the slot art */
 .console .coin{ z-index:3; }
 
-/* Footer */
 .arcade-sitefoot{margin-top:auto;padding:16px 12px 20px;text-align:center;color:#eaeaea;font-size:12px;text-shadow:0 1px 0 #000}
 
-/* ===== Behavior: sticky on mobile, fixed on desktop ===== */
 @media (max-width: 899px){
   .cabinet-console{ position:sticky; bottom:12px; z-index:30; }
   .game-stage{ height:clamp(320px, 52vh, 560px); }
@@ -290,91 +284,35 @@ body{ margin:0; font:17px/1.5 var(--serif) }
     width:var(--cabinet-width);
     z-index:50;
   }
-  /* pad the page so the fixed console never covers the footer */
   body{ padding-bottom: var(--cabinet-console-height); }
 }
 
 /* =========================================================
-   Arcade end-of-round overlay (mirrors homepage coin slot)
-   ========================================================= */
-.arcade-overlay{
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.55);
-  display: grid;
-  place-items: center;
-  z-index: 1000;
-
-  /* ⬇ NEW: let clicks pass through the overlay dimmer */
-  pointer-events: none;
-}
-.arcade-card{
-  width: min(92vw, 520px);
-  background: #fff;
-  border: 2px solid #000;
-  box-shadow: 6px 6px 0 #000, -2px -2px 0 #000;
-  padding: 18px 18px 22px;
-  text-align: center;
-
-  /* ⬇ NEW: keep the centered card interactive */
-  pointer-events: auto;
-}
-.arcade-card h2{ margin: 0 0 6px; font-size: 28px; }
-.arcade-card p{ margin: 0 0 14px; }
-
-/* Overlay coin slot (optional) */
-.overlay-slot{
-  position: relative;
-  width: 200px;
-  height: 90px;
-  margin: 6px auto 0;
-  transform: rotate(-1.5deg);
-  user-select:none;
-  cursor: var(--coin-cursor-url) var(--coin-cursor-x) var(--coin-cursor-y), pointer;
-}
-.overlay-slot__img{
-  display:block;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  pointer-events:none;
-}
-.overlay-slot__hotspot{
-  position:absolute; left:50%; top:var(--slot-hotspot-top);
-  transform:translateX(-50%);
-  width:var(--slot-hotspot-width);
-  height:var(--slot-hotspot-height);
-  background:transparent;
-  pointer-events:none;
-  z-index:2;
-}
-.overlay-slot__label{
-  position: relative;
-  display:inline-block;
-  margin-top: 8px;
-  font-size: 12px;
-  background: #fff;
-  border: 1px solid #000;
-  padding: 2px 6px;
-  box-shadow: 2px 2px 0 #000;
-}
-/* Ensure overlay coin anim sits above */
-.arcade-overlay .coin{ z-index:3; }
-
-/* =========================================================
    QR LANDING (Claw Machine promo)
-   Add <body class="qr-landing"> to index.html
+   REQUIRES: <html class="qr-landing"> AND <body class="qr-landing">
    ========================================================= */
 
+/* Put the same background on html AND body so iOS overscroll never shows black */
+html.qr-landing,
 body.qr-landing{
-  background: url("assets/QR/Background%20Large.png") center/cover no-repeat fixed !important;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding-bottom: 0 !important; /* prevent arcade console padding from affecting this page */
+  background-color:#000;
+  background-image: url("assets/QR/Background%20Large.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: scroll;
 }
 
-/* grime overlay for QR page */
+/* QR page should scroll naturally */
+body.qr-landing{
+  display:block;
+  min-height: 100vh;
+  min-height: 100svh;
+  margin:0;
+  padding: max(12px, env(safe-area-inset-top)) 0 max(18px, env(safe-area-inset-bottom));
+}
+
+/* grime overlay */
 body.qr-landing::before{
   content:"";
   position:fixed;
@@ -387,13 +325,18 @@ body.qr-landing::before{
   opacity:.65;
 }
 
-/* QR page container */
+/* Center everything with a flex column wrapper */
 body.qr-landing .qr-wrap{
-  width:min(860px, 92vw);
+  width: min(860px, 92vw);
+  margin: 0 auto;
+  padding: 14px 10px 28px;
   text-align:center;
-  padding: clamp(18px, 4vw, 38px) 10px;
   position:relative;
   z-index:1;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;   /* hard center children */
 }
 
 /* Title/subtitle PNGs */
@@ -401,25 +344,24 @@ body.qr-landing .qr-title{
   width:min(720px, 92vw);
   height:auto;
   display:block;
-  margin:0 auto 14px; /* was 6px */
+  margin:0 auto 14px;
   user-select:none;
   -webkit-user-drag:none;
 }
-
 body.qr-landing .qr-subtitle{
   width:min(520px, 78vw);
   height:auto;
   display:block;
-  margin:0 auto 22px; /* was 18px */
+  margin:0 auto 22px;
   user-select:none;
   -webkit-user-drag:none;
 }
 
-/* Center artwork */
+/* Art */
 body.qr-landing .qr-art{
   width:min(360px, 70vw);
   aspect-ratio:1/1;
-  margin:10px auto 30px;
+  margin:10px auto 22px;
   border:3px solid #000;
   overflow:hidden;
 }
@@ -432,76 +374,50 @@ body.qr-landing .qr-art img{
   -webkit-user-drag:none;
 }
 
-/* Buttons: flat (no shadows), but pop on hover */
+/* Links container: single centered column width */
 body.qr-landing .qr-links{
+  width: min(520px, 92vw);
+  margin: 0 auto;
   display:flex;
   flex-direction:column;
-  gap:22px;
-  align-items:center;
-  justify-content:center;
+  gap:16px;
+  align-items:center;     /* center pills */
 }
 
+/* Pill: explicit centering + no weird left drift */
 body.qr-landing .qr-pill{
-  display:inline-block;
+  display:block;
+  width:100%;
+  margin: 0 auto;
   border:3px solid #000;
   text-decoration:none;
-
-  /* NO shadows */
   box-shadow:none !important;
+  -webkit-tap-highlight-color: transparent;
 
-  /* pop behavior */
-  transform: translateY(0) scale(1);
-  transition: transform .12s ease, border-width .12s ease;
-  will-change: transform;
+  /* in case any parent does weird text-align/layout */
+  transform: translateX(0);
 }
 
-body.qr-landing .qr-pill{
-  display:inline-block;
-  border:3px solid #000;
-  text-decoration:none;
-
-  /* NO shadows */
-  box-shadow:none !important;
-
-  /* pop behavior */
-  transform: translateY(0) scale(1);
-  transition: transform .12s ease, border-width .12s ease, outline-offset .12s ease;
-  will-change: transform;
-  position: relative; /* allow z-index */
+body.qr-landing .qr-pill img{
+  display:block;
+  width:100%;
+  height:auto;
+  margin:0 auto;
+  user-select:none;
+  -webkit-user-drag:none;
 }
 
-/* HOVER: bigger + slightly up + thicker border (no shadows/glow) */
-body.qr-landing .qr-pill:hover{
-  transform: translateY(-8px) scale(1.06);
-  border-width:4px;
-
-  /* crisp "ring" (not a shadow) */
-  outline: 2px solid #000;
-  outline-offset: 3px;
-
-  z-index: 5;
-}
-
-/* ACTIVE: pressed */
 body.qr-landing .qr-pill:active{
-  transform: translateY(2px) scale(0.99);
-  border-width:4px;
-  outline: none;
+  filter: brightness(.95);
 }
 
-body.qr-landing .qr-pill:focus-visible{
-  outline:2px dotted #000;
-  outline-offset:4px;
+/* Small phone tuning */
+@media (max-width: 420px){
+  body.qr-landing .qr-wrap{ padding: 12px 10px 26px; }
+  body.qr-landing .qr-art{ width:min(320px, 82vw); }
 }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce){
-  body.qr-landing .qr-pill{
-    transition:none;
-    transform:none;
-  }
-  body.qr-landing .qr-pill:hover,
-  body.qr-landing .qr-pill:active{
-    transform:none;
-  }
+  body.qr-landing *{ scroll-behavior:auto; }
 }
