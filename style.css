@@ -6,24 +6,23 @@
   --visited:#000;
   --serif:"Times New Roman", Times, Georgia, serif;
 
+  /* Coin-slot mouth hotspot geometry (home + overlay + console slot) */
   --slot-hotspot-top: 38%;
   --slot-hotspot-width: 76px;
   --slot-hotspot-height: 50px;
 
+  /* Custom cursor (64x64) */
   --coin-cursor-url: url('assets/cursors/robo-coin-cursor-64.png?v=1');
   --coin-cursor-x: 32;
   --coin-cursor-y: 32;
 
+  /* Cabinet sizing */
   --cabinet-width: clamp(340px, 90vw, 1040px);
-  --cabinet-console-offset: 12px;
-  --cabinet-console-height: 180px;
+  --cabinet-console-offset: 12px;    /* desktop bottom offset */
+  --cabinet-console-height: 180px;   /* body padding so footer isn’t covered */
 }
 
 *{ box-sizing:border-box }
-
-/* IMPORTANT:
-   Keep base defaults for the main site,
-   but we will HARD override for body.qr-landing later. */
 html,body{ height:100% }
 html,body{ background:var(--bg); color:var(--fg) }
 body{ margin:0; font:17px/1.5 var(--serif) }
@@ -53,7 +52,7 @@ body{ margin:0; font:17px/1.5 var(--serif) }
 .left-links a{ text-decoration:underline; font-size:22px; color:var(--fg) }
 .left-links a:hover, .left-links a:focus-visible{ text-decoration-thickness:2px; outline:none }
 
-/* ===== Hero video ===== */
+/* ===== Hero video (compact with chalky frame) ===== */
 .hero-frame{
   display:flex; justify-content:center; align-items:center;
   margin:0 auto 6px; padding:6px; background:#fff;
@@ -66,9 +65,10 @@ body{ margin:0; font:17px/1.5 var(--serif) }
   object-fit:cover; image-rendering:pixelated; background:#000;
 }
 
+/* ===== Under-hero ===== */
 .under-hero{ margin-top:4px; }
 
-/* ===== Homepage coin slot ===== */
+/* ===== Homepage coin slot (whole slot clickable) ===== */
 .coin-slot{
   position: relative; width:180px; margin:8px 6px 0 auto; transform: rotate(-2deg);
   user-select:none; background:none; padding:0; box-shadow:none; z-index:3;
@@ -90,7 +90,7 @@ body{ margin:0; font:17px/1.5 var(--serif) }
 
 :focus-visible{ outline:1px dotted #000; outline-offset:2px }
 
-/* ===== Coin animation ===== */
+/* ===== Coin animation (shared) ===== */
 .coin{
   position:absolute; width:48px; height:48px;
   background:url('assets/cursors/robo-coin-cursor-64.png') center/contain no-repeat;
@@ -115,34 +115,48 @@ body{ margin:0; font:17px/1.5 var(--serif) }
   .coin-slot{ width:180px; margin:14px auto 0; transform: rotate(-1deg); }
 }
 
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce){
   .hero-frame{ transform:none; filter:none }
   .coin--into{ animation:none }
 }
 
+/* Print */
 @media print{
   .bottom-links{ display:none !important }
   a[href]:after{ content:" (" attr(href) ")"; font-size:12px }
 }
 
 /* =========================================================
-   Arcade page styles (unchanged)
+   Arcade page — cabinet + crisp canvas + console behavior
    ========================================================= */
+
+/* Canvas: crisp pixel art */
 #game-canvas{
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   -ms-interpolation-mode: nearest-neighbor;
   image-rendering: -moz-crisp-edges;
 }
+
+/* Ensure loading label positions correctly even before JS tweaks */
 #stage{ position: relative; }
+
+/* Prevent accidental blur from transforms */
 #stage, .game-stage { transform: none !important; will-change: auto; }
+
+/* Cabinet wrapper (matches arcade.html) */
 .cabinet{ width:var(--cabinet-width); margin:0 auto; }
+
+/* Window shell */
 .cabinet-window{
   background:#262a2f;
   border:2px solid #000;
   box-shadow:4px 4px 0 #000,-2px -2px 0 #000,inset 0 0 0 3px #fff;
-  border-bottom:none;
+  border-bottom:none; /* visually attaches to console below */
 }
+
+/* Stage size: allow 2–3x upscale of 320x240 */
 .game-stage{
   margin:8px auto 10px;
   width:clamp(320px, 85vw, 1000px);
@@ -153,12 +167,16 @@ body{ margin:0; font:17px/1.5 var(--serif) }
   position:relative;
 }
 .stage-label{ position:absolute; top:8px; left:10px; font-size:12px; color:#eaeaea; opacity:.9; text-shadow:0 1px 0 #000 }
+
+/* Console panel that attaches to the window */
 .cabinet-console{
   border:2px solid #000;
   border-top:none;
   background:linear-gradient(#1b1b1b,#0f0f0f);
   box-shadow:4px 4px 0 #000,-2px -2px 0 #000;
 }
+
+/* Console internals */
 .console{
   width:clamp(320px,72vw,640px);
   margin:12px auto;
@@ -170,6 +188,8 @@ body{ margin:0; font:17px/1.5 var(--serif) }
   position:relative;
 }
 .console-inner{position:relative;z-index:1;width:100%;display:flex;align-items:center;justify-content:space-between}
+
+/* Joystick (visual only) */
 .joy{display:grid;place-items:center;width:120px;height:100px;filter:drop-shadow(2px 2px 0 #000)}
 .joy-gate{
   position:relative;width:78px;height:78px;border-radius:12px;
@@ -187,16 +207,19 @@ body{ margin:0; font:17px/1.5 var(--serif) }
   content:"";position:absolute;left:12px;right:12px;top:50%;height:2px;transform:translateY(-50%);
   background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);pointer-events:none;
 }
+
+/* Button */
 .drop-wrap{display:grid;place-items:center;flex:1}
 .btn-drop{
   width:64px;height:64px;border-radius:50%;background:#d21616;color:#fff;border:2px solid #000;
-  box-shadow:4px 4px 0 #000,inset 0 -6px 0 rgba(0,0,0,.35);
-  font:bold 14px/1 "Times New Roman", Times, Georgia, serif;letter-spacing:.3px;
+  box-shadow:4px 4px 0 #000,inset 0 -6px 0 rgba(0,0,0,.35);font:bold 14px/1 "Times New Roman", Times, Georgia, serif;letter-spacing:.3px;
 }
 .btn-drop:active{transform:translate(1px,1px);box-shadow:3px 3px 0 #000,inset 0 -3px 0 rgba(0,0,0,.45)}
+
+/* ===== Permanent console coin slot (right side) ===== */
 .console-coin-slot{
   position:relative;
-  width:120px;
+  width:120px;               /* fits nicely beside DROP */
   height:84px;
   border:1px solid #000;
   box-shadow: 4px 4px 0 #000;
@@ -208,31 +231,57 @@ body{ margin:0; font:17px/1.5 var(--serif) }
   place-items:center;
   background:#222;
 }
-.console-coin-slot__img{ width:100%; height:100%; object-fit:cover; pointer-events:none; }
+.console-coin-slot__img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  pointer-events:none;
+}
 .console-coin-slot__hotspot{
-  position:absolute; left:50%; top:var(--slot-hotspot-top); transform:translateX(-50%);
-  width:var(--slot-hotspot-width); height:var(--slot-hotspot-height);
-  pointer-events:none; z-index:2;
+  position:absolute;
+  left:50%;
+  top:var(--slot-hotspot-top);
+  transform:translateX(-50%);
+  width:var(--slot-hotspot-width);
+  height:var(--slot-hotspot-height);
+  pointer-events:none;     /* container is clickable */
+  z-index:2;
 }
 .console-coin-slot__badge{
-  position:absolute; right:6px; bottom:6px;
-  font-size:10px; background:#fff; border:1px solid #000; padding:2px 5px;
+  position:absolute;
+  right:6px; bottom:6px;
+  font-size:10px;
+  background:#fff;
+  border:1px solid #000;
+  padding:2px 5px;
   box-shadow:2px 2px 0 #000;
 }
+
+/* Enabled vs disabled (JS toggles .disabled) */
 .console-coin-slot:not(.disabled){
   cursor: var(--coin-cursor-url) var(--coin-cursor-x) var(--coin-cursor-y), pointer;
   filter:none;
 }
-.console-coin-slot.disabled{ cursor:not-allowed; filter: grayscale(0.55) brightness(0.9); }
-.console-coin-slot.disabled .console-coin-slot__badge{ opacity:.85; }
+.console-coin-slot.disabled{
+  cursor: not-allowed;
+  filter: grayscale(0.55) brightness(0.9);
+}
+.console-coin-slot.disabled .console-coin-slot__badge{
+  opacity:.85;
+}
+
+/* Keep any coin animation above the slot art */
 .console .coin{ z-index:3; }
 
+/* Footer */
 .arcade-sitefoot{margin-top:auto;padding:16px 12px 20px;text-align:center;color:#eaeaea;font-size:12px;text-shadow:0 1px 0 #000}
 
+/* ===== Behavior: sticky on mobile, fixed on desktop ===== */
 @media (max-width: 899px){
   .cabinet-console{ position:sticky; bottom:12px; z-index:30; }
   .game-stage{ height:clamp(320px, 52vh, 560px); }
 }
+
 @media (min-width: 900px){
   .cabinet-console{
     position:fixed;
@@ -241,43 +290,103 @@ body{ margin:0; font:17px/1.5 var(--serif) }
     width:var(--cabinet-width);
     z-index:50;
   }
+  /* pad the page so the fixed console never covers the footer */
   body{ padding-bottom: var(--cabinet-console-height); }
 }
 
 /* =========================================================
-   QR LANDING — FIXED FOR iOS SAFARI
+   Arcade end-of-round overlay (mirrors homepage coin slot)
+   ========================================================= */
+.arcade-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+
+  /* let clicks pass through the overlay dimmer */
+  pointer-events: none;
+}
+.arcade-card{
+  width: min(92vw, 520px);
+  background: #fff;
+  border: 2px solid #000;
+  box-shadow: 6px 6px 0 #000, -2px -2px 0 #000;
+  padding: 18px 18px 22px;
+  text-align: center;
+
+  /* keep the centered card interactive */
+  pointer-events: auto;
+}
+.arcade-card h2{ margin: 0 0 6px; font-size: 28px; }
+.arcade-card p{ margin: 0 0 14px; }
+
+/* Overlay coin slot (optional) */
+.overlay-slot{
+  position: relative;
+  width: 200px;
+  height: 90px;
+  margin: 6px auto 0;
+  transform: rotate(-1.5deg);
+  user-select:none;
+  cursor: var(--coin-cursor-url) var(--coin-cursor-x) var(--coin-cursor-y), pointer;
+}
+.overlay-slot__img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  pointer-events:none;
+}
+.overlay-slot__hotspot{
+  position:absolute; left:50%; top:var(--slot-hotspot-top);
+  transform:translateX(-50%);
+  width:var(--slot-hotspot-width);
+  height:var(--slot-hotspot-height);
+  background:transparent;
+  pointer-events:none;
+  z-index:2;
+}
+.overlay-slot__label{
+  position: relative;
+  display:inline-block;
+  margin-top: 8px;
+  font-size: 12px;
+  background: #fff;
+  border: 1px solid #000;
+  padding: 2px 6px;
+  box-shadow: 2px 2px 0 #000;
+}
+/* Ensure overlay coin anim sits above */
+.arcade-overlay .coin{ z-index:3; }
+
+/* =========================================================
+   QR LANDING (Claw Machine promo)
+   Uses <body class="qr-landing">
    ========================================================= */
 
-/* 1) Override the base 100% height behavior for QR page */
+/* IMPORTANT:
+   Apply the same background to BOTH html + body for the QR page
+   to prevent white/black bands beyond content on mobile browsers. */
+html:has(body.qr-landing),
+body.qr-landing{
+  background-image: url("assets/QR/Background%20Large.png") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-color: #000 !important;
+}
+
+/* Don’t lock document to exactly 100% height for QR page */
 body.qr-landing{
   height:auto !important;
-  min-height:100vh;
-  min-height:100dvh;   /* iOS 16+ */
-  margin:0;
-  display:block;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: max(12px, env(safe-area-inset-top)) 0 max(18px, env(safe-area-inset-bottom));
 }
 
-/* 2) FORCE background image on BOTH html and body using !important */
-html{
-  background: var(--bg);
-}
-
-/* If your <html> has that inline background style, this will match it visually too */
-html, body.qr-landing{
-  background-color:#000 !important;
-  background-image:url("assets/QR/Background%20Large.png") !important;
-  background-size:cover !important;
-  background-position:center !important;
-  background-repeat:no-repeat !important;
-}
-
-/* Prevent iOS “fixed background” weirdness */
-body.qr-landing{
-  background-attachment: scroll !important;
-  padding: max(12px, env(safe-area-inset-top)) 0 max(18px, env(safe-area-inset-bottom)) !important;
-}
-
-/* grime overlay */
+/* grime overlay for QR page */
 body.qr-landing::before{
   content:"";
   position:fixed;
@@ -290,17 +399,17 @@ body.qr-landing::before{
   opacity:.65;
 }
 
-/* container */
+/* QR page container */
 body.qr-landing .qr-wrap{
   width:min(860px, 92vw);
   margin:0 auto;
   text-align:center;
-  padding: 14px 10px 28px;
+  padding: 18px 10px 28px;
   position:relative;
   z-index:1;
 }
 
-/* Title/subtitle */
+/* Title/subtitle PNGs */
 body.qr-landing .qr-title{
   width:min(720px, 92vw);
   height:auto;
@@ -309,6 +418,7 @@ body.qr-landing .qr-title{
   user-select:none;
   -webkit-user-drag:none;
 }
+
 body.qr-landing .qr-subtitle{
   width:min(520px, 78vw);
   height:auto;
@@ -318,11 +428,11 @@ body.qr-landing .qr-subtitle{
   -webkit-user-drag:none;
 }
 
-/* Artwork */
+/* Center artwork */
 body.qr-landing .qr-art{
   width:min(360px, 70vw);
   aspect-ratio:1/1;
-  margin:10px auto 22px;
+  margin:10px auto 24px;
   border:3px solid #000;
   overflow:hidden;
 }
@@ -335,21 +445,20 @@ body.qr-landing .qr-art img{
   -webkit-user-drag:none;
 }
 
-/* Links: LOCK width and center everything */
+/* Links: force a centered stack */
 body.qr-landing .qr-links{
   width:min(520px, 92vw);
   margin:0 auto;
   display:flex;
   flex-direction:column;
   gap:16px;
-  align-items:stretch;   /* pills fill width */
+  align-items:stretch; /* pills fill width */
 }
 
-/* Pills: fill container width */
+/* Pills */
 body.qr-landing .qr-pill{
   display:block;
   width:100%;
-  margin:0;
   border:3px solid #000;
   text-decoration:none;
   box-shadow:none !important;
@@ -368,11 +477,13 @@ body.qr-landing .qr-pill:active{
   filter: brightness(.95);
 }
 
+/* Small screens */
 @media (max-width: 420px){
-  body.qr-landing .qr-wrap{ padding: 12px 10px 26px; }
+  body.qr-landing .qr-wrap{ padding: 14px 10px 26px; }
   body.qr-landing .qr-art{ width:min(320px, 82vw); }
 }
 
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce){
   body.qr-landing *{ scroll-behavior:auto; }
 }
