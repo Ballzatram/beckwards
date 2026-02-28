@@ -363,58 +363,84 @@ body{ margin:0; font:17px/1.5 var(--serif) }
 
 /* =========================================================
    QR LANDING (Claw Machine promo)
-   Uses <body class="qr-landing">
+   Uses <html class="qr-landing"> + <body class="qr-landing">
    ========================================================= */
 
-/* Apply background to BOTH html + body to avoid white/black bands */
-html:has(body.qr-landing),
+/* Paint the background on BOTH html + body to prevent mobile white/black bands */
+html.qr-landing,
 body.qr-landing{
-  background-image: url("assets/QR/Background%20Large.png") !important;
-  background-size: cover !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
-  background-color: #000 !important;
+  height:auto;
+  min-height:100%;
+
+  background-color:#000 !important;
+  background-image:url("assets/QR/Background%20Large.png") !important;
+  background-size:cover !important;
+  background-position:center !important;
+  background-repeat:no-repeat !important;
+
+  /* Avoid background-attachment:fixed on mobile */
+  background-attachment:scroll !important;
 }
 
-/* Center the QR content vertically + horizontally, but still allow scroll */
+/* Prefer your vertical background on portrait phones.
+   NOTE: file names are case-sensitive on most hosts. If yours is different,
+   update the URL here. */
+@media (max-width: 640px) and (orientation: portrait){
+  html.qr-landing,
+  body.qr-landing{
+    background-image:url("assets/QR/Social%20Story.png") !important;
+    background-position:center top !important;
+  }
+}
+
+/* Layout: center-if-short, scroll-if-tall (stable across mobile browsers) */
 body.qr-landing{
   margin:0;
-  height:auto !important;
-  min-height: 100vh;
-  min-height: 100dvh;
+
+  min-height:100vh;
+  min-height:100svh;
+  min-height:100dvh;
 
   display:flex;
-  align-items:center;      /* vertical center */
-  justify-content:center;  /* horizontal center */
+  flex-direction:column;
 
-  /* nice safe-area padding without pushing content to the top */
+  /* Safe-area padding */
   padding:
     max(14px, env(safe-area-inset-top))
     max(12px, env(safe-area-inset-right))
     max(22px, env(safe-area-inset-bottom))
     max(12px, env(safe-area-inset-left));
 
-  /* if content is taller than screen, it scrolls */
   overflow-x:hidden;
+
+  /* Helps on Chrome/Android; harmless elsewhere */
+  overscroll-behavior-y:none;
 }
 
-/* grime overlay */
+/* Subtle overlay texture */
 body.qr-landing::before{
   content:"";
   position:fixed;
   inset:0;
   background:
-    radial-gradient(ellipse at center, rgba(0,0,0,0.0), rgba(0,0,0,0.25)),
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.03), rgba(255,255,255,0.03) 1px, rgba(0,0,0,0) 3px, rgba(0,0,0,0) 7px);
+    radial-gradient(ellipse at center, rgba(0,0,0,0.00), rgba(0,0,0,0.25)),
+    repeating-linear-gradient(0deg,
+      rgba(255,255,255,0.03),
+      rgba(255,255,255,0.03) 1px,
+      rgba(0,0,0,0) 3px,
+      rgba(0,0,0,0) 7px
+    );
   pointer-events:none;
-  mix-blend-mode:multiply;
   opacity:.65;
 }
 
 /* QR page container */
 body.qr-landing .qr-wrap{
   width:min(860px, 92vw);
-  margin:0 auto;
+
+  /* Centers vertically when short; becomes top-aligned when content is tall */
+  margin:auto;
+
   text-align:center;
   position:relative;
   z-index:1;
@@ -456,14 +482,13 @@ body.qr-landing .qr-art img{
   -webkit-user-drag:none;
 }
 
-/* Links: centered stack */
+/* Links: centered stack (grid avoids inline-image alignment quirks) */
 body.qr-landing .qr-links{
   width:min(520px, 92vw);
   margin:0 auto;
-  display:flex;
-  flex-direction:column;
+
+  display:grid;
   gap:16px;
-  align-items:stretch;
 }
 
 /* Pills */
@@ -474,6 +499,7 @@ body.qr-landing .qr-pill{
   text-decoration:none;
   box-shadow:none !important;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 body.qr-landing .qr-pill img{
   display:block;
