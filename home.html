@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Beckwards — Official Site</title>
+  <meta name="description" content="Beckwards — new music, links, and experiments." />
+  <meta property="og:title" content="Beckwards" />
+  <meta property="og:description" content="New music from Beckwards." />
+  <meta property="og:image" content="assets/og-image.jpg" />
+  <meta property="og:url" content="https://www.beckwards.com" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="canonical" href="https://www.beckwards.com/" />
+  <link rel="icon" type="image/png" href="assets/thumbnails/1.png" />
+  <link rel="stylesheet" href="style.css" />
+
+  <script>
+    // Clean URL: /index.html -> /
+    (function () {
+      if (/\/index\.html$/i.test(location.pathname)) {
+        location.replace(location.origin + "/" + location.search + location.hash);
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <h1>BECKWARDS</h1>
+      <p class="subtitle">Claw Machine</p>
+    </header>
+
+    <main class="stage" aria-label="layout">
+      <aside class="left-links" aria-label="site pages">
+        <ul>
+          <li><a href="music.html">Music</a></li>
+          <li><a href="lyrics.html">Lyrics</a></li>
+          <li><a href="store.html">Store</a></li>
+          <li><a href="live.html">Live</a></li>
+          <li><a href="digital.html">Digital Madness</a></li>
+        </ul>
+      </aside>
+
+      <section class="center-visual" aria-label="hero video">
+        <div class="hero-frame">
+          <video class="hero-video"
+                 autoplay loop muted playsinline
+                 preload="metadata"
+                 poster="assets/og-image.jpg">
+            <source src="assets/video/lil.mp4" type="video/mp4" />
+            Sorry—your browser doesn’t support embedded video.
+            <a href="assets/video/lil.mp4">Watch the mp4</a>.
+          </video>
+        </div>
+      </section>
+    </main>
+
+    <!-- Under-hero: coin slot FIRST (right-aligned), then socials + footer -->
+    <section class="under-hero" aria-label="under hero">
+      <div class="coin-slot" aria-label="Insert coin">
+        <img
+          class="coin-slot__img"
+          src="assets/sprites/ui/coin-slot-128.png"
+          srcset="assets/sprites/ui/coin-slot-128.png 1x, assets/sprites/ui/coin-slot-256.png 2x"
+          alt="coin slot" />
+        <!-- Hotspot is only to measure the mouth area; not clickable -->
+        <div class="coin-slot__hotspot"></div>
+        <audio id="coin-sfx" src="assets/audio/clink.wav" preload="auto"></audio>
+      </div>
+
+      <div class="below-info">
+        <nav class="bottom-links" aria-label="social">
+          <a href="https://open.spotify.com/artist/0urHGaFXBdSbrykH82Ferf" target="_blank" rel="noopener">spotify</a>
+          <span>•</span>
+          <a href="https://music.apple.com/us/album/the-call/1837441446?i=1837441447" target="_blank" rel="noopener">apple</a>
+          <span>•</span>
+          <a href="https://www.instagram.com/beckwardss/" target="_blank" rel="noopener">instagram</a>
+        </nav>
+        <footer class="foot">
+          <p><strong>Under heavy tinkering</strong></p>
+          <p class="tiny">© <span id="year"></span> Beckwards</p>
+        </footer>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Footer year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Video black-frame loop fix
+    const v = document.querySelector('.hero-video');
+    const EPS = 0.08;
+    v?.play?.().catch(()=>{});
+    v?.addEventListener('timeupdate', () => {
+      if (v.duration && v.duration - v.currentTime < EPS) v.currentTime = 0.001;
+    });
+    v?.addEventListener('ended', () => { v.currentTime = 0.001; v.play().catch(()=>{}); });
+
+    // ===== Coin slot interactions =====
+    // WHOLE SLOT is clickable; coin ALWAYS drops into the mouth.
+    const slot  = document.querySelector('.coin-slot');
+    const mouth = document.querySelector('.coin-slot__hotspot'); // geometry only
+    const sfx   = document.getElementById('coin-sfx');
+
+    function triggerCoin(){
+      if (!slot || !mouth) return;
+
+      const slotRect  = slot.getBoundingClientRect();
+      const mouthRect = mouth.getBoundingClientRect();
+
+      const COIN_W = 48; // MUST match CSS .coin size
+      const coin = document.createElement('div');
+      coin.className = 'coin';
+      slot.appendChild(coin);
+
+      // Always spawn horizontally centered on the slot mouth
+      const x = (mouthRect.left - slotRect.left) + (mouthRect.width / 2) - (COIN_W / 2);
+      coin.style.left = `${x}px`;
+
+      // Start a little above the slot so it "falls into" the mouth
+      coin.style.top = `-28px`;
+
+      // Vertical drop distance to the center of the mouth
+      const dropY = (mouthRect.top - slotRect.top) + (mouthRect.height / 2) - (COIN_W / 2);
+      coin.style.setProperty('--dropY', `${dropY}px`);
+
+      try { sfx.currentTime = 0; sfx.play().catch(()=>{}); } catch(_) {}
+
+      requestAnimationFrame(() => coin.classList.add('coin--into'));
+      setTimeout(() => { window.location.href = 'arcade.html'; }, 950);
+    }
+
+    if (slot) {
+      slot.addEventListener('pointerdown', (e) => { e.preventDefault(); triggerCoin(); });
+      slot.addEventListener('click',        (e) => { e.preventDefault(); triggerCoin(); });
+    }
+  </script>
+</body>
+</html>
