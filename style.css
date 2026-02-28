@@ -432,28 +432,28 @@ body.qr-landing .qr-wrap{
 
 /* Title/subtitle PNGs */
 body.qr-landing .qr-title{
-  width:min(720px, 92vw);
+  width:min(760px, 92vw);
   height:auto;
   display:block;
-  margin:0 auto 14px;
+  margin:30px auto 6px;
   user-select:none;
   -webkit-user-drag:none;
 }
 
 body.qr-landing .qr-subtitle{
-  width:min(520px, 78vw);
+  width:min(460px, 78vw);
   height:auto;
   display:block;
-  margin:0 auto 22px;
+  margin:35px auto 26px;
   user-select:none;
   -webkit-user-drag:none;
 }
 
 /* Center artwork */
 body.qr-landing .qr-art{
-  width:min(360px, 70vw);
+  width:min(460px, 70vw);
   aspect-ratio:1/1;
-  margin:10px auto 24px;
+  margin:30px auto 24px;
 
   /* ✅ thinner border */
   border: none;
@@ -471,8 +471,8 @@ body.qr-landing .qr-art img{
 
 /* Links: centered stack */
 body.qr-landing .qr-links{
-  width:min(520px, 92vw);
-  margin:0 auto;
+  width:min(600px, 92vw);
+  margin:25px auto;
   display:flex;
   flex-direction:column;
   gap:16px;
