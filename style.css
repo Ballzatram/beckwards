@@ -367,17 +367,24 @@ body{ margin:0; font:17px/1.5 var(--serif) }
    .qr-wrap .qr-title .qr-subtitle .qr-art .qr-links .qr-pill
    ========================================================= */
 
-body.qr-landing{
-  /* Fixed backgrounds are janky on mobile Safari — we override below */
-  background: url("assets/QR/Background%20Large.png") center/cover no-repeat fixed;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+/* Make sure there is NEVER a white “page” behind the QR background */
+html, body{
+  background: #000;
+}
 
-  /* iOS notch safe-area + comfortable scroll */
-  padding: max(16px, env(safe-area-inset-top)) 0 max(24px, env(safe-area-inset-bottom));
-  min-height: 100svh;
-  padding-bottom: 0 !important; /* prevent arcade console padding from affecting this page */
+/* QR page background should cover the whole scroll height */
+body.qr-landing{
+  background-color:#000; /* fallback */
+  background-image: url("assets/QR/Background%20Large.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  /* mobile Safari behaves better with scroll than fixed */
+  background-attachment: scroll;
+
+  min-height: 100vh;   /* fallback */
+  min-height: 100svh;  /* modern mobile */
 }
 
 /* grime overlay for QR page */
