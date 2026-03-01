@@ -441,7 +441,7 @@ body.qr-landing .qr-title{
 }
 
 body.qr-landing .qr-subtitle{
-  width:min(460px, 78vw);
+  width:min(400px, 78vw);
   height:auto;
   display:block;
   margin:35px auto 26px;
