@@ -121,6 +121,28 @@
     .game-stage{ height:clamp(320px, 52vh, 560px); }
   }
 
+  @media (max-width: 420px) and (max-height: 780px){
+    .arcade-wrap{
+      width:calc(100% - 24px);
+      margin:18px auto 8px;
+      padding:14px 16px;
+    }
+    .arcade-brand{margin-bottom:6px;font-size:16px}
+    .arcade-title{font-size:30px;line-height:1.05}
+    .arcade-instructions{font-size:14px;line-height:1.25}
+    .game-stage{height:300px}
+    .cabinet-console{bottom:8px}
+    .console{
+      width:clamp(300px, 86vw, 640px);
+      margin:10px auto;
+      padding:10px 12px;
+      gap:10px;
+    }
+    .joy{width:94px;height:82px}
+    .joy-gate{width:68px;height:68px}
+    .btn-drop{width:58px;height:58px;font-size:12px}
+  }
+
   /* Desktop: fix console at bottom and keep footer visible */
   @media (min-width: 900px){
     .cabinet-console{ position:fixed; left:50%; transform:translateX(-50%); bottom:var(--console-offset); width:var(--cabinet-width); z-index:50; }
