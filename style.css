@@ -421,12 +421,12 @@ body.home-reference.is-dragging-coin{
     font-size:14px;
   }
   .home-label::before{ inset:-20px; }
-  .home-label--music{ --label-w:128px; width:128px; left:30%; top:43%; }
-  .home-label--who{ --label-w:164px; width:164px; left:60%; top:47%; }
-  .home-label--store{ --label-w:132px; width:132px; left:27%; top:54%; }
-  .home-label--live{ --label-w:82px; width:82px; left:64%; top:55%; }
-  .home-label--socials{ --label-w:164px; width:164px; left:31%; top:66%; }
-  .home-label--contact{ --label-w:144px; width:144px; left:59%; top:73%; }
+  .home-label--music{ --label-w:122px; width:122px; left:25%; top:44%; }
+  .home-label--who{ --label-w:154px; width:154px; left:68%; top:46.5%; }
+  .home-label--store{ --label-w:122px; width:122px; left:27%; top:56%; }
+  .home-label--live{ --label-w:78px; width:78px; left:68%; top:58%; }
+  .home-label--socials{ --label-w:150px; width:150px; left:29%; top:68.5%; }
+  .home-label--contact{ --label-w:136px; width:136px; left:66%; top:76.5%; }
   .home-coin{ width:74px; }
   .home-coin--1{ --coin-left:13%; --coin-top:19%; }
   .home-coin--2{ --coin-left:87%; --coin-top:19.5%; }
@@ -437,12 +437,12 @@ body.home-reference.is-dragging-coin{
 @media (max-width:380px){
   .home-title{ width:74vw; }
   .home-slot-wrap{ top:28.5%; width:118px; }
-  .home-label--music{ --label-w:118px; width:118px; left:30%; top:43%; }
-  .home-label--who{ --label-w:150px; width:150px; left:60%; top:47%; }
-  .home-label--store{ --label-w:120px; width:120px; left:27%; top:54%; }
-  .home-label--live{ --label-w:74px; width:74px; left:64%; top:55%; }
-  .home-label--socials{ --label-w:150px; width:150px; left:30%; top:66%; }
-  .home-label--contact{ --label-w:132px; width:132px; left:58%; top:73%; }
+  .home-label--music{ --label-w:112px; width:112px; left:25%; top:44%; }
+  .home-label--who{ --label-w:142px; width:142px; left:68%; top:46.5%; }
+  .home-label--store{ --label-w:114px; width:114px; left:27%; top:56%; }
+  .home-label--live{ --label-w:70px; width:70px; left:68%; top:58%; }
+  .home-label--socials{ --label-w:140px; width:140px; left:29%; top:68.5%; }
+  .home-label--contact{ --label-w:126px; width:126px; left:66%; top:76.5%; }
 }
 
 @media (max-height:700px) and (max-width:520px){
@@ -453,12 +453,12 @@ body.home-reference.is-dragging-coin{
   .home-title{ top:7.5%; width:82vw; }
   .home-slot-wrap{ top:27.5%; width:112px; }
   .home-insert{ width:108px; }
-  .home-label--music{ top:39%; }
-  .home-label--who{ top:39%; }
-  .home-label--store{ top:50%; }
-  .home-label--live{ top:51%; }
-  .home-label--socials{ top:62%; }
-  .home-label--contact{ top:68%; }
+  .home-label--music{ top:43%; }
+  .home-label--who{ top:43.5%; }
+  .home-label--store{ top:53.5%; }
+  .home-label--live{ top:55.5%; }
+  .home-label--socials{ top:66%; }
+  .home-label--contact{ top:72%; }
   .home-coin{ width:68px; }
   .home-coin--3{ --coin-top:88%; }
   .home-coin--4{ --coin-top:87%; }

@@ -93,20 +93,52 @@
       const totalCoins = coins.length;
       let deposited = 0;
       let redirectTimer = null;
+      let audioPrimed = false;
+
+      const primeCoinAudio = () => {
+        if (audioPrimed) return;
+        audioPrimed = true;
+        [...audio, fallbackAudio].filter(Boolean).forEach((track) => {
+          try {
+            track.load();
+            const previousMuted = track.muted;
+            track.muted = true;
+            const playAttempt = track.play();
+            if (playAttempt?.then) {
+              playAttempt
+                .then(() => {
+                  track.pause();
+                  track.currentTime = 0;
+                  track.muted = previousMuted;
+                })
+                .catch(() => {
+                  track.muted = previousMuted;
+                });
+            } else {
+              track.pause();
+              track.currentTime = 0;
+              track.muted = previousMuted;
+            }
+          } catch (_) {}
+        });
+      };
 
       const playDepositAudio = () => {
         const track = audio[deposited] || fallbackAudio;
         if (!track) return;
         try {
+          track.muted = false;
           track.currentTime = 0;
           track.play().catch(() => {
             if (track !== fallbackAudio && fallbackAudio) {
+              fallbackAudio.muted = false;
               fallbackAudio.currentTime = 0;
               fallbackAudio.play().catch(() => {});
             }
           });
         } catch (_) {
           try {
+            fallbackAudio.muted = false;
             fallbackAudio.currentTime = 0;
             fallbackAudio.play().catch(() => {});
           } catch (_) {}
@@ -164,6 +196,7 @@
         const startDrag = (event) => {
           if (coin.dataset.deposited === 'true') return;
           event.preventDefault();
+          primeCoinAudio();
           const pointerId = event.pointerId;
           const coinRect = coin.getBoundingClientRect();
           const offsetX = event.clientX - (coinRect.left + coinRect.width / 2);
