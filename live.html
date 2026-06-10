@@ -6,15 +6,24 @@
   <title>Live — Beckwards</title>
   <link rel="icon" type="image/png" href="assets/thumbnails/1.png" />
   <link rel="stylesheet" href="style.css" />
+  <script>
+    (function () {
+      let cleanPath = location.pathname;
+      if (cleanPath.endsWith("/index.html")) {
+        cleanPath = cleanPath.slice(0, -"index.html".length);
+      } else if (cleanPath.endsWith(".html")) {
+        cleanPath = cleanPath.slice(0, -".html".length);
+      }
+      if (cleanPath !== location.pathname) {
+        location.replace(location.origin + cleanPath + location.search + location.hash);
+      }
+    })();
+  </script>
 </head>
-<body>
+<body class="site-page">
   <div class="wrap">
-    <nav class="home-link">
-      <a href="/" aria-label="Home">Home</a>
-    </nav>
-
     <header class="top">
-      <h1>BECKWARDS</h1>
+      <h1><a class="site-title-link" href="/" aria-label="Home">BECKWARDS</a></h1>
       <p class="subtitle">Coming Soon...</p>
     </header>
 

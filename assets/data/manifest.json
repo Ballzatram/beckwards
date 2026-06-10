@@ -36,51 +36,9 @@
       ]
     },
     {
-      "id": "claw_open_sfx",
+      "id": "clink",
       "src": [
-        "assets/audio/claw_open.ogg",
-        "assets/audio/claw_open.mp3",
-        "assets/audio/claw_open.wav"
-      ]
-    },
-    {
-      "id": "claw_close_sfx",
-      "src": [
-        "assets/audio/claw_close.ogg",
-        "assets/audio/claw_close.mp3",
-        "assets/audio/claw_close.wav"
-      ]
-    },
-    {
-      "id": "glass_bonk",
-      "src": [
-        "assets/audio/glass_bonk.ogg",
-        "assets/audio/glass_bonk.mp3",
-        "assets/audio/glass_bonk.wav"
-      ]
-    },
-    {
-      "id": "prize_drop",
-      "src": [
-        "assets/audio/prize_drop.ogg",
-        "assets/audio/prize_drop.mp3",
-        "assets/audio/prize_drop.wav"
-      ]
-    },
-    {
-      "id": "win",
-      "src": [
-        "assets/audio/win.ogg",
-        "assets/audio/win.mp3",
-        "assets/audio/win.wav"
-      ]
-    },
-    {
-      "id": "fail",
-      "src": [
-        "assets/audio/fail.ogg",
-        "assets/audio/fail.mp3",
-        "assets/audio/fail.wav"
+        "assets/audio/clink.wav"
       ]
     }
   ]

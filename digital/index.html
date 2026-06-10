@@ -1,9 +1,10 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <base href="/" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Music — Beckwards</title>
+  <title>Digital Madness — Beckwards</title>
   <link rel="icon" type="image/png" href="assets/thumbnails/1.png" />
   <link rel="stylesheet" href="style.css" />
   <script>
@@ -24,27 +25,18 @@
   <div class="wrap">
     <header class="top">
       <h1><a class="site-title-link" href="/" aria-label="Home">BECKWARDS</a></h1>
-      <p class="subtitle">music</p>
+      <p class="subtitle">digital madness</p>
     </header>
 
     <main>
-      <section>
-        <iframe style="border-radius:0"
-          src="https://open.spotify.com/embed/artist/0urHGaFXBdSbrykH82Ferf?utm_source=generator"
-          width="100%" height="152" frameborder="0"
-          allow="clipboard-write; encrypted-media; fullscreen; picture-in-picture">
-        </iframe>
-        <p class="links">
-          <a href="https://open.spotify.com/artist/0urHGaFXBdSbrykH82Ferf" target="_blank">spotify</a> /
-          <a href="https://music.apple.com/us/album/the-call/1837441446?i=1837441447" target="_blank">apple</a> /
-          <a href="https://www.instagram.com/beckwardss/" target="_blank">instagram</a>
-        </p>
-      </section>
+      <ul>
+        <li><a href="https://open.spotify.com/artist/0urHGaFXBdSbrykH82Ferf" target="_blank">spotify</a></li>
+        <li><a href="https://music.apple.com/us/album/the-call/1837441446?i=1837441447" target="_blank">apple music</a></li>
+        <li><a href="https://www.instagram.com/beckwardss/" target="_blank">instagram</a></li>
+      </ul>
     </main>
 
-    <footer class="foot">
-      <p class="tiny">© <span id="year"></span> Beckwards</p>
-    </footer>
+    <footer class="foot"><p class="tiny">© <span id="year"></span> Beckwards</p></footer>
   </div>
   <script>document.getElementById('year').textContent=new Date().getFullYear()</script>
 </body>

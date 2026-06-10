@@ -1,13 +1,218 @@
 <!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <link rel="canonical" href="https://beckwards.com/findmyrobot" />
-    <title>Redirecting…</title>
-  </head>
-  <body>
-    <script>
-      location.replace("/findmyrobot");
-    </script>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Beckwards - Claw Machine</title>
+  <meta name="description" content="Beckwards - claw machine, music, links, and experiments." />
+  <meta property="og:title" content="Beckwards" />
+  <meta property="og:description" content="Claw Machine by Beckwards." />
+  <meta property="og:image" content="assets/home-page/reference.png" />
+  <meta property="og:url" content="https://www.beckwards.com" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="canonical" href="https://www.beckwards.com/" />
+  <link rel="icon" type="image/png" href="assets/thumbnails/1.png" />
+  <link rel="stylesheet" href="style.css" />
+
+  <script>
+    (function () {
+      if (/\/(?:index|home)\.html$/i.test(location.pathname)) {
+        location.replace(location.origin + "/" + location.search + location.hash);
+      }
+    })();
+  </script>
+</head>
+<body class="home-reference">
+  <main class="home-scene" aria-label="Beckwards claw machine homepage">
+    <img class="home-foreground" src="assets/home-page/assets/B3000%20head.png" alt="" aria-hidden="true" />
+
+    <div class="home-title">
+      <img src="assets/home-page/assets/claw%20machine%20by%20beckwards.png" alt="Claw Machine by Beckwards" />
+    </div>
+
+    <nav class="home-nav" aria-label="Site pages">
+      <a class="home-label home-label--music" href="/findmyrobot" aria-label="Music">
+        <img src="assets/home-page/assets/Music_.png" alt="Music" />
+      </a>
+      <a class="home-label home-label--store" href="/store" aria-label="Store">
+        <img src="assets/home-page/assets/Store_.png" alt="Store" />
+      </a>
+      <a class="home-label home-label--socials" href="/socials" aria-label="Socials">
+        <img src="assets/home-page/assets/Socials_.png" alt="Socials" />
+      </a>
+      <a class="home-label home-label--live" href="/live" aria-label="Live">
+        <img src="assets/home-page/assets/Live_.png" alt="Live" />
+      </a>
+      <a class="home-label home-label--who" href="/digital" aria-label="Who is B3000?">
+        <img src="assets/home-page/assets/Who%20is%20b3000_.png" alt="Who is B3000?" />
+      </a>
+      <a class="home-label home-label--contact" href="/contact" aria-label="Contact">
+        <img src="assets/home-page/assets/contact_.png" alt="Contact" />
+      </a>
+    </nav>
+
+    <section class="home-slot-wrap" aria-labelledby="insert-coins-title">
+      <img id="insert-coins-title" class="home-insert" src="assets/home-page/assets/Insert%20coins_.png" alt="Insert coins" />
+      <div class="home-slot" aria-label="Coin slot">
+        <img class="home-slot__img" src="assets/home-page/assets/COIN%20SLOT.png" alt="" aria-hidden="true" />
+        <span class="home-slot__hotspot" aria-hidden="true"></span>
+      </div>
+      <p class="home-coin-status" id="coin-status" role="status" aria-live="polite">0/4</p>
+    </section>
+
+    <button class="home-coin home-coin--1" type="button" aria-label="Quarter 1">
+      <img src="assets/home-page/assets/quarter%201.png" alt="" aria-hidden="true" />
+    </button>
+    <button class="home-coin home-coin--2" type="button" aria-label="Quarter 2">
+      <img src="assets/home-page/assets/quarter%202.png" alt="" aria-hidden="true" />
+    </button>
+    <button class="home-coin home-coin--3" type="button" aria-label="Quarter 3">
+      <img src="assets/home-page/assets/quarter%203.png" alt="" aria-hidden="true" />
+    </button>
+    <button class="home-coin home-coin--4" type="button" aria-label="Quarter 4">
+      <img src="assets/home-page/assets/quarter%204.png" alt="" aria-hidden="true" />
+    </button>
+
+    <audio class="home-coin-audio" src="assets/home-page/audio/quarter_audio_1.wav" preload="auto"></audio>
+    <audio class="home-coin-audio" src="assets/home-page/audio/quarter_audio_2.wav" preload="auto"></audio>
+    <audio class="home-coin-audio" src="assets/home-page/audio/quarter_audio_3.wav" preload="auto"></audio>
+    <audio class="home-coin-audio" src="assets/home-page/audio/quarter_audio_4.wav" preload="auto"></audio>
+    <audio id="coin-fallback-sfx" src="assets/audio/clink.wav" preload="auto"></audio>
+  </main>
+
+  <script>
+    (() => {
+      const scene = document.querySelector('.home-scene');
+      const slot = document.querySelector('.home-slot');
+      const hotspot = document.querySelector('.home-slot__hotspot');
+      const status = document.getElementById('coin-status');
+      const coins = Array.from(document.querySelectorAll('.home-coin'));
+      const audio = Array.from(document.querySelectorAll('.home-coin-audio'));
+      const fallbackAudio = document.getElementById('coin-fallback-sfx');
+      const totalCoins = coins.length;
+      let deposited = 0;
+      let redirectTimer = null;
+
+      const playDepositAudio = () => {
+        const track = audio[deposited] || fallbackAudio;
+        if (!track) return;
+        try {
+          track.currentTime = 0;
+          track.play().catch(() => {
+            if (track !== fallbackAudio && fallbackAudio) {
+              fallbackAudio.currentTime = 0;
+              fallbackAudio.play().catch(() => {});
+            }
+          });
+        } catch (_) {
+          try {
+            fallbackAudio.currentTime = 0;
+            fallbackAudio.play().catch(() => {});
+          } catch (_) {}
+        }
+      };
+
+      const updateStatus = () => {
+        if (!status) return;
+        status.textContent = deposited >= totalCoins ? 'READY' : `${deposited}/${totalCoins}`;
+      };
+
+      const rectsOverlap = (a, b) => (
+        a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
+      );
+
+      const getDropTarget = () => {
+        const target = hotspot || slot;
+        return target?.getBoundingClientRect();
+      };
+
+      const setCoinCenter = (coin, x, y) => {
+        const sceneRect = scene.getBoundingClientRect();
+        coin.style.left = `${x - sceneRect.left}px`;
+        coin.style.top = `${y - sceneRect.top}px`;
+      };
+
+      const resetCoin = (coin) => {
+        coin.classList.remove('is-dragging');
+        document.body.classList.remove('is-dragging-coin');
+        coin.style.left = '';
+        coin.style.top = '';
+      };
+
+      const depositCoin = (coin) => {
+        if (coin.dataset.deposited === 'true') return;
+        playDepositAudio();
+        coin.dataset.deposited = 'true';
+        coin.classList.remove('is-dragging');
+        document.body.classList.remove('is-dragging-coin');
+        coin.classList.add('is-deposited');
+        coin.setAttribute('aria-hidden', 'true');
+        coin.tabIndex = -1;
+        deposited += 1;
+        updateStatus();
+
+        if (deposited >= totalCoins) {
+          window.clearTimeout(redirectTimer);
+          redirectTimer = window.setTimeout(() => {
+            window.location.href = '/arcade';
+          }, 900);
+        }
+      };
+
+      coins.forEach((coin) => {
+        const startDrag = (event) => {
+          if (coin.dataset.deposited === 'true') return;
+          event.preventDefault();
+          const pointerId = event.pointerId;
+          const coinRect = coin.getBoundingClientRect();
+          const offsetX = event.clientX - (coinRect.left + coinRect.width / 2);
+          const offsetY = event.clientY - (coinRect.top + coinRect.height / 2);
+
+          coin.classList.add('is-dragging');
+          document.body.classList.add('is-dragging-coin');
+          coin.setPointerCapture?.(pointerId);
+          setCoinCenter(coin, event.clientX - offsetX, event.clientY - offsetY);
+
+          const moveCoin = (moveEvent) => {
+            if (moveEvent.pointerId !== pointerId) return;
+            setCoinCenter(coin, moveEvent.clientX - offsetX, moveEvent.clientY - offsetY);
+          };
+
+          const endDrag = (upEvent) => {
+            if (upEvent.pointerId !== pointerId) return;
+            coin.releasePointerCapture?.(pointerId);
+            coin.removeEventListener('pointermove', moveCoin);
+            coin.removeEventListener('pointerup', endDrag);
+            coin.removeEventListener('pointercancel', cancelDrag);
+
+            const targetRect = getDropTarget();
+            const coinRectAfter = coin.getBoundingClientRect();
+            if (targetRect && rectsOverlap(coinRectAfter, targetRect)) {
+              depositCoin(coin);
+            } else {
+              resetCoin(coin);
+            }
+          };
+
+          const cancelDrag = () => {
+            coin.removeEventListener('pointermove', moveCoin);
+            coin.removeEventListener('pointerup', endDrag);
+            coin.removeEventListener('pointercancel', cancelDrag);
+            document.body.classList.remove('is-dragging-coin');
+            resetCoin(coin);
+          };
+
+          coin.addEventListener('pointermove', moveCoin);
+          coin.addEventListener('pointerup', endDrag);
+          coin.addEventListener('pointercancel', cancelDrag);
+        };
+
+        coin.addEventListener('pointerdown', startDrag);
+      });
+
+      updateStatus();
+    })();
+  </script>
+</body>
 </html>
