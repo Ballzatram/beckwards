@@ -11,6 +11,12 @@
     { "id": "claw_open",   "src": "assets/sprites/claw/claw_open.png" },
     { "id": "claw_closed", "src": "assets/sprites/claw/claw_closed.png" },
 
+    { "id": "cm_claw_base",   "src": "assets/claw-machine/claw/base.png" },
+    { "id": "cm_claw_arm",    "src": "assets/claw-machine/claw/arm.png" },
+    { "id": "cm_claw_left",   "src": "assets/claw-machine/claw/CLAW LEFT.png" },
+    { "id": "cm_claw_middle", "src": "assets/claw-machine/claw/CLAW MIDDLE.png" },
+    { "id": "cm_claw_right",  "src": "assets/claw-machine/claw/CLAW RIGHT.png" },
+
     { "id": "prize_star",  "src": "assets/sprites/prizes/plush_star.png" },
     { "id": "prize_duck",  "src": "assets/sprites/prizes/duck.png" },
     { "id": "prize_box",   "src": "assets/sprites/prizes/mystery_box.png" },

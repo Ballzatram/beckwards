@@ -3,150 +3,236 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Arcade — Beckwards</title>
+<title>Arcade - Beckwards</title>
 <link rel="icon" type="image/png" href="assets/thumbnails/1.png" />
 <link rel="stylesheet" href="style.css" />
-
 <style>
-  /* ===== Page steel backdrop ===== */
-  html,body{height:100%;margin:0;padding:0;background:none !important}
-  body{display:flex;flex-direction:column;min-height:100vh;color:#000}
-  body::before{
-    content:"";position:fixed;inset:0;z-index:-1;
-    background:repeating-linear-gradient(-12deg,#d6d7d9 0 3px,#111 3px 80px);
-    background-size:200px 200px;
+  html,
+  body{
+    width:100%;
+    min-height:100%;
+    margin:0;
+    padding:0;
+    background:#2d2d2a;
   }
-  @supports(-webkit-touch-callout:none){body::before{position:absolute}} /* iOS bg fix */
-
-  /* ===== Header card ===== */
-  .arcade-wrap{
-    background:#fff;max-width:900px;width:calc(100% - 32px);
-    margin:40px auto 10px;padding:20px 22px;border:1px solid #000;
-    box-shadow:6px 6px 0 #000,-2px -2px 0 #000;
+  body{
+    overflow:hidden;
+    color:#f20b06;
+    font-family:"Times New Roman", Times, Georgia, serif;
   }
-  .arcade-brand{margin:0 0 8px;text-align:center;font:bold 18px/1 "Times New Roman", Times, Georgia, serif}
-  .arcade-brand a{color:#000;text-decoration:none}
-  .arcade-brand a:hover,.arcade-brand a:focus-visible{text-decoration:underline}
-  .arcade-title{margin:0 0 8px;font-size:36px;text-align:center}
-  .arcade-instructions{margin:0 auto;max-width:640px;text-align:center;font-size:16px}
-
-  /* =========================================================
-     CABINET (window + console are a single unit)
-     ========================================================= */
-  :root{
-    --cabinet-width: clamp(340px, 90vw, 1040px);
-    --console-offset: 12px;       /* bottom offset (desktop) */
-    --console-pad-desktop: 160px; /* body padding so footer isn't covered */
-  }
-
-  .cabinet{ width:var(--cabinet-width); margin:0 auto; }
-
-  /* Play window container (bezel-like shell) */
-  .cabinet-window{
-    background:#262a2f;
-    border:2px solid #000;
-    box-shadow:4px 4px 0 #000,-2px -2px 0 #000,inset 0 0 0 3px #fff;
-    border-bottom:none; /* visually attaches to console below */
-  }
-
-  /* Game stage (canvas injected here by scripts/game.js) */
-  .game-stage{
-    margin:8px auto 10px;
-    width:clamp(320px, 85vw, 1000px);
-    height:clamp(360px, 70vh, 720px); /* let 320x240 upscale 2–3x */
-    background:#0b0b0b;border:2px solid #000;
-    box-shadow:4px 4px 0 #000,-2px -2px 0 #000,inset 0 0 0 3px #fff;position:relative;
-  }
-  .stage-label{position:absolute;top:8px;left:10px;font-size:12px;color:#eaeaea;opacity:.9;text-shadow:0 1px 0 #000}
-
-  /* Canvas: crisp pixel art */
-  #game-canvas{
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-  }
-
-  /* Console panel that’s physically attached to the window */
-  .cabinet-console{
-    border:2px solid #000;
-    border-top:none;
-    background:linear-gradient(#1b1b1b,#0f0f0f);
-    box-shadow:4px 4px 0 #000,-2px -2px 0 #000;
-  }
-
-  /* ===== Console internals ===== */
-  .console{
-    width:clamp(320px,72vw,640px);margin:12px auto;padding:14px 16px;
-    display:flex;align-items:center;justify-content:space-between;gap:18px;
-    background:repeating-linear-gradient(-25deg,rgba(255,255,255,.22) 0 6px,transparent 6px 16px),linear-gradient(#d72626,#b21818);
-    border:1px solid #000;border-radius:14px;
-    box-shadow:6px 6px 0 #000,-2px -2px 0 #000,inset 0 10px 18px rgba(255,255,255,.06);
+  .arcade-scene{
     position:relative;
+    width:100vw;
+    height:100vh;
+    height:100dvh;
+    overflow:hidden;
+    background:#2d2d2a;
+    isolation:isolate;
+    touch-action:none;
   }
-  .console-inner{position:relative;z-index:1;width:100%;display:flex;align-items:center;justify-content:space-between}
-
-  /* Joystick */
-  .joy{display:grid;place-items:center;width:120px;height:100px;filter:drop-shadow(2px 2px 0 #000)}
-  .joy-gate{
-    position:relative;width:78px;height:78px;border-radius:12px;
-    background:radial-gradient(68px 52px at 50% 40%,#151515,#0a0a0a);border:1px solid #000;
-    box-shadow:inset 0 8px 16px rgba(255,255,255,.06),inset 0 -6px 12px rgba(0,0,0,.6)
+  .arcade-frame{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:min(100vw, calc(100vh * 16 / 9));
+    aspect-ratio:16 / 9;
+    transform:translate(-50%, -50%);
+    transform-origin:center;
   }
-  .joy-knob{
-    position:absolute;left:50%;top:50%;
-    width:24px;height:24px;border-radius:50%;
-    background:radial-gradient(circle at 30% 30%,#ff4a4a,#b80e0e);border:2px solid #000;
-    transform:translate(-50%,-50%);touch-action:none;will-change:transform;
+  .arcade-bg,
+  .arcade-layer,
+  .arcade-control{
+    position:absolute;
   }
-  .joy-knob.spring{transition:transform .12s cubic-bezier(.2,.9,.3,1)}
-  .joy-gate::after{
-    content:"";position:absolute;left:12px;right:12px;top:50%;height:2px;transform:translateY(-50%);
-    background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);pointer-events:none;
+  .arcade-bg{
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    pointer-events:none;
+    user-select:none;
+    -webkit-user-drag:none;
+    z-index:1;
   }
-
-  /* Button */
-  .drop-wrap{display:grid;place-items:center;flex:1}
-  .btn-drop{
-    width:64px;height:64px;border-radius:50%;background:#d21616;color:#fff;border:2px solid #000;
-    box-shadow:4px 4px 0 #000,inset 0 -6px 0 rgba(0,0,0,.35);font:bold 14px/1 "Times New Roman", Times, Georgia, serif;letter-spacing:.3px;
+  .arcade-layer{
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:2;
+    pointer-events:none;
   }
-  .btn-drop:active{transform:translate(1px,1px);box-shadow:3px 3px 0 #000,inset 0 -3px 0 rgba(0,0,0,.45)}
-
-  /* Footer */
-  .arcade-sitefoot{margin-top:auto;padding:16px 12px 20px;text-align:center;color:#eaeaea;font-size:12px;text-shadow:0 1px 0 #000}
-
-  /* ===== Positioning behavior ===== */
-  /* Mobile/tablet: keep console sticky so it doesn't eat vertical space */
-  @media (max-width: 899px){
-    .cabinet-console{ position:sticky; bottom:12px; z-index:30; }
-    .game-stage{ height:clamp(320px, 52vh, 560px); }
+  .arcade-brand-hit{
+    position:absolute;
+    left:26%;
+    top:7%;
+    width:48%;
+    height:14%;
+    z-index:4;
+    text-indent:-999px;
+    overflow:hidden;
   }
-
-  @media (max-width: 420px) and (max-height: 780px){
-    .arcade-wrap{
-      width:calc(100% - 24px);
-      margin:18px auto 8px;
-      padding:14px 16px;
+  .arcade-status{
+    position:absolute;
+    left:50%;
+    top:80.2%;
+    z-index:5;
+    min-width:clamp(74px, 7vw, 136px);
+    padding:.12em .35em;
+    transform:translate(-50%, -50%);
+    color:#f20b06;
+    text-align:center;
+    font:bold clamp(11px, .92vw, 17px)/1.05 "Courier New", monospace;
+    background:rgba(0,0,0,.22);
+    text-shadow:0 2px 0 #000;
+    letter-spacing:.06em;
+    pointer-events:none;
+  }
+  .arcade-status.is-done{
+    animation:arcadeBlink .78s steps(2, end) infinite;
+  }
+  .arcade-status:empty{
+    display:none;
+  }
+  .arcade-handle-zone{
+    left:43.58%;
+    top:71.8%;
+    width:5%;
+    height:6.67%;
+    z-index:6;
+    cursor:grab;
+    touch-action:none;
+  }
+  .arcade-handle-zone:active{
+    cursor:grabbing;
+  }
+  .arcade-handle{
+    position:absolute;
+    left:50%;
+    bottom:0;
+    width:35.2%;
+    transform:translate(calc(-50% + var(--joy-x, 0px)), 0);
+    transform-origin:50% 90%;
+    filter:drop-shadow(0 3px 2px rgba(0,0,0,.7));
+    pointer-events:none;
+    user-select:none;
+    -webkit-user-drag:none;
+  }
+  .arcade-button{
+    left:53.125%;
+    top:77.7%;
+    width:2.46%;
+    z-index:6;
+    padding:0;
+    border:0;
+    background:transparent;
+    cursor:pointer;
+    touch-action:manipulation;
+    filter:drop-shadow(0 3px 2px rgba(0,0,0,.7));
+  }
+  .arcade-button img{
+    display:block;
+    width:100%;
+    height:auto;
+    user-select:none;
+    -webkit-user-drag:none;
+  }
+  .arcade-button__pressed{
+    display:none;
+  }
+  .arcade-button.is-pressed .arcade-button__idle{
+    display:none;
+  }
+  .arcade-button.is-pressed .arcade-button__pressed{
+    display:block;
+    transform:translateY(5%);
+  }
+  .arcade-coin-slot{
+    left:49.2%;
+    top:83.15%;
+    width:4.8%;
+    height:9.2%;
+    z-index:7;
+    padding:0;
+    border:0;
+    border-radius:42%;
+    background:transparent;
+    cursor:pointer;
+    opacity:0;
+    touch-action:manipulation;
+  }
+  .arcade-coin-slot:disabled{
+    cursor:default;
+    pointer-events:none;
+  }
+  .arcade-coin{
+    position:absolute;
+    left:50.45%;
+    top:72.9%;
+    width:2.4%;
+    aspect-ratio:1;
+    z-index:8;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 28%, #fff7ba, #d1a32d 55%, #785313);
+    border:2px solid rgba(0,0,0,.45);
+    box-shadow:0 3px 4px rgba(0,0,0,.6);
+    transform:translate(-50%, -50%);
+    pointer-events:none;
+    animation:arcadeCoinDrop .82s cubic-bezier(.26,.7,.3,1) forwards;
+  }
+  .arcade-sr{
+    position:absolute;
+    width:1px;
+    height:1px;
+    padding:0;
+    margin:-1px;
+    overflow:hidden;
+    clip:rect(0,0,0,0);
+    white-space:nowrap;
+    border:0;
+  }
+  @keyframes arcadeBlink{
+    0%,49%{ opacity:1; }
+    50%,100%{ opacity:.35; }
+  }
+  @keyframes arcadeCoinDrop{
+    0%{ transform:translate(-50%, -50%) scale(1) rotate(0deg); opacity:1; }
+    72%{ transform:translate(-50%, 108%) scale(.82) rotate(94deg); opacity:1; }
+    100%{ transform:translate(-50%, 145%) scale(.42) rotate(128deg); opacity:0; }
+  }
+  @media (max-aspect-ratio:16 / 9){
+    .arcade-frame{
+      width:100vw;
     }
-    .arcade-brand{margin-bottom:6px;font-size:16px}
-    .arcade-title{font-size:30px;line-height:1.05}
-    .arcade-instructions{font-size:14px;line-height:1.25}
-    .game-stage{height:300px}
-    .cabinet-console{bottom:8px}
-    .console{
-      width:clamp(300px, 86vw, 640px);
-      margin:10px auto;
-      padding:10px 12px;
-      gap:10px;
-    }
-    .joy{width:94px;height:82px}
-    .joy-gate{width:68px;height:68px}
-    .btn-drop{width:58px;height:58px;font-size:12px}
   }
-
-  /* Desktop: fix console at bottom and keep footer visible */
-  @media (min-width: 900px){
-    .cabinet-console{ position:fixed; left:50%; transform:translateX(-50%); bottom:var(--console-offset); width:var(--cabinet-width); z-index:50; }
-    body{ padding-bottom: var(--console-pad-desktop); } /* room so footer isn't covered */
+  @media (min-aspect-ratio:16 / 9){
+    .arcade-frame{
+      width:calc(100vh * 16 / 9);
+    }
+  }
+  @media (max-width:820px){
+    .arcade-frame{
+      width:max(100vw, calc(100vh * 16 / 9));
+    }
+    .arcade-status{
+      font-size:12px;
+    }
+  }
+  @media (max-width:480px){
+    .arcade-frame{
+      left:50%;
+      width:max(178vw, calc(100vh * 16 / 9));
+    }
+    .arcade-button{
+      width:3.75%;
+    }
+    .arcade-handle-zone{
+      width:5.9%;
+    }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .arcade-status.is-done{
+      animation:none;
+    }
   }
 </style>
   <script>
@@ -164,147 +250,112 @@
   </script>
 </head>
 <body>
-  <!-- Info box -->
-  <div class="arcade-wrap">
-    <header>
-      <p class="arcade-brand"><a href="/" aria-label="Home">BECKWARDS</a></p>
-      <h1 class="arcade-title">Claw Machine</h1>
-    </header>
-    <main><p class="arcade-instructions">Move with the joystick or arrow keys. Press DROP, Space, or Enter to start a timed run and grab prizes.</p></main>
-  </div>
-
-  <!-- CABINET: window + console are one unit -->
-  <section class="cabinet">
-    <!-- Play window -->
-    <div class="cabinet-window">
-      <div class="game-stage" id="stage" aria-label="Game stage">
-        <span class="stage-label">loading game…</span>
+  <main class="arcade-scene" aria-label="Beckwards claw machine arcade">
+    <div class="arcade-frame" id="arcade-frame">
+      <img class="arcade-bg" src="assets/claw-machine/background.png" alt="" aria-hidden="true" />
+      <a class="arcade-brand-hit" href="/" aria-label="Home">Beckwards</a>
+      <div class="arcade-layer" id="stage" aria-label="Game stage">
+        <span class="arcade-sr">Loading claw machine...</span>
       </div>
-    </div>
-
-    <!-- Console panel physically attached to the window -->
-    <div class="cabinet-console">
-      <div class="console" aria-label="Arcade console">
-        <div class="console-inner">
-          <!-- Joystick -->
-          <div class="joy">
-            <div class="joy-gate" id="gate">
-              <div class="joy-knob spring" id="joy" aria-label="Joystick" role="slider" aria-valuemin="-1" aria-valuemax="1" aria-valuenow="0"></div>
-            </div>
-          </div>
-
-          <!-- DROP button -->
-          <div class="drop-wrap">
-            <button type="button" class="btn-drop" id="btn-drop" aria-label="Drop claw">DROP</button>
-          </div>
-
-          <!-- Permanent coin slot (right side in console) -->
-          <div class="console-coin-slot disabled" id="play-slot" aria-disabled="true" title="Insert coin after the round">
-            <!-- uses same art + 2x as homepage -->
-            <img
-              class="console-coin-slot__img"
-              src="assets/sprites/ui/coin-slot-128.png"
-              srcset="assets/sprites/ui/coin-slot-256.png 2x"
-              alt="Coin slot"
-            />
-            <span class="console-coin-slot__hotspot"></span>
-            <span class="console-coin-slot__badge">LOCKED</span>
-            <!-- identical sound as homepage -->
-            <audio id="coin-sfx" src="assets/audio/clink.wav" preload="auto"></audio>
-          </div>
-        </div>
+      <p class="arcade-status" id="arcade-status" role="status" aria-live="polite">ONE TRY</p>
+      <div class="arcade-control arcade-handle-zone" id="gate" aria-label="Joystick area">
+        <img class="arcade-handle" id="joy" src="assets/claw-machine/handle.png" alt="Joystick" role="slider" aria-valuemin="-1" aria-valuemax="1" aria-valuenow="0" />
       </div>
+      <button type="button" class="arcade-control arcade-button" id="btn-drop" aria-label="Drop claw">
+        <img class="arcade-button__idle" src="assets/claw-machine/button%20pressed.png" alt="" aria-hidden="true" />
+        <img class="arcade-button__pressed" src="assets/claw-machine/button%20pressed.png" alt="" aria-hidden="true" />
+      </button>
+      <button type="button" class="arcade-control arcade-coin-slot" id="coin-slot" aria-label="Insert coin to retry" disabled></button>
     </div>
-  </section>
+  </main>
 
-  <!-- Footer -->
-  <footer class="arcade-sitefoot">© <span id="year"></span> Beckwards</footer>
-
-  <!-- Game module (injects canvas; exposes window.GAME) -->
   <script type="module" src="scripts/game.js"></script>
-
-  <!-- UI wiring for joystick + button + coin (home-matching) -->
   <script>
-    // Year
-    document.getElementById('year').textContent = new Date().getFullYear();
-
-    // ===== Joystick control =====
-    (function(){
+    (() => {
       const knob = document.getElementById('joy');
       const gate = document.getElementById('gate');
-      if(!knob || !gate) return;
+      const button = document.getElementById('btn-drop');
+      if (!knob || !gate || !button) return;
 
-      const gateRect = ()=> gate.getBoundingClientRect();
-      function radiusPx(){
-        const r = Math.min(gateRect().width, gateRect().height)/2;
-        const knobR = knob.offsetWidth/2 + 4;
-        return Math.max(10, r - knobR);
-      }
+      const setKnob = (x) => {
+        const rect = gate.getBoundingClientRect();
+        const max = Math.max(8, rect.width * 0.26);
+        const clamped = Math.max(-max, Math.min(max, x));
+        gate.style.setProperty('--joy-x', `${clamped}px`);
+        knob.setAttribute('aria-valuenow', (clamped / max).toFixed(2));
+        return clamped / max;
+      };
 
-      let currentX = 0, dragging = false, raf=null, lastDir=0;
+      let dragging = false;
+      let lastDir = 0;
+      let raf = null;
+      let currentRatio = 0;
 
-      function setKnob(x){
-        const R = radiusPx();
-        const clamped = Math.max(-R, Math.min(R, x));
-        knob.style.transform = `translate(calc(-50% + ${clamped}px), -50%)`;
-        knob.setAttribute('aria-valuenow', (clamped/R).toFixed(2));
-        return clamped;
-      }
-      function dirFrom(x){
-        const R = radiusPx();
-        const t = x / R;
-        if (t <= -0.25) return -1;
-        if (t >=  0.25) return  1;
+      const dirFromRatio = (ratio) => {
+        if (ratio <= -0.26) return -1;
+        if (ratio >= 0.26) return 1;
         return 0;
-      }
-      function update(){
-        const dir = dirFrom(currentX);
-        if (dir !== lastDir){
-          if (dir === -1) window.GAME?.moveLeft();
-          else if (dir === 1) window.GAME?.moveRight();
+      };
+
+      const updateMove = () => {
+        const dir = dirFromRatio(currentRatio);
+        if (dir !== lastDir) {
+          if (dir < 0) window.GAME?.moveLeft();
+          else if (dir > 0) window.GAME?.moveRight();
           else window.GAME?.stopMove();
           lastDir = dir;
         }
-        raf = requestAnimationFrame(update);
-      }
-      function onDown(e){
-        e.preventDefault();
-        knob.classList.remove('spring');
-        knob.setPointerCapture?.(e.pointerId);
-        dragging = true;
-        if (!raf) raf = requestAnimationFrame(update);
-        window.addEventListener('pointermove', onMove, {passive:false});
-        window.addEventListener('pointerup', onUp, {passive:false, once:true});
-        window.addEventListener('touchmove', onMove, {passive:false});
-        window.addEventListener('touchend', onUp, {passive:false, once:true});
-      }
-      function onMove(e){
-        if(!dragging) return;
-        const p = ('touches' in e) ? e.touches[0] : e;
-        const rect = gateRect();
-        currentX = p.clientX - (rect.left + rect.width/2);
-        setKnob(currentX);
-      }
-      function onUp(){
+        raf = requestAnimationFrame(updateMove);
+      };
+
+      const move = (event) => {
+        if (!dragging) return;
+        const point = event.touches ? event.touches[0] : event;
+        const rect = gate.getBoundingClientRect();
+        currentRatio = setKnob(point.clientX - (rect.left + rect.width / 2));
+      };
+
+      const stop = () => {
         dragging = false;
-        cancelAnimationFrame(raf); raf=null;
-        currentX = 0;
-        knob.classList.add('spring');
+        currentRatio = 0;
         setKnob(0);
         window.GAME?.stopMove();
-        window.removeEventListener('pointermove', onMove);
-        window.removeEventListener('touchmove', onMove);
-      }
-      knob.addEventListener('pointerdown', onDown, {passive:false});
-      knob.addEventListener('touchstart', onDown, {passive:false});
+        lastDir = 0;
+        if (raf) cancelAnimationFrame(raf);
+        raf = null;
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('touchmove', move);
+      };
+
+      const start = (event) => {
+        event.preventDefault();
+        dragging = true;
+        move(event);
+        if (!raf) raf = requestAnimationFrame(updateMove);
+        window.addEventListener('pointermove', move, { passive:false });
+        window.addEventListener('pointerup', stop, { passive:false, once:true });
+        window.addEventListener('pointercancel', stop, { passive:false, once:true });
+        window.addEventListener('touchmove', move, { passive:false });
+        window.addEventListener('touchend', stop, { passive:false, once:true });
+      };
+
+      gate.addEventListener('pointerdown', start, { passive:false });
+      gate.addEventListener('touchstart', start, { passive:false });
+
+      const pressDrop = (event) => {
+        event.preventDefault();
+        button.classList.add('is-pressed');
+        window.GAME?.drop();
+      };
+      const releaseDrop = () => {
+        button.classList.remove('is-pressed');
+      };
+
+      button.addEventListener('pointerdown', pressDrop, { passive:false });
+      button.addEventListener('pointerup', releaseDrop);
+      button.addEventListener('pointerleave', releaseDrop);
+      button.addEventListener('pointercancel', releaseDrop);
     })();
-
-    // ===== DROP button =====
-    document.getElementById('btn-drop')?.addEventListener('pointerdown',(e)=>{
-      e.preventDefault();
-      window.GAME?.drop();
-    });
-
   </script>
 </body>
 </html>
