@@ -5,22 +5,22 @@ import { AudioBus } from './audio.js';
 
 (function(){
   const stage = document.getElementById('stage');
+  const status = document.getElementById('arcade-status');
+  const coinSlot = document.getElementById('coin-slot');
+  const frame = document.getElementById('arcade-frame');
   if (!stage) return;
 
-  const BASE_W = 320;
-  const BASE_H = 240;
-  const STORAGE_KEY = 'beckwards-claw-best';
-  const ROUND_TIME = 45;
+  const BASE_W = 2560;
+  const BASE_H = 1440;
   const PRIZE_TYPES = [
-    { spriteId: 'prize_star', name: 'Star', value: 140, width: 40, height: 40, grip: 0.9 },
-    { spriteId: 'prize_duck', name: 'Duck', value: 110, width: 48, height: 36, grip: 0.82 },
-    { spriteId: 'prize_box', name: 'Mystery Box', value: 220, width: 36, height: 36, grip: 0.68 }
+    { spriteId: 'prize_star', name: 'Star', value: 140, width: 96, height: 96, grip: 0.9 },
+    { spriteId: 'prize_duck', name: 'Duck', value: 110, width: 116, height: 86, grip: 0.82 },
+    { spriteId: 'prize_box', name: 'Mystery Box', value: 220, width: 88, height: 88, grip: 0.68 }
   ];
 
   const canvas = document.createElement('canvas');
   canvas.id = 'game-canvas';
-  canvas.style.width = '100%';
-  canvas.style.height = '100%';
+  canvas.setAttribute('aria-hidden', 'true');
   stage.innerHTML = '';
   stage.appendChild(canvas);
 
@@ -29,15 +29,28 @@ import { AudioBus } from './audio.js';
   const renderer = new Renderer(canvas, loader);
 
   const cfg = {
-    bounds: { left: 24, right: BASE_W - 24 },
-    speeds: { move: 150, return: 230, descend: 185, carriedSway: 2.4 },
-    drop: { maxDropLen: 118, closeDelayMs: 220, openDelayMs: 260 },
-    grip: { perfectRadius: 7, grabRadius: 24, maxDepthError: 28 },
-    chute: { x: 274, y: 186, w: 36, h: 34 }
+    bounds: { left: 410, right: 2140 },
+    speeds: { move: 640, return: 920, descend: 740, carriedSway: 12 },
+    drop: { maxDropLen: 410, closeDelayMs: 260, openDelayMs: 310 },
+    grip: { perfectRadius: 34, grabRadius: 94, maxDepthError: 84 },
+    chute: { x: 1264, y: 1168, w: 180, h: 130 }
   };
 
   function clamp(n, min, max){
     return Math.max(min, Math.min(max, n));
+  }
+
+  function setStatus(text, done = false){
+    if (!status) return;
+    status.textContent = text;
+    status.classList.toggle('is-done', done);
+  }
+
+  function setCoinReady(ready){
+    coinReady = !!ready;
+    if (!coinSlot) return;
+    coinSlot.disabled = !coinReady;
+    coinSlot.setAttribute('aria-disabled', String(!coinReady));
   }
 
   function makePrize(index, type, x, y){
@@ -59,28 +72,25 @@ import { AudioBus } from './audio.js';
   }
 
   function makePrizeField(){
-    const xs = [26, 72, 118, 166, 214, 254];
-    return xs.map((x, index) => {
-      const type = PRIZE_TYPES[(index + Math.floor(Math.random() * PRIZE_TYPES.length)) % PRIZE_TYPES.length];
-      return makePrize(index, type, x + Math.random() * 14 - 7, 156 + Math.random() * 24);
+    const positions = [
+      [430, 1004],
+      [760, 1020],
+      [1080, 1008],
+      [1510, 1018],
+      [1780, 1006],
+      [2030, 1022]
+    ];
+    return positions.map(([x, y], index) => {
+      const type = PRIZE_TYPES[index % PRIZE_TYPES.length];
+      return makePrize(index, type, x, y);
     });
-  }
-
-  function readBestScore(){
-    try { return Number(localStorage.getItem(STORAGE_KEY)) || 0; }
-    catch { return 0; }
-  }
-
-  function writeBestScore(score){
-    try { localStorage.setItem(STORAGE_KEY, String(score)); }
-    catch {}
   }
 
   function makeInitialState(){
     return {
       width: BASE_W,
       height: BASE_H,
-      carriageX: 160,
+      carriageX: 1213,
       vx: 0,
       dropLen: 0,
       targetY: 0,
@@ -88,14 +98,10 @@ import { AudioBus } from './audio.js';
       mode: 'READY',
       heldPrize: null,
       prizes: makePrizeField(),
-      score: 0,
-      bestScore: readBestScore(),
+      attempts: 0,
       catches: 0,
-      drops: 0,
-      combo: 0,
-      timeLeft: ROUND_TIME,
-      message: 'DROP TO PLAY',
-      subMessage: 'Catch prizes before time runs out',
+      message: '',
+      subMessage: '',
       noticeTimer: 0,
       shake: 0,
       flash: 0,
@@ -107,12 +113,12 @@ import { AudioBus } from './audio.js';
   let closeTimer = 0;
   let openTimer = 0;
   let last = performance.now();
-  let roundActive = false;
   let motorOn = false;
+  let finished = false;
+  let coinReady = false;
 
   function onResize(){
-    const rect = stage.getBoundingClientRect();
-    renderer.resizeTo(rect.width, rect.height);
+    renderer.resizeTo();
   }
   window.addEventListener('resize', onResize);
 
@@ -125,7 +131,7 @@ import { AudioBus } from './audio.js';
     if (!motor) return;
     if (on && !motorOn){
       motorOn = true;
-      try { AudioBus.loop ? AudioBus.loop(motor, { volume: 0.2 }) : motor.play(); } catch {}
+      try { AudioBus.loop ? AudioBus.loop(motor, { volume: 0.18 }) : motor.play(); } catch {}
     } else if (!on && motorOn){
       motorOn = false;
       try { motor.pause(); motor.currentTime = 0; } catch {}
@@ -133,104 +139,121 @@ import { AudioBus } from './audio.js';
   }
 
   function updateMotorByState(){
-    const moving = state.vx !== 0;
-    const mechActive = state.mode === 'DROPPING' || state.mode === 'RETURNING' || state.mode === 'DELIVERING';
+    const moving = state.vx !== 0 && !finished;
+    const mechActive = ['DROPPING', 'RETURNING', 'DELIVERING'].includes(state.mode);
     setMotor(moving || mechActive);
   }
 
-  function announce(message, subMessage = '', seconds = 1.35){
+  function announce(message, subMessage = '', seconds = 1.2){
     state.message = message;
     state.subMessage = subMessage;
     state.noticeTimer = seconds;
   }
 
-  function spawnParticles(x, y, color, count = 12){
-    for (let i = 0; i < count; i++){
-      const a = Math.random() * Math.PI * 2;
-      const speed = 20 + Math.random() * 45;
-      state.particles.push({
-        x, y,
-        vx: Math.cos(a) * speed,
-        vy: Math.sin(a) * speed - 20,
-        life: 0.45 + Math.random() * 0.35,
-        maxLife: 0.8,
-        color
-      });
-    }
-  }
-
-  function startRound(){
-    roundActive = true;
-    state.mode = 'IDLE';
-    state.message = '';
-    state.subMessage = '';
-    state.noticeTimer = 0;
-    unlockCoinSlot(false);
-  }
-
-  function endRound(message, subMessage){
-    roundActive = false;
-    state.mode = 'PAUSE';
+  function finishAttempt(message, subMessage){
+    finished = true;
+    state.mode = 'DONE';
     state.vx = 0;
     state.clawClosed = false;
     state.heldPrize = null;
     state.dropLen = 0;
-    if (state.score > state.bestScore){
-      state.bestScore = state.score;
-      writeBestScore(state.score);
-      subMessage = `New best: ${state.bestScore}`;
-      play('win', 0.55);
-      spawnParticles(160, 98, '#fff36d', 28);
-    }
-    unlockCoinSlot(true);
-    showRoundOverlay(message, subMessage);
+    state.message = message;
+    state.subMessage = subMessage;
+    state.noticeTimer = 9999;
+    setStatus('INSERT COIN', true);
+    setCoinReady(true);
     updateMotorByState();
   }
 
-  function restartRound(){
+  function resetAttempt(){
     state = makeInitialState();
     closeTimer = 0;
     openTimer = 0;
-    roundActive = false;
-    unlockCoinSlot(false);
+    finished = false;
+    setCoinReady(false);
+    setStatus('');
     updateMotorByState();
   }
 
+  function animateCoinDrop(){
+    if (!frame) return;
+    const coin = document.createElement('span');
+    coin.className = 'arcade-coin';
+    coin.setAttribute('aria-hidden', 'true');
+    frame.appendChild(coin);
+    window.setTimeout(() => {
+      try { coin.remove(); } catch {}
+    }, 900);
+  }
+
+  function insertCoin(){
+    if (!coinReady) return;
+    setCoinReady(false);
+    setStatus('');
+    animateCoinDrop();
+    play('clink', 0.62);
+    window.setTimeout(resetAttempt, 760);
+  }
+
+  function spawnParticles(x, y, color, count = 12){
+    for (let i = 0; i < count; i++){
+      const a = Math.random() * Math.PI * 2;
+      const speed = 80 + Math.random() * 130;
+      state.particles.push({
+        x, y,
+        vx: Math.cos(a) * speed,
+        vy: Math.sin(a) * speed - 50,
+        life: 0.45 + Math.random() * 0.45,
+        maxLife: 0.9,
+        color,
+        size: 5 + Math.random() * 6
+      });
+    }
+  }
+
   function canMove(){
-    return state.mode === 'READY' || state.mode === 'IDLE' || state.mode === 'MOVING';
+    return !finished && (state.mode === 'READY' || state.mode === 'MOVING');
   }
 
   const CTRL = {
     moveLeft(){
       if (!canMove()) return;
       state.vx = -1;
-      if (state.mode === 'IDLE' || state.mode === 'READY') state.mode = 'MOVING';
+      state.mode = 'MOVING';
+      state.message = '';
+      state.subMessage = '';
+      setStatus('');
       updateMotorByState();
     },
     moveRight(){
       if (!canMove()) return;
       state.vx = 1;
-      if (state.mode === 'IDLE' || state.mode === 'READY') state.mode = 'MOVING';
+      state.mode = 'MOVING';
+      state.message = '';
+      state.subMessage = '';
+      setStatus('');
       updateMotorByState();
     },
     stopMove(){
       state.vx = 0;
-      if (state.mode === 'MOVING') state.mode = roundActive ? 'IDLE' : 'READY';
+      if (state.mode === 'MOVING') state.mode = 'READY';
       updateMotorByState();
     },
     drop(){
-      if (!(state.mode === 'READY' || state.mode === 'IDLE' || state.mode === 'MOVING')) return;
-      if (!roundActive) startRound();
+      if (finished || !(state.mode === 'READY' || state.mode === 'MOVING')) return;
       state.mode = 'DROPPING';
       state.vx = 0;
       state.clawClosed = false;
       state.targetY = chooseDropDepth();
-      state.drops += 1;
+      state.attempts += 1;
+      state.message = '';
+      state.subMessage = '';
+      setStatus('');
       play('ui_click', 0.55);
       play('claw_open_sfx', 0.45);
       updateMotorByState();
     },
-    restartRound
+    insertCoin
   };
   window.GAME = CTRL;
 
@@ -238,12 +261,12 @@ import { AudioBus } from './audio.js';
     const reachable = state.prizes
       .filter(p => !p.grabbed && !p.collected)
       .map(p => ({ p, dx: Math.abs((p.x + p.width / 2) - state.carriageX) }))
-      .filter(hit => hit.dx < cfg.grip.grabRadius + 18)
+      .filter(hit => hit.dx < cfg.grip.grabRadius + 42)
       .sort((a, b) => a.dx - b.dx);
 
     if (!reachable.length) return cfg.drop.maxDropLen;
     const prize = reachable[0].p;
-    return clamp(prize.y - 44, 72, cfg.drop.maxDropLen);
+    return clamp(prize.y - 642, 170, cfg.drop.maxDropLen);
   }
 
   function tryGrabPrize(){
@@ -254,7 +277,7 @@ import { AudioBus } from './audio.js';
       const centerX = prize.x + prize.width / 2;
       const centerY = prize.y + prize.height / 2;
       const clawX = state.carriageX;
-      const clawY = 44 + state.dropLen;
+      const clawY = 650 + state.dropLen;
       const dx = Math.abs(centerX - clawX);
       const dy = Math.abs(centerY - clawY);
       if (dx > cfg.grip.grabRadius || dy > cfg.grip.maxDepthError) continue;
@@ -268,17 +291,17 @@ import { AudioBus } from './audio.js';
       }
     }
 
-    if (!target || bestScore < 0.45){
+    if (!target || bestScore < 0.48){
       state.shake = 0.18;
       play('fail', 0.35);
-      announce('MISSED', 'Line up the claw over a prize', 0.8);
+      announce('MISSED', 'WAIT FOR THE CLAW', 0.8);
       return;
     }
 
     target.grabbed = true;
     state.heldPrize = target;
     play('claw_close_sfx', 0.58);
-    spawnParticles(target.x + target.width / 2, target.y + target.height / 2, '#f9f4d8', 10);
+    spawnParticles(target.x + target.width / 2, target.y + target.height / 2, 'rgb(249,244,216)', 10);
   }
 
   function deliverPrize(){
@@ -286,41 +309,15 @@ import { AudioBus } from './audio.js';
     const prize = state.heldPrize;
     prize.collected = true;
     prize.grabbed = false;
-    prize.x = cfg.chute.x + 6;
-    prize.y = cfg.chute.y - 8;
+    prize.showCollected = true;
+    prize.x = cfg.chute.x + 16;
+    prize.y = cfg.chute.y - 54;
     state.heldPrize = null;
     state.catches += 1;
-    state.combo += 1;
-
-    const timeBonus = Math.max(0, Math.ceil(state.timeLeft * 2));
-    const comboBonus = Math.max(0, (state.combo - 1) * 40);
-    const points = prize.value + timeBonus + comboBonus;
-    state.score += points;
-    state.bestScore = Math.max(state.bestScore, state.score);
     state.flash = 0.35;
     play('prize_drop', 0.55);
-    if (state.combo > 1) play('win', 0.35);
-    announce(`+${points}`, `${prize.type}${state.combo > 1 ? ` combo x${state.combo}` : ''}`, 1.05);
-    spawnParticles(cfg.chute.x + 18, cfg.chute.y - 6, '#fff36d', 18);
-
-    if (state.prizes.every(p => p.collected)){
-      state.prizes = makePrizeField();
-      announce('RESTOCKED', 'Fresh prizes loaded', 1.1);
-    }
-  }
-
-  function dropHeldPrize(){
-    if (!state.heldPrize) return;
-    const prize = state.heldPrize;
-    prize.grabbed = false;
-    prize.x = clamp(state.carriageX - prize.width / 2, 16, BASE_W - prize.width - 12);
-    prize.y = clamp(164 + Math.random() * 24, 150, 190);
-    prize.baseY = prize.y;
-    state.heldPrize = null;
-    state.combo = 0;
-    state.shake = 0.2;
-    play('glass_bonk', 0.4);
-    announce('DROPPED', 'Keep it steady to the chute', 0.9);
+    play('win', 0.35);
+    spawnParticles(cfg.chute.x + 90, cfg.chute.y - 26, 'rgb(255,243,109)', 22);
   }
 
   function updateParticles(dt){
@@ -328,36 +325,23 @@ import { AudioBus } from './audio.js';
       p.life -= dt;
       p.x += p.vx * dt;
       p.y += p.vy * dt;
-      p.vy += 95 * dt;
+      p.vy += 220 * dt;
     }
     state.particles = state.particles.filter(p => p.life > 0);
   }
 
-  function updateHeldPrize(dt){
+  function updateHeldPrize(){
     if (!state.heldPrize) return;
     const p = state.heldPrize;
     const sway = Math.sin(performance.now() / 120) * cfg.speeds.carriedSway;
     p.x = state.carriageX - p.width / 2 + sway;
-    p.y = 52 + state.dropLen;
-
-    if (state.mode === 'DELIVERING' && state.dropLen < 10 && state.carriageX < cfg.chute.x - 12){
-      const distance = cfg.chute.x - state.carriageX;
-      const slipChance = clamp((distance - 28) / 220, 0, 0.0028) * dt * 60;
-      if (Math.random() < slipChance) dropHeldPrize();
-    }
+    p.y = 760 + state.dropLen;
   }
 
-  function updateRound(dt){
-    if (roundActive && !['PAUSE', 'READY'].includes(state.mode)){
-      state.timeLeft = Math.max(0, state.timeLeft - dt);
-      if (state.timeLeft <= 0 && state.mode !== 'DROPPING' && state.mode !== 'RETURNING' && state.mode !== 'DELIVERING'){
-        endRound('Time!', state.score ? `Final score: ${state.score}` : 'No prizes this run.');
-      }
-    }
-
-    if (state.noticeTimer > 0){
+  function updateTimers(dt){
+    if (state.noticeTimer > 0 && state.noticeTimer < 9999){
       state.noticeTimer = Math.max(0, state.noticeTimer - dt);
-      if (state.noticeTimer === 0 && state.mode !== 'PAUSE'){
+      if (state.noticeTimer === 0 && state.mode !== 'DONE'){
         state.message = '';
         state.subMessage = '';
       }
@@ -371,9 +355,9 @@ import { AudioBus } from './audio.js';
   function step(t){
     const dt = Math.min(0.05, (t - last) / 1000);
     last = t;
-    updateRound(dt);
+    updateTimers(dt);
 
-    if (state.mode === 'READY' || state.mode === 'IDLE' || state.mode === 'MOVING'){
+    if (canMove()){
       state.carriageX += state.vx * cfg.speeds.move * dt;
       state.carriageX = clamp(state.carriageX, cfg.bounds.left, cfg.bounds.right);
     }
@@ -392,6 +376,7 @@ import { AudioBus } from './audio.js';
       closeTimer -= dt;
       if (closeTimer <= 0){
         state.mode = 'RETURNING';
+        setStatus('');
         updateMotorByState();
       }
     } else if (state.mode === 'RETURNING'){
@@ -401,17 +386,16 @@ import { AudioBus } from './audio.js';
         if (state.heldPrize){
           state.mode = 'DELIVERING';
           state.clawClosed = true;
+          setStatus('GOT IT');
         } else {
-          state.clawClosed = false;
-          state.mode = state.timeLeft <= 0 ? 'PAUSE' : 'IDLE';
-          if (state.timeLeft <= 0) endRound('Time!', state.score ? `Final score: ${state.score}` : 'No prizes this run.');
-          updateMotorByState();
+          finishAttempt('MISSED', 'INSERT COIN TO RETRY');
         }
+        updateMotorByState();
       }
     } else if (state.mode === 'DELIVERING'){
       const dir = Math.sign(cfg.chute.x - state.carriageX);
       state.carriageX += dir * cfg.speeds.return * dt;
-      if (Math.abs(cfg.chute.x - state.carriageX) < 3){
+      if (Math.abs(cfg.chute.x - state.carriageX) < 4){
         state.carriageX = cfg.chute.x;
         state.mode = 'OPENING';
         state.clawClosed = false;
@@ -422,26 +406,36 @@ import { AudioBus } from './audio.js';
     } else if (state.mode === 'OPENING'){
       openTimer -= dt;
       if (openTimer <= 0){
-        state.mode = state.timeLeft <= 0 ? 'PAUSE' : 'IDLE';
-        if (state.timeLeft <= 0) endRound('Time!', state.score ? `Final score: ${state.score}` : 'No prizes this run.');
+        finishAttempt('GOT IT', 'NICE GRAB');
       }
     }
 
-    updateHeldPrize(dt);
+    updateHeldPrize();
     renderer.draw(state);
     requestAnimationFrame(step);
   }
 
   const label = document.createElement('div');
   Object.assign(label.style, {
-    position:'absolute', inset:'0', display:'grid', placeItems:'center',
-    fontFamily:'monospace', fontSize:'12px', color:'#fff', textShadow:'1px 1px 0 #000',
-    textAlign:'center', padding:'8px'
+    position:'absolute',
+    inset:'0',
+    display:'grid',
+    placeItems:'center',
+    fontFamily:'monospace',
+    fontSize:'12px',
+    color:'#f20b06',
+    textShadow:'1px 1px 0 #000',
+    textAlign:'center',
+    padding:'8px',
+    zIndex:'3'
   });
   label.textContent = 'Loading... 0%';
-  stage.style.position='relative';
+  stage.style.position='absolute';
   stage.appendChild(label);
-  const progress = (p)=>{ label.textContent = `Loading... ${Math.round(p*100)}%`; if (p>=1) label.remove(); };
+  const progress = (p)=>{
+    label.textContent = `Loading... ${Math.round(p * 100)}%`;
+    if (p >= 1) label.remove();
+  };
 
   let unlocked = false;
   function unlockOnce(){
@@ -452,6 +446,12 @@ import { AudioBus } from './audio.js';
     ['pointerdown','touchstart','keydown'].forEach(ev=>window.removeEventListener(ev, unlockOnce, true));
   }
   ['pointerdown','touchstart','keydown'].forEach(ev=>window.addEventListener(ev, unlockOnce, { capture:true }));
+
+  coinSlot?.addEventListener('pointerdown', (event) => {
+    if (!coinReady) return;
+    event.preventDefault();
+    insertCoin();
+  }, { passive:false });
 
   document.addEventListener('visibilitychange', ()=>{
     if (document.hidden) setMotor(false);
@@ -468,6 +468,13 @@ import { AudioBus } from './audio.js';
       CTRL.moveRight();
     } else if (e.key === ' ' || e.key === 'Enter' || e.key.toLowerCase() === 's'){
       e.preventDefault();
+      if (coinReady) {
+        insertCoin();
+        return;
+      }
+      const button = document.getElementById('btn-drop');
+      button?.classList.add('is-pressed');
+      setTimeout(()=>button?.classList.remove('is-pressed'), 160);
       CTRL.drop();
     }
   });
@@ -478,69 +485,6 @@ import { AudioBus } from './audio.js';
       CTRL.stopMove();
     }
   });
-
-  const slotEl = document.getElementById('play-slot');
-  const slotHotspot = slotEl?.querySelector('.console-coin-slot__hotspot');
-  const slotBadge = slotEl?.querySelector('.console-coin-slot__badge');
-  let coinEnabled = false;
-
-  function unlockCoinSlot(enable){
-    coinEnabled = !!enable;
-    if (!slotEl) return;
-    slotEl.classList.toggle('disabled', !coinEnabled);
-    slotEl.setAttribute('aria-disabled', String(!coinEnabled));
-    slotEl.title = coinEnabled ? 'Insert coin to play again' : 'Finish the round to unlock replay';
-    if (slotBadge) slotBadge.textContent = coinEnabled ? 'PLAY AGAIN' : 'LOCKED';
-  }
-
-  function spawnFallingCoinAtSlot(){
-    if (!slotEl || !slotHotspot || !coinEnabled) return;
-    coinEnabled = false;
-    const rSlot = slotEl.getBoundingClientRect();
-    const rMouth = slotHotspot.getBoundingClientRect();
-    const coin = document.createElement('div');
-    coin.className = 'coin coin--into';
-    const startTop = rSlot.top - 56;
-    const startLeft = rMouth.left + rMouth.width / 2 - 24;
-    const dropY = (rMouth.top - startTop) + 'px';
-
-    Object.assign(coin.style, {
-      position:'fixed',
-      top: startTop + 'px',
-      left: startLeft + 'px'
-    });
-    coin.style.setProperty('--dropY', dropY);
-    document.body.appendChild(coin);
-
-    setTimeout(()=> play('clink', 0.6), 650);
-    setTimeout(()=>{
-      try { coin.remove(); } catch {}
-      if (overlayEl) { try { overlayEl.remove(); } catch {} }
-      restartRound();
-    }, 920);
-  }
-
-  slotEl?.addEventListener('pointerdown', (e)=>{
-    if (!coinEnabled) return;
-    e.preventDefault();
-    spawnFallingCoinAtSlot();
-  }, { passive:false });
-
-  let overlayEl = null;
-  function showRoundOverlay(title, body){
-    if (overlayEl) overlayEl.remove();
-    overlayEl = document.createElement('div');
-    overlayEl.className = 'arcade-overlay';
-    overlayEl.innerHTML = `
-      <div class="arcade-card">
-        <h2>${title}</h2>
-        <p>${body}</p>
-        <p class="arcade-card__meta">Score ${state.score} · Catches ${state.catches} · Best ${state.bestScore}</p>
-        <p><em>Drop a coin in the slot to play again.</em></p>
-      </div>
-    `;
-    document.body.appendChild(overlayEl);
-  }
 
   async function init(){
     const base = window.location.pathname.replace(/[^/]+$/, '');
@@ -571,7 +515,8 @@ import { AudioBus } from './audio.js';
     catch(e) { console.error('[loader] unexpected error', e); }
 
     onResize();
-    unlockCoinSlot(false);
+    setStatus('');
+    setCoinReady(false);
     requestAnimationFrame((t)=>{ last = t; step(t); });
   }
 
