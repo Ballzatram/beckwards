@@ -8,6 +8,7 @@ import { AudioBus } from './audio.js';
   const status = document.getElementById('arcade-status');
   const coinSlot = document.getElementById('coin-slot');
   const frame = document.getElementById('arcade-frame');
+  const dropButton = document.getElementById('btn-drop');
   if (!stage) return;
 
   const BASE_W = 2560;
@@ -95,6 +96,7 @@ import { AudioBus } from './audio.js';
       dropLen: 0,
       targetY: 0,
       clawClosed: false,
+      clawGrip: 0,
       mode: 'READY',
       heldPrize: null,
       prizes: makePrizeField(),
@@ -105,6 +107,8 @@ import { AudioBus } from './audio.js';
       noticeTimer: 0,
       shake: 0,
       flash: 0,
+      grabResolved: false,
+      prizeDelivered: false,
       particles: []
     };
   }
@@ -140,8 +144,17 @@ import { AudioBus } from './audio.js';
 
   function updateMotorByState(){
     const moving = state.vx !== 0 && !finished;
-    const mechActive = ['DROPPING', 'RETURNING', 'DELIVERING'].includes(state.mode);
+    const mechActive = ['DROPPING', 'CLOSING', 'RETURNING', 'DELIVERING', 'OPENING'].includes(state.mode);
     setMotor(moving || mechActive);
+  }
+
+  function setDropButtonPressed(pressed){
+    dropButton?.classList.toggle('is-pressed', !!pressed);
+    dropButton?.setAttribute('aria-pressed', String(!!pressed));
+  }
+
+  function updateDropButtonByState(){
+    setDropButtonPressed(state.mode === 'DROPPING' || state.mode === 'CLOSING');
   }
 
   function announce(message, subMessage = '', seconds = 1.2){
@@ -155,12 +168,14 @@ import { AudioBus } from './audio.js';
     state.mode = 'DONE';
     state.vx = 0;
     state.clawClosed = false;
+    state.clawGrip = 0;
     state.heldPrize = null;
     state.dropLen = 0;
     state.message = message;
     state.subMessage = subMessage;
     state.noticeTimer = 9999;
     setStatus('INSERT COIN', true);
+    setDropButtonPressed(false);
     setCoinReady(true);
     updateMotorByState();
   }
@@ -172,6 +187,7 @@ import { AudioBus } from './audio.js';
     finished = false;
     setCoinReady(false);
     setStatus('');
+    setDropButtonPressed(false);
     updateMotorByState();
   }
 
@@ -216,6 +232,9 @@ import { AudioBus } from './audio.js';
   }
 
   const CTRL = {
+    mode(){
+      return state.mode;
+    },
     moveLeft(){
       if (!canMove()) return;
       state.vx = -1;
@@ -244,6 +263,9 @@ import { AudioBus } from './audio.js';
       state.mode = 'DROPPING';
       state.vx = 0;
       state.clawClosed = false;
+      state.clawGrip = 0;
+      state.grabResolved = false;
+      state.prizeDelivered = false;
       state.targetY = chooseDropDepth();
       state.attempts += 1;
       state.message = '';
@@ -251,6 +273,7 @@ import { AudioBus } from './audio.js';
       setStatus('');
       play('ui_click', 0.55);
       play('claw_open_sfx', 0.45);
+      setDropButtonPressed(true);
       updateMotorByState();
     },
     insertCoin
@@ -367,15 +390,27 @@ import { AudioBus } from './audio.js';
       if (state.dropLen >= state.targetY){
         state.dropLen = state.targetY;
         state.mode = 'CLOSING';
-        state.clawClosed = true;
         closeTimer = cfg.drop.closeDelayMs / 1000;
-        tryGrabPrize();
+        state.clawClosed = false;
+        state.clawGrip = 0;
+        state.grabResolved = false;
         updateMotorByState();
       }
     } else if (state.mode === 'CLOSING'){
       closeTimer -= dt;
+      const closeDuration = cfg.drop.closeDelayMs / 1000;
+      const closeProgress = clamp(1 - closeTimer / closeDuration, 0, 1);
+      state.clawGrip = closeProgress;
+      state.clawClosed = closeProgress >= 0.82;
+      if (!state.grabResolved && closeProgress >= 0.72){
+        state.grabResolved = true;
+        tryGrabPrize();
+      }
       if (closeTimer <= 0){
         state.mode = 'RETURNING';
+        state.clawGrip = 1;
+        state.clawClosed = true;
+        setDropButtonPressed(false);
         setStatus('');
         updateMotorByState();
       }
@@ -386,6 +421,7 @@ import { AudioBus } from './audio.js';
         if (state.heldPrize){
           state.mode = 'DELIVERING';
           state.clawClosed = true;
+          state.clawGrip = 1;
           setStatus('GOT IT');
         } else {
           finishAttempt('MISSED', 'INSERT COIN TO RETRY');
@@ -398,19 +434,31 @@ import { AudioBus } from './audio.js';
       if (Math.abs(cfg.chute.x - state.carriageX) < 4){
         state.carriageX = cfg.chute.x;
         state.mode = 'OPENING';
-        state.clawClosed = false;
+        state.clawClosed = true;
+        state.clawGrip = 1;
+        state.prizeDelivered = false;
         openTimer = cfg.drop.openDelayMs / 1000;
-        deliverPrize();
         updateMotorByState();
       }
     } else if (state.mode === 'OPENING'){
       openTimer -= dt;
+      const openDuration = cfg.drop.openDelayMs / 1000;
+      const openProgress = clamp(1 - openTimer / openDuration, 0, 1);
+      state.clawGrip = 1 - openProgress;
+      state.clawClosed = state.clawGrip > 0.2;
+      if (!state.prizeDelivered && openProgress >= 0.45){
+        state.prizeDelivered = true;
+        deliverPrize();
+      }
       if (openTimer <= 0){
+        state.clawGrip = 0;
+        state.clawClosed = false;
         finishAttempt('GOT IT', 'NICE GRAB');
       }
     }
 
     updateHeldPrize();
+    updateDropButtonByState();
     renderer.draw(state);
     requestAnimationFrame(step);
   }
@@ -474,7 +522,6 @@ import { AudioBus } from './audio.js';
       }
       const button = document.getElementById('btn-drop');
       button?.classList.add('is-pressed');
-      setTimeout(()=>button?.classList.remove('is-pressed'), 160);
       CTRL.drop();
     }
   });

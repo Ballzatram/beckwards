@@ -36,6 +36,26 @@ export class Renderer {
     this.ctx.restore();
   }
 
+  drawImageRotated(img, cx, cy, dw, dh, angle = 0, alpha = 1){
+    if (!img) return;
+    this.ctx.save();
+    this.ctx.globalAlpha *= alpha;
+    this.ctx.translate(Math.round(cx), Math.round(cy));
+    this.ctx.rotate(angle);
+    this.ctx.drawImage(img, Math.round(-dw / 2), Math.round(-dh / 2), Math.round(dw), Math.round(dh));
+    this.ctx.restore();
+  }
+
+  drawImagePivot(img, pivotX, pivotY, dw, dh, originX, originY, angle = 0, alpha = 1){
+    if (!img) return;
+    this.ctx.save();
+    this.ctx.globalAlpha *= alpha;
+    this.ctx.translate(Math.round(pivotX), Math.round(pivotY));
+    this.ctx.rotate(angle);
+    this.ctx.drawImage(img, Math.round(-originX), Math.round(-originY), Math.round(dw), Math.round(dh));
+    this.ctx.restore();
+  }
+
   rect(x, y, w, h, color){
     this.ctx.fillStyle = color;
     this.ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
@@ -80,28 +100,28 @@ export class Renderer {
 
   drawClaw(state){
     const x = state.carriageX;
-    const drop = state.dropLen;
-    const topY = 351 + drop;
-    const armY = 380 + drop;
-    const leftY = 570 + drop;
-    const middleY = 575 + drop;
-    const rightY = 558 + drop;
+    const drop = Math.max(0, state.dropLen || 0);
+    const grip = Math.max(0, Math.min(1, state.clawGrip ?? (state.clawClosed ? 1 : 0)));
+    const baseY = 351;
+    const armY = 380;
+    const armH = 243 + drop;
+    const clawY = 570 + drop;
+    const headY = clawY + 25;
+    const leftPivotX = x - 26 + (grip * 14);
+    const rightPivotX = x + 28 - (grip * 14);
+    const middleX = x + 3;
+    const leftAngle = 0.28 - (grip * 0.36);
+    const rightAngle = -0.28 + (grip * 0.36);
+    const middleDrop = grip * 7;
 
     this.ctx.save();
     this.ctx.globalAlpha = 0.9;
     this.ctx.filter = 'brightness(0.96) contrast(1.03)';
-    this.drawImage(this.loader.img('cm_claw_arm'), x - 66, armY, 111, 243);
-    this.drawImage(this.loader.img('cm_claw_base'), x - 85, topY, 170, 79);
-
-    if (state.clawClosed){
-      this.drawImage(this.loader.img('cm_claw_left'), x - 73, leftY + 6, 85, 225);
-      this.drawImage(this.loader.img('cm_claw_middle'), x - 24, middleY, 54, 215);
-      this.drawImage(this.loader.img('cm_claw_right'), x - 2, rightY + 6, 77, 228);
-    } else {
-      this.drawImage(this.loader.img('cm_claw_left'), x - 88, leftY, 85, 225);
-      this.drawImage(this.loader.img('cm_claw_middle'), x - 24, middleY, 54, 215);
-      this.drawImage(this.loader.img('cm_claw_right'), x - 13, rightY, 77, 228);
-    }
+    this.drawImage(this.loader.img('cm_claw_arm'), x - 56, armY, 111, armH);
+    this.drawImage(this.loader.img('cm_claw_base'), x - 85, baseY, 170, 79);
+    this.drawImagePivot(this.loader.img('cm_claw_left'), leftPivotX, headY, 85, 225, 76, 16, leftAngle);
+    this.drawImage(this.loader.img('cm_claw_middle'), middleX - 27, clawY + 5 + middleDrop, 54, 215);
+    this.drawImagePivot(this.loader.img('cm_claw_right'), rightPivotX, headY, 77, 228, 10, 16, rightAngle);
     this.ctx.restore();
   }
 
