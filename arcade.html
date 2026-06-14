@@ -94,10 +94,10 @@
     display:none;
   }
   .arcade-handle-zone{
-    left:43.58%;
-    top:71.8%;
-    width:5%;
-    height:6.67%;
+    left:42.55%;
+    top:70.85%;
+    width:7.1%;
+    height:8.4%;
     z-index:6;
     cursor:grab;
     touch-action:none;
@@ -129,6 +129,12 @@
     touch-action:manipulation;
     filter:drop-shadow(0 3px 2px rgba(0,0,0,.7));
   }
+  .arcade-button::before,
+  .arcade-coin-slot::before{
+    content:"";
+    position:absolute;
+    inset:-90%;
+  }
   .arcade-button img{
     display:block;
     width:100%;
@@ -136,7 +142,7 @@
     user-select:none;
     -webkit-user-drag:none;
   }
-  .arcade-button__pressed{
+  .arcade-button .arcade-button__pressed{
     display:none;
   }
   .arcade-button.is-pressed .arcade-button__idle{
@@ -147,10 +153,10 @@
     transform:translateY(5%);
   }
   .arcade-coin-slot{
-    left:49.2%;
-    top:83.15%;
-    width:4.8%;
-    height:9.2%;
+    left:48.45%;
+    top:82.35%;
+    width:6.3%;
+    height:10.8%;
     z-index:7;
     padding:0;
     border:0;
@@ -211,7 +217,7 @@
   }
   @media (max-width:820px){
     .arcade-frame{
-      width:max(100vw, calc(100vh * 16 / 9));
+      width:max(128vw, calc(100vh * 16 / 9));
     }
     .arcade-status{
       font-size:12px;
@@ -219,8 +225,8 @@
   }
   @media (max-width:480px){
     .arcade-frame{
-      left:50%;
-      width:max(178vw, calc(100vh * 16 / 9));
+      left:52%;
+      width:max(190vw, calc(100vh * 16 / 9));
     }
     .arcade-button{
       width:3.75%;
@@ -262,7 +268,7 @@
         <img class="arcade-handle" id="joy" src="assets/claw-machine/handle.png" alt="Joystick" role="slider" aria-valuemin="-1" aria-valuemax="1" aria-valuenow="0" />
       </div>
       <button type="button" class="arcade-control arcade-button" id="btn-drop" aria-label="Drop claw">
-        <img class="arcade-button__idle" src="assets/claw-machine/button%20pressed.png" alt="" aria-hidden="true" />
+        <img class="arcade-button__idle" src="assets/claw-machine/button%20unpressed.png" alt="" aria-hidden="true" />
         <img class="arcade-button__pressed" src="assets/claw-machine/button%20pressed.png" alt="" aria-hidden="true" />
       </button>
       <button type="button" class="arcade-control arcade-coin-slot" id="coin-slot" aria-label="Insert coin to retry" disabled></button>
@@ -310,9 +316,8 @@
 
       const move = (event) => {
         if (!dragging) return;
-        const point = event.touches ? event.touches[0] : event;
         const rect = gate.getBoundingClientRect();
-        currentRatio = setKnob(point.clientX - (rect.left + rect.width / 2));
+        currentRatio = setKnob(event.clientX - (rect.left + rect.width / 2));
       };
 
       const stop = () => {
@@ -324,7 +329,6 @@
         if (raf) cancelAnimationFrame(raf);
         raf = null;
         window.removeEventListener('pointermove', move);
-        window.removeEventListener('touchmove', move);
       };
 
       const start = (event) => {
@@ -335,12 +339,9 @@
         window.addEventListener('pointermove', move, { passive:false });
         window.addEventListener('pointerup', stop, { passive:false, once:true });
         window.addEventListener('pointercancel', stop, { passive:false, once:true });
-        window.addEventListener('touchmove', move, { passive:false });
-        window.addEventListener('touchend', stop, { passive:false, once:true });
       };
 
       gate.addEventListener('pointerdown', start, { passive:false });
-      gate.addEventListener('touchstart', start, { passive:false });
 
       const pressDrop = (event) => {
         event.preventDefault();
@@ -348,7 +349,9 @@
         window.GAME?.drop();
       };
       const releaseDrop = () => {
-        button.classList.remove('is-pressed');
+        if (!['DROPPING', 'CLOSING'].includes(window.GAME?.mode?.() || '')) {
+          button.classList.remove('is-pressed');
+        }
       };
 
       button.addEventListener('pointerdown', pressDrop, { passive:false });

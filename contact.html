@@ -20,21 +20,164 @@
     })();
   </script>
 </head>
-<body class="site-page">
-  <div class="wrap">
-    <header class="top">
-      <h1><a class="site-title-link" href="/" aria-label="Home">BECKWARDS</a></h1>
-      <p class="subtitle">contact</p>
-    </header>
+<body class="poster-page poster-contact">
+  <main class="poster-scene" aria-label="Contact Beckwards">
+    <a class="poster-logo" href="/" aria-label="Home">
+      <img src="assets/contact/Beckwards.png" alt="Beckwards" />
+    </a>
+    <img class="poster-callout poster-contact-callout" src="assets/contact/take%20tab%20to%20copy.png" alt="Take tab to copy" />
 
-    <main class="contact-page">
-      <p class="contact-email" id="contact-email">beckwardss@gmail.com</p>
-    </main>
+    <section class="contact-tabs" aria-label="Pull a tab to copy contact details">
+      <button class="contact-tab contact-tab--1" type="button" data-contact-tab aria-label="Copy beckwardss@gmail.com">
+        <img src="assets/contact/tab%201.png" alt="" aria-hidden="true" />
+      </button>
+      <button class="contact-tab contact-tab--2" type="button" data-contact-tab aria-label="Copy beckwardss@gmail.com">
+        <img src="assets/contact/tab%202.png" alt="" aria-hidden="true" />
+      </button>
+      <button class="contact-tab contact-tab--3" type="button" data-contact-tab aria-label="Copy beckwardss@gmail.com">
+        <img src="assets/contact/tab%203.png" alt="" aria-hidden="true" />
+      </button>
+      <button class="contact-tab contact-tab--4" type="button" data-contact-tab aria-label="Copy beckwardss@gmail.com">
+        <img src="assets/contact/tab%204.png" alt="" aria-hidden="true" />
+      </button>
+      <button class="contact-tab contact-tab--5" type="button" data-contact-tab aria-label="Copy beckwardss@gmail.com">
+        <img src="assets/contact/tab%205.png" alt="" aria-hidden="true" />
+      </button>
+      <button class="contact-tab contact-tab--6" type="button" data-contact-tab aria-label="Copy beckwardss@gmail.com">
+        <img src="assets/contact/tab%206.png" alt="" aria-hidden="true" />
+      </button>
+      <button class="contact-tab contact-tab--7" type="button" data-contact-tab aria-label="Copy beckwardss@gmail.com">
+        <img src="assets/contact/tab%207.png" alt="" aria-hidden="true" />
+      </button>
+      <button class="contact-tab contact-tab--8" type="button" data-contact-tab aria-label="Copy beckwardss@gmail.com">
+        <img src="assets/contact/tab%208.png" alt="" aria-hidden="true" />
+      </button>
+    </section>
 
-    <footer class="foot">
-      <p class="tiny">© <span id="year"></span> Beckwards</p>
-    </footer>
-  </div>
-  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+    <p class="poster-status" id="copy-status" role="status" aria-live="polite" aria-atomic="true">
+      <img class="poster-copied" src="assets/contact/copied_.png" alt="" aria-hidden="true" />
+      <span class="poster-status-text" data-copy-status-text></span>
+    </p>
+  </main>
+
+  <script>
+    (() => {
+      const EMAIL = 'beckwardss@gmail.com';
+      const scene = document.querySelector('.poster-scene');
+      const status = document.getElementById('copy-status');
+      const statusText = document.querySelector('[data-copy-status-text]');
+      const copiedImage = document.querySelector('.poster-copied');
+      const tabs = Array.from(document.querySelectorAll('[data-contact-tab]'));
+
+      const writeClipboardFallback = (text) => {
+        const input = document.createElement('textarea');
+        input.value = text;
+        input.setAttribute('readonly', '');
+        input.style.position = 'fixed';
+        input.style.left = '-9999px';
+        input.style.top = '0';
+        document.body.appendChild(input);
+        input.select();
+        try {
+          document.execCommand('copy');
+        } finally {
+          input.remove();
+        }
+      };
+
+      const copyEmail = async (tab) => {
+        if (tab.dataset.copied === 'true') return;
+        tab.dataset.copied = 'true';
+        tab.classList.remove('is-dragging');
+        tab.classList.add('is-removed');
+        tab.style.opacity = '0';
+        tab.style.visibility = 'hidden';
+        tab.style.pointerEvents = 'none';
+        tab.tabIndex = -1;
+        tab.setAttribute('aria-hidden', 'true');
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(EMAIL);
+          } else {
+            writeClipboardFallback(EMAIL);
+          }
+          status.classList.add('is-visible');
+          statusText.textContent = 'copied';
+          copiedImage.style.opacity = '1';
+          copiedImage.style.transform = 'scale(1)';
+        } catch (_) {
+          writeClipboardFallback(EMAIL);
+          status.classList.add('is-visible');
+          statusText.textContent = 'copied';
+          copiedImage.style.opacity = '1';
+          copiedImage.style.transform = 'scale(1)';
+        }
+      };
+
+      const setTabPosition = (tab, x, y) => {
+        const sceneRect = scene.getBoundingClientRect();
+        tab.style.left = `${x - sceneRect.left}px`;
+        tab.style.top = `${y - sceneRect.top}px`;
+        tab.style.right = 'auto';
+        tab.style.bottom = 'auto';
+      };
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('keydown', (event) => {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          copyEmail(tab);
+        });
+
+        tab.addEventListener('pointerdown', (event) => {
+          if (event.button !== undefined && event.button !== 0) return;
+          event.preventDefault();
+          const pointerId = event.pointerId;
+          const startX = event.clientX;
+          const startY = event.clientY;
+          const tabRect = tab.getBoundingClientRect();
+          const offsetX = event.clientX - (tabRect.left + tabRect.width / 2);
+          const offsetY = event.clientY - (tabRect.top + tabRect.height / 2);
+          const threshold = window.matchMedia('(max-width: 640px)').matches ? 96 : 140;
+
+          tab.classList.add('is-dragging');
+          tab.setPointerCapture?.(pointerId);
+          setTabPosition(tab, event.clientX - offsetX, event.clientY - offsetY);
+
+          const moveTab = (moveEvent) => {
+            if (moveEvent.pointerId !== pointerId) return;
+            const nextX = moveEvent.clientX - offsetX;
+            const nextY = moveEvent.clientY - offsetY;
+            setTabPosition(tab, nextX, nextY);
+
+            const distance = Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY);
+            if (distance >= threshold) {
+              copyEmail(tab);
+            }
+          };
+
+          const endDrag = (upEvent) => {
+            if (upEvent.pointerId !== pointerId) return;
+            tab.releasePointerCapture?.(pointerId);
+            tab.removeEventListener('pointermove', moveTab);
+            tab.removeEventListener('pointerup', endDrag);
+            tab.removeEventListener('pointercancel', cancelDrag);
+            tab.classList.remove('is-dragging');
+          };
+
+          const cancelDrag = () => {
+            tab.removeEventListener('pointermove', moveTab);
+            tab.removeEventListener('pointerup', endDrag);
+            tab.removeEventListener('pointercancel', cancelDrag);
+            tab.classList.remove('is-dragging');
+          };
+
+          tab.addEventListener('pointermove', moveTab);
+          tab.addEventListener('pointerup', endDrag);
+          tab.addEventListener('pointercancel', cancelDrag);
+        });
+      });
+    })();
+  </script>
 </body>
 </html>

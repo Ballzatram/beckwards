@@ -17,6 +17,13 @@
 
   <script>
     (function () {
+      const host = location.hostname.toLowerCase();
+      const isLiveDomain = host === "beckwards.com" || host === "www.beckwards.com";
+      const isHomePath = location.pathname === "/" || /\/(?:index|home)\.html$/i.test(location.pathname);
+      if (isLiveDomain && isHomePath) {
+        location.replace("https://beckwards.com/findmyrobot" + location.search + location.hash);
+        return;
+      }
       if (/\/(?:index|home)\.html$/i.test(location.pathname)) {
         location.replace(location.origin + "/" + location.search + location.hash);
       }
