@@ -7,23 +7,18 @@
   <meta name="description" content="Beckwards - claw machine, music, links, and experiments." />
   <meta property="og:title" content="Beckwards" />
   <meta property="og:description" content="Claw Machine by Beckwards." />
-  <meta property="og:image" content="assets/home-page/reference.png" />
-  <meta property="og:url" content="https://www.beckwards.com" />
+  <meta property="og:image" content="https://beckwards.com/assets/home-page/reference.png" />
+  <meta property="og:url" content="https://beckwards.com/" />
+  <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
 
-  <link rel="canonical" href="https://www.beckwards.com/" />
+  <link rel="canonical" href="https://beckwards.com/" />
   <link rel="icon" type="image/png" href="assets/thumbnails/1.png" />
+  <link rel="preload" as="image" href="assets/shared/background.webp" fetchpriority="high" />
   <link rel="stylesheet" href="style.css" />
 
   <script>
     (function () {
-      const host = location.hostname.toLowerCase();
-      const isLiveDomain = host === "beckwards.com" || host === "www.beckwards.com";
-      const isHomePath = location.pathname === "/" || /\/(?:index|home)\.html$/i.test(location.pathname);
-      if (isLiveDomain && isHomePath) {
-        location.replace("https://beckwards.com/findmyrobot" + location.search + location.hash);
-        return;
-      }
       if (/\/(?:index|home)\.html$/i.test(location.pathname)) {
         location.replace(location.origin + "/" + location.search + location.hash);
       }
@@ -32,7 +27,7 @@
 </head>
 <body class="home-reference">
   <main class="home-scene" aria-label="Beckwards claw machine homepage">
-    <img class="home-foreground" src="assets/home-page/assets/B3000%20head.png" alt="" aria-hidden="true" />
+    <img class="home-foreground" src="assets/home-page/assets/B3000%20head.webp" width="2560" height="1440" fetchpriority="high" alt="" aria-hidden="true" />
 
     <div class="home-title">
       <img src="assets/home-page/assets/claw%20machine%20by%20beckwards.png" alt="Claw Machine by Beckwards" />
@@ -42,7 +37,7 @@
       <a class="home-label home-label--music" href="/findmyrobot" aria-label="Music">
         <img src="assets/home-page/assets/Music_.png" alt="Music" />
       </a>
-      <a class="home-label home-label--store" href="/store" aria-label="Store">
+      <a class="home-label home-label--store" href="https://beckwards.bandcamp.com/album/claw-machine" aria-label="Store">
         <img src="assets/home-page/assets/Store_.png" alt="Store" />
       </a>
       <a class="home-label home-label--socials" href="/socials" aria-label="Socials">
@@ -69,23 +64,27 @@
     </section>
 
     <button class="home-coin home-coin--1" type="button" aria-label="Quarter 1">
-      <img src="assets/home-page/assets/quarter%201.png" alt="" aria-hidden="true" />
+      <img src="assets/home-page/assets/quarter%201.webp" alt="" aria-hidden="true" />
     </button>
     <button class="home-coin home-coin--2" type="button" aria-label="Quarter 2">
-      <img src="assets/home-page/assets/quarter%202.png" alt="" aria-hidden="true" />
+      <img src="assets/home-page/assets/quarter%202.webp" alt="" aria-hidden="true" />
     </button>
     <button class="home-coin home-coin--3" type="button" aria-label="Quarter 3">
-      <img src="assets/home-page/assets/quarter%203.png" alt="" aria-hidden="true" />
+      <img src="assets/home-page/assets/quarter%203.webp" alt="" aria-hidden="true" />
     </button>
     <button class="home-coin home-coin--4" type="button" aria-label="Quarter 4">
-      <img src="assets/home-page/assets/quarter%204.png" alt="" aria-hidden="true" />
+      <img src="assets/home-page/assets/quarter%204.webp" alt="" aria-hidden="true" />
     </button>
 
-    <audio class="home-coin-audio" src="assets/home-page/audio/quarter_audio_1.wav" preload="auto"></audio>
-    <audio class="home-coin-audio" src="assets/home-page/audio/quarter_audio_2.wav" preload="auto"></audio>
-    <audio class="home-coin-audio" src="assets/home-page/audio/quarter_audio_3.wav" preload="auto"></audio>
-    <audio class="home-coin-audio" src="assets/home-page/audio/quarter_audio_4.wav" preload="auto"></audio>
-    <audio id="coin-fallback-sfx" src="assets/audio/clink.wav" preload="auto"></audio>
+    <a class="home-secret-card-trigger" href="/secret-card" aria-label="Open the hidden B3000 card">
+      <img src="assets/card-home-page/card-from-6.png" alt="" aria-hidden="true" />
+    </a>
+
+    <audio class="home-coin-audio" src="assets/home-page/audio/quarter_audio_1.wav" preload="none"></audio>
+    <audio class="home-coin-audio" src="assets/home-page/audio/quarter_audio_2.wav" preload="none"></audio>
+    <audio class="home-coin-audio" src="assets/home-page/audio/quarter_audio_3.wav" preload="none"></audio>
+    <audio class="home-coin-audio" src="assets/home-page/audio/quarter_audio_4.wav" preload="none"></audio>
+    <audio id="coin-fallback-sfx" src="assets/audio/clink.wav" preload="none"></audio>
   </main>
 
   <script>
@@ -100,34 +99,33 @@
       const totalCoins = coins.length;
       let deposited = 0;
       let redirectTimer = null;
-      let audioPrimed = false;
+      const primedAudio = new WeakSet();
 
       const primeCoinAudio = () => {
-        if (audioPrimed) return;
-        audioPrimed = true;
-        [...audio, fallbackAudio].filter(Boolean).forEach((track) => {
-          try {
-            track.load();
-            const previousMuted = track.muted;
-            track.muted = true;
-            const playAttempt = track.play();
-            if (playAttempt?.then) {
-              playAttempt
-                .then(() => {
-                  track.pause();
-                  track.currentTime = 0;
-                  track.muted = previousMuted;
-                })
-                .catch(() => {
-                  track.muted = previousMuted;
-                });
-            } else {
-              track.pause();
-              track.currentTime = 0;
-              track.muted = previousMuted;
-            }
-          } catch (_) {}
-        });
+        const track = audio[deposited] || fallbackAudio;
+        if (!track || primedAudio.has(track)) return;
+        primedAudio.add(track);
+        try {
+          track.load();
+          const previousMuted = track.muted;
+          track.muted = true;
+          const playAttempt = track.play();
+          if (playAttempt?.then) {
+            playAttempt
+              .then(() => {
+                track.pause();
+                track.currentTime = 0;
+                track.muted = previousMuted;
+              })
+              .catch(() => {
+                track.muted = previousMuted;
+              });
+          } else {
+            track.pause();
+            track.currentTime = 0;
+            track.muted = previousMuted;
+          }
+        } catch (_) {}
       };
 
       const playDepositAudio = () => {
@@ -249,6 +247,12 @@
         };
 
         coin.addEventListener('pointerdown', startDrag);
+        coin.addEventListener('keydown', (event) => {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          primeCoinAudio();
+          depositCoin(coin);
+        });
       });
 
       updateStatus();

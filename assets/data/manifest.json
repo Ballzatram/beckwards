@@ -17,6 +17,53 @@
     { "id": "cm_claw_middle", "src": "assets/claw-machine/claw/CLAW MIDDLE.png" },
     { "id": "cm_claw_right",  "src": "assets/claw-machine/claw/CLAW RIGHT.png" },
 
+    { "id": "cm_prize_strip",    "src": "assets/claw-machine/prizes.png" },
+    { "id": "cm_claw_open_v2",   "src": "assets/claw-machine/claw 2/claw open.png" },
+    { "id": "cm_claw_closed_v2", "src": "assets/claw-machine/claw 2/claw brighter.png" },
+    { "id": "cm_prize_1",        "src": "assets/claw-machine/Prizes/prize1.png" },
+    { "id": "cm_prize_2",        "src": "assets/claw-machine/Prizes/prize2.png" },
+    { "id": "cm_prize_3",        "src": "assets/claw-machine/Prizes/prize3.png" },
+    { "id": "cm_prize_4",        "src": "assets/claw-machine/Prizes/prize4.png" },
+    { "id": "cm_prize_5",        "src": "assets/claw-machine/Prizes/prize5.png" },
+    { "id": "cm_prize_6",        "src": "assets/claw-machine/Prizes/prize6.png" },
+    { "id": "cm_prize_7",        "src": "assets/claw-machine/Prizes/prize7.png" },
+    { "id": "cm_prize_8",        "src": "assets/claw-machine/Prizes/prize8.png" },
+    { "id": "cm_prize_9",        "src": "assets/claw-machine/Prizes/prize9.png" },
+    { "id": "cm_prize_10",       "src": "assets/claw-machine/Prizes/prize10.png" },
+    { "id": "cm_prize_11",       "src": "assets/claw-machine/Prizes/prize11.png" },
+    { "id": "cm_prize_12",       "src": "assets/claw-machine/Prizes/prize12.png" },
+    { "id": "cm_prize_13",       "src": "assets/claw-machine/Prizes/prize13.png" },
+    { "id": "cm_prize_14",       "src": "assets/claw-machine/Prizes/prize14.png" },
+    { "id": "cm_prize_15",       "src": "assets/claw-machine/Prizes/prize15.png" },
+    { "id": "cm_prize_16",       "src": "assets/claw-machine/Prizes/prize16.png" },
+    { "id": "cm_prize_17",       "src": "assets/claw-machine/Prizes/prize17.png" },
+    { "id": "cm_prize_18",       "src": "assets/claw-machine/Prizes/prize18.png" },
+    { "id": "cm_prize_19",       "src": "assets/claw-machine/Prizes/prize19.png" },
+    { "id": "cm_prize_20",       "src": "assets/claw-machine/Prizes/prize20.png" },
+    { "id": "cm_prize_21",       "src": "assets/claw-machine/Prizes/prize21.png" },
+    { "id": "cm_prize_22",       "src": "assets/claw-machine/Prizes/prize22.png" },
+    { "id": "cm_prize_23",       "src": "assets/claw-machine/Prizes/prize23.png" },
+    { "id": "cm_prize_24",       "src": "assets/claw-machine/Prizes/prize24.png" },
+    { "id": "cm_prize_25",       "src": "assets/claw-machine/Prizes/prize25.png" },
+    { "id": "cm_prize_26",       "src": "assets/claw-machine/Prizes/prize26.png" },
+    { "id": "cm_prize_27",       "src": "assets/claw-machine/Prizes/prize27.png" },
+    { "id": "quarter_1",         "src": "assets/home-page/assets/quarter 1.webp" },
+    { "id": "cm_reward_1",       "src": "assets/claw-machine/rewards/Alcatraz.png" },
+    { "id": "cm_reward_2",       "src": "assets/claw-machine/rewards/Cut for time.png" },
+    { "id": "cm_reward_3",       "src": "assets/claw-machine/rewards/PCTB.png" },
+    { "id": "cm_reward_4",       "src": "assets/claw-machine/rewards/Papercut.png" },
+    { "id": "cm_reward_5",       "src": "assets/claw-machine/rewards/draft kings.png" },
+    { "id": "cm_reward_6",       "src": "assets/claw-machine/rewards/fizzled fuse.png" },
+    { "id": "cm_reward_7",       "src": "assets/claw-machine/rewards/half brain.png" },
+    { "id": "cm_reward_8",       "src": "assets/claw-machine/rewards/hometown.png" },
+    { "id": "cm_reward_9",       "src": "assets/claw-machine/rewards/infinite jest.png" },
+    { "id": "cm_reward_10",      "src": "assets/claw-machine/rewards/millstones.png" },
+    { "id": "cm_reward_11",      "src": "assets/claw-machine/rewards/plea deal.png" },
+    { "id": "cm_reward_12",      "src": "assets/claw-machine/rewards/stone face.png" },
+    { "id": "cm_reward_13",      "src": "assets/claw-machine/rewards/the call.png" },
+    { "id": "cm_reward_14",      "src": "assets/claw-machine/rewards/to crack a diamond.png" },
+    { "id": "cm_reward_15",      "src": "assets/claw-machine/rewards/wishing well.png" },
+
     { "id": "prize_star",  "src": "assets/sprites/prizes/plush_star.png" },
     { "id": "prize_duck",  "src": "assets/sprites/prizes/duck.png" },
     { "id": "prize_box",   "src": "assets/sprites/prizes/mystery_box.png" },
@@ -27,8 +74,6 @@
     {
       "id": "motor_loop",
       "src": [
-        "assets/audio/motor_loop.ogg",
-        "assets/audio/motor_loop.mp3",
         "assets/audio/motor_loop.wav"
       ],
       "loop": true
@@ -36,8 +81,6 @@
     {
       "id": "ui_click",
       "src": [
-        "assets/audio/ui_click.ogg",
-        "assets/audio/ui_click.mp3",
         "assets/audio/ui_click.wav"
       ]
     },
@@ -45,6 +88,18 @@
       "id": "clink",
       "src": [
         "assets/audio/clink.wav"
+      ]
+    },
+    {
+      "id": "quarter_audio_1",
+      "src": [
+        "assets/home-page/audio/quarter_audio_1.wav"
+      ]
+    },
+    {
+      "id": "win",
+      "src": [
+        "assets/claw-machine/audio/prize victory.wav"
       ]
     }
   ]

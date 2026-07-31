@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Digital Madness — Beckwards</title>
+  <title>Who is B3000? - Beckwards</title>
+  <meta name="description" content="Who is B3000? A Beckwards collage and note." />
   <link rel="icon" type="image/png" href="assets/thumbnails/1.png" />
   <link rel="stylesheet" href="style.css" />
   <script>
@@ -20,23 +21,216 @@
     })();
   </script>
 </head>
-<body class="site-page">
-  <div class="wrap">
-    <header class="top">
-      <h1><a class="site-title-link" href="/" aria-label="Home">BECKWARDS</a></h1>
-      <p class="subtitle">digital madness</p>
-    </header>
+<body class="who-page">
+  <main class="who-scene" data-who-scene aria-label="Who is B3000?">
+    <div class="who-art" data-who-art>
+      <img class="who-piece who-piece--secret" src="assets/who-is-b3/you'll%20poke%20holes%20in%20anything.png" alt="" aria-hidden="true" />
+      <img class="who-piece who-piece--photo who-piece--photo-left" src="assets/who-is-b3/picture%203.png" alt="B3000 robot portrait" />
+      <img class="who-piece who-piece--photo who-piece--photo-bottom" src="assets/who-is-b3/picture%202.png" alt="B3000 robot in front of hills" />
+      <img class="who-piece who-piece--photo who-piece--photo-right" src="assets/who-is-b3/picture%201.png" alt="B3000 robot standing beside Becket" />
+      <img class="who-piece who-piece--note" src="assets/who-is-b3/note.png" alt="Who is B3000? handwritten note by Becket" />
+    </div>
 
-    <main>
-      <ul>
-        <li><a href="https://open.spotify.com/artist/0urHGaFXBdSbrykH82Ferf" target="_blank">spotify</a></li>
-        <li><a href="https://music.apple.com/us/album/the-call/1837441446?i=1837441447" target="_blank">apple music</a></li>
-        <li><a href="https://www.instagram.com/beckwardss/" target="_blank">instagram</a></li>
-      </ul>
-    </main>
+    <a class="who-home-link" href="/" aria-label="Home">
+      <img src="assets/who-is-b3/house%20drawing/house%20drawing.png" alt="" aria-hidden="true" />
+    </a>
 
-    <footer class="foot"><p class="tiny">© <span id="year"></span> Beckwards</p></footer>
-  </div>
-  <script>document.getElementById('year').textContent=new Date().getFullYear()</script>
+    <div class="who-magnifier" data-who-magnifier role="button" tabindex="0" aria-disabled="true" aria-label="Drag the magnifying glass to magnify the page and reveal hidden writing">
+      <div class="who-lens" data-who-lens aria-hidden="true">
+        <div class="who-lens-content" data-who-lens-content></div>
+      </div>
+      <img class="who-magnifier__image" src="assets/who-is-b3/magnifying%20glass.png" alt="" aria-hidden="true" />
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const scene = document.querySelector('[data-who-scene]');
+      const art = document.querySelector('[data-who-art]');
+      const magnifier = document.querySelector('[data-who-magnifier]');
+      const lens = document.querySelector('[data-who-lens]');
+      const lensContent = document.querySelector('[data-who-lens-content]');
+      if (!scene || !art || !magnifier || !lens || !lensContent) return;
+
+      const zoom = 1.74;
+      const unlockKey = 'beckwardsInfiniteJestUnlocked';
+      const secret = art.querySelector('.who-piece--secret');
+      let unlocked = false;
+      let revealActive = false;
+      let sceneRect = null;
+      let dragOffsetX = 0;
+      let dragOffsetY = 0;
+      let centerX = 0;
+      let centerY = 0;
+      let pointerStartX = 0;
+      let pointerStartY = 0;
+      let dragged = false;
+
+      const clone = art.cloneNode(true);
+      clone.removeAttribute('data-who-art');
+      clone.setAttribute('aria-hidden', 'true');
+      clone.classList.add('who-art--magnified');
+      lensContent.appendChild(clone);
+
+      const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+      const hasSessionUnlock = () => {
+        try {
+          return window.sessionStorage?.getItem(unlockKey) === 'true';
+        } catch (_) {
+          return false;
+        }
+      };
+
+      const writeSessionUnlock = () => {
+        try {
+          window.sessionStorage?.setItem(unlockKey, 'true');
+        } catch (_) {}
+      };
+
+      const setUnlocked = () => {
+        if (unlocked) return;
+        unlocked = true;
+        writeSessionUnlock();
+        magnifier.classList.add('is-unlocked');
+      };
+
+      const setRevealActive = (active) => {
+        revealActive = active;
+        magnifier.classList.toggle('is-reveal-active', active);
+        magnifier.setAttribute('aria-disabled', active ? 'false' : 'true');
+        if (active) {
+          magnifier.setAttribute('aria-label', 'Open the hidden Infinite Jest page');
+          magnifier.title = 'Open hidden Infinite Jest page';
+          return;
+        }
+        magnifier.setAttribute('aria-label', unlocked ? 'Drag the magnifying glass back over the hidden writing to open the Infinite Jest page' : 'Drag the magnifying glass to magnify the page and reveal hidden writing');
+        magnifier.removeAttribute('title');
+      };
+
+      const openSecretPage = () => {
+        if (!unlocked || !revealActive) return;
+        window.location.href = '/infinite-jest';
+      };
+
+      const rectsOverlapEnough = (a, b) => {
+        const left = Math.max(a.left, b.left);
+        const top = Math.max(a.top, b.top);
+        const right = Math.min(a.right, b.right);
+        const bottom = Math.min(a.bottom, b.bottom);
+        if (right <= left || bottom <= top) return false;
+        const overlapArea = (right - left) * (bottom - top);
+        const targetArea = Math.min(a.width * a.height, b.width * b.height);
+        return targetArea > 0 && overlapArea / targetArea >= 0.2;
+      };
+
+      const checkReveal = () => {
+        const active = !!secret && rectsOverlapEnough(lens.getBoundingClientRect(), secret.getBoundingClientRect());
+        setRevealActive(active);
+        if (active && !unlocked) {
+          setUnlocked();
+        }
+      };
+
+      const readCenter = () => {
+        sceneRect = scene.getBoundingClientRect();
+        const rect = magnifier.getBoundingClientRect();
+        centerX = rect.left + rect.width / 2 - sceneRect.left;
+        centerY = rect.top + rect.height / 2 - sceneRect.top;
+      };
+
+      const updateLens = () => {
+        sceneRect = scene.getBoundingClientRect();
+        const lensRect = lens.getBoundingClientRect();
+        const lensCenterX = lensRect.left + lensRect.width / 2 - sceneRect.left;
+        const lensCenterY = lensRect.top + lensRect.height / 2 - sceneRect.top;
+        lensContent.style.width = `${sceneRect.width}px`;
+        lensContent.style.height = `${sceneRect.height}px`;
+        lensContent.style.transform = `translate(${(lensRect.width / 2) - (lensCenterX * zoom)}px, ${(lensRect.height / 2) - (lensCenterY * zoom)}px) scale(${zoom})`;
+        checkReveal();
+      };
+
+      const setCenter = (x, y) => {
+        sceneRect = scene.getBoundingClientRect();
+        const rect = magnifier.getBoundingClientRect();
+        const marginX = rect.width * 0.18;
+        const marginY = rect.height * 0.18;
+        centerX = clamp(x, -marginX, sceneRect.width + marginX);
+        centerY = clamp(y, -marginY, sceneRect.height + marginY);
+        magnifier.style.left = `${centerX}px`;
+        magnifier.style.top = `${centerY}px`;
+        updateLens();
+      };
+
+      const startDrag = (event) => {
+        event.preventDefault();
+        readCenter();
+        pointerStartX = event.clientX;
+        pointerStartY = event.clientY;
+        dragged = false;
+        dragOffsetX = event.clientX - (sceneRect.left + centerX);
+        dragOffsetY = event.clientY - (sceneRect.top + centerY);
+        magnifier.classList.add('is-dragging');
+        magnifier.setPointerCapture?.(event.pointerId);
+        magnifier.focus?.({ preventScroll: true });
+      };
+
+      const moveDrag = (event) => {
+        if (!magnifier.classList.contains('is-dragging')) return;
+        if (Math.hypot(event.clientX - pointerStartX, event.clientY - pointerStartY) > 5) {
+          dragged = true;
+        }
+        sceneRect = scene.getBoundingClientRect();
+        setCenter(event.clientX - sceneRect.left - dragOffsetX, event.clientY - sceneRect.top - dragOffsetY);
+      };
+
+      const stopDrag = (event) => {
+        const shouldActivate = event?.type === 'pointerup' && !dragged && unlocked && revealActive;
+        magnifier.classList.remove('is-dragging');
+        if (event?.pointerId != null) magnifier.releasePointerCapture?.(event.pointerId);
+        if (shouldActivate) openSecretPage();
+      };
+
+      magnifier.addEventListener('pointerdown', startDrag);
+      magnifier.addEventListener('pointermove', moveDrag);
+      magnifier.addEventListener('pointerup', stopDrag);
+      magnifier.addEventListener('pointercancel', stopDrag);
+      magnifier.addEventListener('click', (event) => {
+        if (!unlocked || !revealActive || dragged) return;
+        event.preventDefault();
+        openSecretPage();
+      });
+      magnifier.addEventListener('keydown', (event) => {
+        if ((event.key === 'Enter' || event.key === ' ') && unlocked && revealActive) {
+          event.preventDefault();
+          openSecretPage();
+          return;
+        }
+        const keyMap = {
+          ArrowLeft: [-1, 0],
+          ArrowRight: [1, 0],
+          ArrowUp: [0, -1],
+          ArrowDown: [0, 1]
+        };
+        const direction = keyMap[event.key];
+        if (!direction) return;
+        event.preventDefault();
+        if (!sceneRect) readCenter();
+        const step = event.shiftKey ? 38 : 16;
+        setCenter(centerX + direction[0] * step, centerY + direction[1] * step);
+      });
+
+      window.addEventListener('resize', () => {
+        readCenter();
+        setCenter(centerX, centerY);
+      });
+
+      requestAnimationFrame(() => {
+        if (hasSessionUnlock()) setUnlocked();
+        readCenter();
+        setCenter(centerX, centerY);
+      });
+    })();
+  </script>
 </body>
 </html>

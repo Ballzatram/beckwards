@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <base href="/" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>B3000 Secret Card - Beckwards</title>
+  <meta name="description" content="Enter the four B3000 artifact codes." />
+  <link rel="icon" type="image/png" href="assets/thumbnails/1.png" />
+  <link rel="preload" as="image" href="assets/shared/background.webp" fetchpriority="high" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="secret-card-page">
+  <main class="secret-card-scene" data-secret-card-page aria-labelledby="secret-card-title">
+    <h1 id="secret-card-title" class="visually-hidden">B3000 secret card</h1>
+
+    <div class="secret-card-panel" data-secret-card-panel>
+      <img class="secret-card-image" src="assets/secret-card-page/assets/Card.webp" width="1269" height="801" fetchpriority="high" alt="B3000 artifact card. Enter the four vinyl codes to receive the quarters needed for the Claw Machine." />
+      <a class="secret-card-home" href="/" aria-label="Return home"></a>
+
+      <form class="secret-card-form" data-secret-card-form autocomplete="off">
+        <label class="secret-card-slot secret-card-slot--1">
+          <span class="visually-hidden">Enter vinyl code 1</span>
+          <input data-secret-code-input type="text" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="9" placeholder=" " spellcheck="false" />
+          <img data-secret-quarter data-src="assets/secret-card-page/assets/quarter%201.webp" alt="" aria-hidden="true" hidden />
+        </label>
+        <label class="secret-card-slot secret-card-slot--2">
+          <span class="visually-hidden">Enter vinyl code 2</span>
+          <input data-secret-code-input type="text" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="9" placeholder=" " spellcheck="false" />
+          <img data-secret-quarter data-src="assets/secret-card-page/assets/quarter%202.webp" alt="" aria-hidden="true" hidden />
+        </label>
+        <label class="secret-card-slot secret-card-slot--3">
+          <span class="visually-hidden">Enter vinyl code 3</span>
+          <input data-secret-code-input type="text" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="9" placeholder=" " spellcheck="false" />
+          <img data-secret-quarter data-src="assets/secret-card-page/assets/quarter%203.webp" alt="" aria-hidden="true" hidden />
+        </label>
+        <label class="secret-card-slot secret-card-slot--4">
+          <span class="visually-hidden">Enter vinyl code 4</span>
+          <input data-secret-code-input type="text" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="9" placeholder=" " spellcheck="false" />
+          <img data-secret-quarter data-src="assets/secret-card-page/assets/quarter%204.webp" alt="" aria-hidden="true" hidden />
+        </label>
+      </form>
+
+      <p class="secret-card-status" data-secret-card-status role="status" aria-live="polite">0 of 4 codes accepted</p>
+    </div>
+
+    <audio data-secret-card-audio src="assets/home-page/audio/quarter_audio_1.wav" preload="none"></audio>
+    <audio data-secret-card-audio src="assets/home-page/audio/quarter_audio_2.wav" preload="none"></audio>
+    <audio data-secret-card-audio src="assets/home-page/audio/quarter_audio_3.wav" preload="none"></audio>
+    <audio data-secret-card-audio src="assets/home-page/audio/quarter_audio_4.wav" preload="none"></audio>
+  </main>
+
+  <script src="scripts/secret-card.js"></script>
+</body>
+</html>

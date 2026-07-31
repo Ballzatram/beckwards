@@ -40,6 +40,9 @@
     transform-origin:center;
   }
   .arcade-bg,
+  .arcade-prize-strip,
+  .arcade-front,
+  .arcade-coin-mouth,
   .arcade-layer,
   .arcade-control{
     position:absolute;
@@ -58,8 +61,35 @@
     inset:0;
     width:100%;
     height:100%;
+    z-index:3;
+    pointer-events:none;
+  }
+  #game-canvas{
+    display:block;
+    width:100%;
+    height:100%;
+    image-rendering:auto;
+    contain:strict;
+  }
+  .arcade-front{
+    left:9.9609375%;
+    top:3.125%;
+    width:81.6015625%;
+    height:auto;
+    z-index:4;
+    pointer-events:none;
+    user-select:none;
+    -webkit-user-drag:none;
+  }
+  .arcade-prize-strip{
+    left:10.8203125%;
+    top:59.8611111111%;
+    width:76.9140625%;
+    height:auto;
     z-index:2;
     pointer-events:none;
+    user-select:none;
+    -webkit-user-drag:none;
   }
   .arcade-brand-hit{
     position:absolute;
@@ -67,7 +97,7 @@
     top:7%;
     width:48%;
     height:14%;
-    z-index:4;
+    z-index:5;
     text-indent:-999px;
     overflow:hidden;
   }
@@ -75,7 +105,7 @@
     position:absolute;
     left:50%;
     top:80.2%;
-    z-index:5;
+    z-index:6;
     min-width:clamp(74px, 7vw, 136px);
     padding:.12em .35em;
     transform:translate(-50%, -50%);
@@ -98,7 +128,7 @@
     top:70.85%;
     width:7.1%;
     height:8.4%;
-    z-index:6;
+    z-index:7;
     cursor:grab;
     touch-action:none;
   }
@@ -107,7 +137,7 @@
   }
   .arcade-handle{
     position:absolute;
-    left:50%;
+    left:58%;
     bottom:0;
     width:35.2%;
     transform:translate(calc(-50% + var(--joy-x, 0px)), 0);
@@ -121,7 +151,7 @@
     left:53.125%;
     top:77.7%;
     width:2.46%;
-    z-index:6;
+    z-index:7;
     padding:0;
     border:0;
     background:transparent;
@@ -157,7 +187,7 @@
     top:82.35%;
     width:6.3%;
     height:10.8%;
-    z-index:7;
+    z-index:8;
     padding:0;
     border:0;
     border-radius:42%;
@@ -170,20 +200,28 @@
     cursor:default;
     pointer-events:none;
   }
-  .arcade-coin{
-    position:absolute;
-    left:50.45%;
-    top:72.9%;
-    width:2.4%;
-    aspect-ratio:1;
+  .arcade-coin-mouth{
+    left:50.35%;
+    top:88.45%;
+    width:1.25%;
+    height:4.2%;
     z-index:8;
-    border-radius:50%;
-    background:radial-gradient(circle at 35% 28%, #fff7ba, #d1a32d 55%, #785313);
-    border:2px solid rgba(0,0,0,.45);
-    box-shadow:0 3px 4px rgba(0,0,0,.6);
     transform:translate(-50%, -50%);
     pointer-events:none;
-    animation:arcadeCoinDrop .82s cubic-bezier(.26,.7,.3,1) forwards;
+  }
+  .arcade-coin{
+    position:absolute;
+    left:50.35%;
+    top:88.45%;
+    width:1.25%;
+    height:auto;
+    z-index:9;
+    display:block;
+    filter:drop-shadow(0 2px 2px rgba(0,0,0,.7));
+    transform:translate(-50%, -50%);
+    will-change:transform, opacity;
+    pointer-events:none;
+    animation:arcadeCoinDeposit .48s ease-in forwards;
   }
   .arcade-sr{
     position:absolute;
@@ -200,10 +238,9 @@
     0%,49%{ opacity:1; }
     50%,100%{ opacity:.35; }
   }
-  @keyframes arcadeCoinDrop{
-    0%{ transform:translate(-50%, -50%) scale(1) rotate(0deg); opacity:1; }
-    72%{ transform:translate(-50%, 108%) scale(.82) rotate(94deg); opacity:1; }
-    100%{ transform:translate(-50%, 145%) scale(.42) rotate(128deg); opacity:0; }
+  @keyframes arcadeCoinDeposit{
+    0%{ transform:translate(-50%, -50%) scale(1) rotate(-7deg); opacity:1; }
+    100%{ transform:translate(-50%, -50%) scale(.2) rotate(90deg); opacity:0; }
   }
   @media (max-aspect-ratio:16 / 9){
     .arcade-frame{
@@ -258,11 +295,13 @@
 <body>
   <main class="arcade-scene" aria-label="Beckwards claw machine arcade">
     <div class="arcade-frame" id="arcade-frame">
-      <img class="arcade-bg" src="assets/claw-machine/background.png" alt="" aria-hidden="true" />
+      <img class="arcade-bg" src="assets/claw-machine/background.webp" alt="" aria-hidden="true" />
       <a class="arcade-brand-hit" href="/" aria-label="Home">Beckwards</a>
+      <img class="arcade-prize-strip" src="assets/claw-machine/prizes.webp" alt="" aria-hidden="true" />
       <div class="arcade-layer" id="stage" aria-label="Game stage">
         <span class="arcade-sr">Loading claw machine...</span>
       </div>
+      <img class="arcade-front" src="assets/claw-machine/front%20layer.webp" alt="" aria-hidden="true" />
       <p class="arcade-status" id="arcade-status" role="status" aria-live="polite">ONE TRY</p>
       <div class="arcade-control arcade-handle-zone" id="gate" aria-label="Joystick area">
         <img class="arcade-handle" id="joy" src="assets/claw-machine/handle.png" alt="Joystick" role="slider" aria-valuemin="-1" aria-valuemax="1" aria-valuenow="0" />
@@ -271,94 +310,28 @@
         <img class="arcade-button__idle" src="assets/claw-machine/button%20unpressed.png" alt="" aria-hidden="true" />
         <img class="arcade-button__pressed" src="assets/claw-machine/button%20pressed.png" alt="" aria-hidden="true" />
       </button>
+      <span class="arcade-coin-mouth" id="coin-mouth" aria-hidden="true"></span>
       <button type="button" class="arcade-control arcade-coin-slot" id="coin-slot" aria-label="Insert coin to retry" disabled></button>
     </div>
   </main>
 
+  <div class="reward-modal" id="reward-modal" role="dialog" aria-modal="true" aria-label="Your reward" hidden>
+    <div class="reward-modal__scrim" data-reward-close aria-hidden="true"></div>
+    <div class="reward-modal__coin-layer" aria-hidden="true"></div>
+    <section class="reward-modal__panel" id="reward-panel" tabindex="-1">
+      <div class="reward-modal__image-wrap">
+        <a class="reward-modal__image-link" id="reward-link">
+          <img class="reward-modal__image" id="reward-image" decoding="async" alt="Reward" hidden />
+        </a>
+      </div>
+      <div class="reward-modal__actions">
+        <a class="reward-modal__button reward-modal__download" id="reward-download" href="#" download hidden>Download</a>
+        <button class="reward-modal__button reward-modal__back" type="button" data-reward-close>Back</button>
+      </div>
+    </section>
+  </div>
+
   <script type="module" src="scripts/game.js"></script>
-  <script>
-    (() => {
-      const knob = document.getElementById('joy');
-      const gate = document.getElementById('gate');
-      const button = document.getElementById('btn-drop');
-      if (!knob || !gate || !button) return;
-
-      const setKnob = (x) => {
-        const rect = gate.getBoundingClientRect();
-        const max = Math.max(8, rect.width * 0.26);
-        const clamped = Math.max(-max, Math.min(max, x));
-        gate.style.setProperty('--joy-x', `${clamped}px`);
-        knob.setAttribute('aria-valuenow', (clamped / max).toFixed(2));
-        return clamped / max;
-      };
-
-      let dragging = false;
-      let lastDir = 0;
-      let raf = null;
-      let currentRatio = 0;
-
-      const dirFromRatio = (ratio) => {
-        if (ratio <= -0.26) return -1;
-        if (ratio >= 0.26) return 1;
-        return 0;
-      };
-
-      const updateMove = () => {
-        const dir = dirFromRatio(currentRatio);
-        if (dir !== lastDir) {
-          if (dir < 0) window.GAME?.moveLeft();
-          else if (dir > 0) window.GAME?.moveRight();
-          else window.GAME?.stopMove();
-          lastDir = dir;
-        }
-        raf = requestAnimationFrame(updateMove);
-      };
-
-      const move = (event) => {
-        if (!dragging) return;
-        const rect = gate.getBoundingClientRect();
-        currentRatio = setKnob(event.clientX - (rect.left + rect.width / 2));
-      };
-
-      const stop = () => {
-        dragging = false;
-        currentRatio = 0;
-        setKnob(0);
-        window.GAME?.stopMove();
-        lastDir = 0;
-        if (raf) cancelAnimationFrame(raf);
-        raf = null;
-        window.removeEventListener('pointermove', move);
-      };
-
-      const start = (event) => {
-        event.preventDefault();
-        dragging = true;
-        move(event);
-        if (!raf) raf = requestAnimationFrame(updateMove);
-        window.addEventListener('pointermove', move, { passive:false });
-        window.addEventListener('pointerup', stop, { passive:false, once:true });
-        window.addEventListener('pointercancel', stop, { passive:false, once:true });
-      };
-
-      gate.addEventListener('pointerdown', start, { passive:false });
-
-      const pressDrop = (event) => {
-        event.preventDefault();
-        button.classList.add('is-pressed');
-        window.GAME?.drop();
-      };
-      const releaseDrop = () => {
-        if (!['DROPPING', 'CLOSING'].includes(window.GAME?.mode?.() || '')) {
-          button.classList.remove('is-pressed');
-        }
-      };
-
-      button.addEventListener('pointerdown', pressDrop, { passive:false });
-      button.addEventListener('pointerup', releaseDrop);
-      button.addEventListener('pointerleave', releaseDrop);
-      button.addEventListener('pointercancel', releaseDrop);
-    })();
-  </script>
+  <script type="module" src="scripts/arcade-controls.js"></script>
 </body>
 </html>

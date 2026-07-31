@@ -68,6 +68,18 @@
       const statusText = document.querySelector('[data-copy-status-text]');
       const copiedImage = document.querySelector('.poster-copied');
       const tabs = Array.from(document.querySelectorAll('[data-contact-tab]'));
+      const tearSoundUrls = Array.from({ length: 6 }, (_, index) => `assets/contact/tear%20${index + 1}.wav`);
+
+      const playTearSound = () => {
+        const source = tearSoundUrls[Math.floor(Math.random() * tearSoundUrls.length)];
+        if (!source) return;
+        try {
+          const sound = new Audio(source);
+          sound.preload = 'none';
+          sound.volume = 0.72;
+          sound.play().catch(() => {});
+        } catch (_) {}
+      };
 
       const writeClipboardFallback = (text) => {
         const input = document.createElement('textarea');
@@ -95,6 +107,7 @@
         tab.style.pointerEvents = 'none';
         tab.tabIndex = -1;
         tab.setAttribute('aria-hidden', 'true');
+        playTearSound();
         try {
           if (navigator.clipboard?.writeText) {
             await navigator.clipboard.writeText(EMAIL);
