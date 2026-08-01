@@ -1447,46 +1447,39 @@ body.who-page{
 
 .who-secret-callout{
   position:absolute;
-  left:50%;
-  top:58%;
+  left:27%;
+  top:56%;
   z-index:3;
   display:block;
-  width:min(74%, 270px);
-  padding:clamp(8px, 1.1vw, 14px) clamp(10px, 1.35vw, 18px);
-  border:2px solid rgba(37,31,20,.78);
-  background:#f4e7b7;
-  box-shadow:3px 4px 0 rgba(37,31,20,.24), 0 8px 16px rgba(0,0,0,.18);
+  width:max-content;
+  max-width:48%;
+  padding:4px 7px;
+  border:1px solid rgba(37,31,20,.62);
+  background:rgba(244,231,183,.9);
+  box-shadow:1px 2px 0 rgba(37,31,20,.18);
   color:#191710;
   font-family:"Bradley Hand", "Marker Felt", "Comic Sans MS", cursive;
-  font-size:clamp(11px, 1.15vw, 18px);
-  font-weight:700;
-  line-height:1.08;
-  letter-spacing:.035em;
+  font-size:clamp(9px, .72vw, 12px);
+  font-weight:500;
+  line-height:1;
+  letter-spacing:.015em;
   text-align:center;
   opacity:0;
   visibility:hidden;
   pointer-events:none;
-  transform:rotate(-4deg) scale(.82);
+  transform:translate(-50%, -50%) rotate(-2deg) scale(.92);
   transform-origin:center;
   transition:opacity .16s ease, visibility .16s ease, transform .16s ease;
 }
 
 .who-secret-callout::before{
-  content:"";
-  position:absolute;
-  left:50%;
-  top:-7px;
-  width:clamp(30px, 4vw, 54px);
-  height:12px;
-  background:rgba(237,220,170,.88);
-  box-shadow:0 1px 2px rgba(0,0,0,.12);
-  transform:translateX(-50%) rotate(2deg);
+  content:none;
 }
 
 .who-magnifier.is-reveal-active .who-secret-callout{
-  opacity:1;
+  opacity:.9;
   visibility:visible;
-  transform:rotate(-4deg) scale(1);
+  transform:translate(-50%, -50%) rotate(-2deg) scale(1);
 }
 
 .who-magnifier:hover .who-magnifier__image,
@@ -1855,10 +1848,10 @@ body.who-page{
   }
 
   .who-secret-callout{
-    left:10%;
-    top:57%;
-    width:70%;
-    font-size:11px;
+    left:27%;
+    top:54%;
+    max-width:48%;
+    font-size:9px;
   }
 }
 
@@ -1974,11 +1967,11 @@ body.sticky-note-page{
   opacity:0;
   pointer-events:none;
 }
-.sticky-note-form:focus-within .sticky-type-prompt,
+.sticky-note-form:has(.sticky-note-input:focus) .sticky-type-prompt,
 .sticky-note-form.has-copy .sticky-type-prompt{
   opacity:0;
 }
-.sticky-note-form:focus-within .sticky-note-input,
+.sticky-note-input:focus,
 .sticky-note-form.has-copy .sticky-note-input{
   border-color:#34342e;
   background:
@@ -2055,7 +2048,7 @@ body.sticky-note-page{
 .sticky-note-status{
   position:absolute;
   right:0;
-  top:calc(100% + clamp(66px, 4vw, 94px));
+  top:calc(100% + clamp(88px, 5vw, 118px));
   z-index:5;
   width:100%;
   margin:0;
@@ -2166,7 +2159,7 @@ body.sticky-note-page{
     width:132px;
   }
   .sticky-note-status{
-    top:calc(100% + 66px);
+    top:calc(100% + 86px);
     font-size:11px;
   }
   .sticky-example--draw-label{
