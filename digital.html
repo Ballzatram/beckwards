@@ -40,7 +40,7 @@
         <div class="who-lens-content" data-who-lens-content></div>
       </div>
       <img class="who-magnifier__image" src="assets/who-is-b3/magnifying%20glass.png" alt="" aria-hidden="true" />
-      <span class="who-secret-callout">OPEN INFINITE JEST SECRET PAGE</span>
+      <span class="who-secret-callout">open secret page</span>
     </div>
   </main>
 
@@ -101,8 +101,8 @@
         magnifier.classList.toggle('is-reveal-active', active);
         magnifier.setAttribute('aria-disabled', active ? 'false' : 'true');
         if (active) {
-          magnifier.setAttribute('aria-label', 'Open Infinite Jest secret page');
-          magnifier.title = 'Open Infinite Jest secret page';
+          magnifier.setAttribute('aria-label', 'Open secret page');
+          magnifier.title = 'Open secret page';
           return;
         }
         magnifier.setAttribute('aria-label', unlocked ? 'Drag the magnifying glass back over the hidden writing to open the Infinite Jest page' : 'Drag the magnifying glass to magnify the page and reveal hidden writing');
@@ -114,19 +114,19 @@
         window.location.href = '/infinite-jest';
       };
 
-      const rectsOverlapEnough = (a, b) => {
-        const left = Math.max(a.left, b.left);
-        const top = Math.max(a.top, b.top);
-        const right = Math.min(a.right, b.right);
-        const bottom = Math.min(a.bottom, b.bottom);
-        if (right <= left || bottom <= top) return false;
-        const overlapArea = (right - left) * (bottom - top);
-        const targetArea = Math.min(a.width * a.height, b.width * b.height);
-        return targetArea > 0 && overlapArea / targetArea >= 0.2;
+      const lensCenteredOnSecret = (lensRect, secretRect) => {
+        const lensCenterX = lensRect.left + lensRect.width / 2;
+        const lensCenterY = lensRect.top + lensRect.height / 2;
+        const insetX = secretRect.width * 0.12;
+        const insetY = secretRect.height * 0.18;
+        return lensCenterX >= secretRect.left + insetX
+          && lensCenterX <= secretRect.right - insetX
+          && lensCenterY >= secretRect.top + insetY
+          && lensCenterY <= secretRect.bottom - insetY;
       };
 
       const checkReveal = () => {
-        const active = !!secret && rectsOverlapEnough(lens.getBoundingClientRect(), secret.getBoundingClientRect());
+        const active = !!secret && lensCenteredOnSecret(lens.getBoundingClientRect(), secret.getBoundingClientRect());
         setRevealActive(active);
         if (active && !unlocked) {
           setUnlocked();

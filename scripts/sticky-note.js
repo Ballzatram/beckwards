@@ -104,6 +104,7 @@
       form.reset();
       updateCount();
       messageInput.blur();
+      submitButton?.blur();
       setEmailFallback(false);
       setStatus('NOTE SENT. THANK YOU.');
     } catch (_) {
