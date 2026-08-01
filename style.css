@@ -1445,6 +1445,50 @@ body.who-page{
   filter:drop-shadow(0 10px 8px rgba(0,0,0,.16));
 }
 
+.who-secret-callout{
+  position:absolute;
+  left:50%;
+  top:58%;
+  z-index:3;
+  display:block;
+  width:min(74%, 270px);
+  padding:clamp(8px, 1.1vw, 14px) clamp(10px, 1.35vw, 18px);
+  border:2px solid rgba(37,31,20,.78);
+  background:#f4e7b7;
+  box-shadow:3px 4px 0 rgba(37,31,20,.24), 0 8px 16px rgba(0,0,0,.18);
+  color:#191710;
+  font-family:"Bradley Hand", "Marker Felt", "Comic Sans MS", cursive;
+  font-size:clamp(11px, 1.15vw, 18px);
+  font-weight:700;
+  line-height:1.08;
+  letter-spacing:.035em;
+  text-align:center;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transform:rotate(-4deg) scale(.82);
+  transform-origin:center;
+  transition:opacity .16s ease, visibility .16s ease, transform .16s ease;
+}
+
+.who-secret-callout::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:-7px;
+  width:clamp(30px, 4vw, 54px);
+  height:12px;
+  background:rgba(237,220,170,.88);
+  box-shadow:0 1px 2px rgba(0,0,0,.12);
+  transform:translateX(-50%) rotate(2deg);
+}
+
+.who-magnifier.is-reveal-active .who-secret-callout{
+  opacity:1;
+  visibility:visible;
+  transform:rotate(-4deg) scale(1);
+}
+
 .who-magnifier:hover .who-magnifier__image,
 .who-magnifier:focus-visible .who-magnifier__image,
 .who-magnifier.is-dragging .who-magnifier__image{
@@ -1583,6 +1627,48 @@ body.who-page{
   height:100%;
   object-fit:cover;
   object-position:8% 0;
+}
+
+.jest-youtube-link{
+  position:absolute;
+  left:50%;
+  bottom:8%;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:84%;
+  min-height:clamp(32px, 4.2vw, 48px);
+  padding:6px 10px;
+  border:2px solid #fff;
+  border-radius:3px;
+  background:#080808;
+  box-shadow:3px 3px 0 rgba(255,255,255,.3);
+  color:#fff;
+  font-family:Arial, Helvetica, sans-serif;
+  font-size:clamp(10px, 1.08vw, 16px);
+  font-weight:800;
+  letter-spacing:.08em;
+  line-height:1.1;
+  text-align:center;
+  text-decoration:none;
+  pointer-events:auto;
+  transform:translateX(-50%) rotate(-1.5deg);
+}
+
+.jest-youtube-link[hidden]{
+  display:none;
+}
+
+.jest-youtube-link:hover,
+.jest-youtube-link:focus-visible{
+  background:#fff;
+  color:#080808;
+}
+
+.jest-youtube-link:focus-visible{
+  outline:3px dashed #fff;
+  outline-offset:4px;
 }
 
 .jest-burn-frame{
@@ -1767,6 +1853,19 @@ body.who-page{
   .who-lens{
     width:54.5%;
   }
+
+  .who-secret-callout{
+    left:10%;
+    top:57%;
+    width:70%;
+    font-size:11px;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .who-secret-callout{
+    transition:none;
+  }
 }
 
 /* =========================================================
@@ -1918,28 +2017,30 @@ body.sticky-note-page{
   opacity:1;
 }
 .sticky-note-submit{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:.35em;
-  min-width:clamp(132px, 8.2vw, 210px);
-  padding:clamp(9px, .7vw, 17px) clamp(15px, 1.15vw, 29px);
-  border:2px solid #17120f;
+  display:block;
+  flex:0 0 auto;
+  width:clamp(132px, 8.2vw, 210px);
+  padding:0;
+  border:0;
   border-radius:0;
-  background:#fff6a7;
-  color:#f10d07;
+  background:transparent;
   cursor:pointer;
-  font:900 clamp(13px, .8vw, 20px)/1 Arial, Helvetica, sans-serif;
-  letter-spacing:.035em;
-  text-shadow:1px 1px 0 #17120f;
-  box-shadow:4px 5px 0 rgba(0,0,0,.68);
-  clip-path:polygon(1% 7%, 98% 0, 100% 91%, 4% 100%);
+  filter:drop-shadow(3px 4px 0 rgba(0,0,0,.36));
   transform:rotate(1.2deg);
+  transition:filter 120ms ease, transform 120ms ease;
+}
+.sticky-note-submit-image{
+  display:block;
+  width:100%;
+  height:auto;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-drag:none;
 }
 .sticky-note-submit:hover,
 .sticky-note-submit:focus-visible{
   outline:none;
-  background:#ffea55;
+  filter:brightness(1.08) drop-shadow(4px 6px 0 rgba(0,0,0,.4));
   transform:translateY(-2px) rotate(-.4deg);
 }
 .sticky-note-submit:disabled{
@@ -2062,9 +2163,7 @@ body.sticky-note-page{
     font-size:10px;
   }
   .sticky-note-submit{
-    min-width:132px;
-    padding:10px 16px;
-    font-size:13px;
+    width:132px;
   }
   .sticky-note-status{
     top:calc(100% + 66px);

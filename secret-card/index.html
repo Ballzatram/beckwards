@@ -6,6 +6,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>B3000 Secret Card - Beckwards</title>
   <meta name="description" content="Enter the four B3000 artifact codes." />
+  <script>
+    (function () {
+      const unlockKey = "beckwardsStickyNoteUnlocked";
+      let persistentUnlock = false;
+      let sessionUnlock = false;
+      try {
+        persistentUnlock = window.localStorage?.getItem(unlockKey) === "true";
+      } catch (_) {}
+      try {
+        sessionUnlock = window.sessionStorage?.getItem(unlockKey) === "true";
+      } catch (_) {}
+      if (!persistentUnlock && sessionUnlock) {
+        try {
+          window.localStorage?.setItem(unlockKey, "true");
+        } catch (_) {}
+      }
+      window.__beckwardsStickyNoteUnlocked = persistentUnlock || sessionUnlock;
+      if (window.__beckwardsStickyNoteUnlocked) {
+        location.replace(location.origin + "/sticky-note" + location.search + location.hash);
+      }
+    })();
+  </script>
   <link rel="icon" type="image/png" href="assets/thumbnails/1.png" />
   <link rel="preload" as="image" href="assets/shared/background.webp" fetchpriority="high" />
   <link rel="stylesheet" href="style.css" />
@@ -21,22 +43,22 @@
       <form class="secret-card-form" data-secret-card-form autocomplete="off">
         <label class="secret-card-slot secret-card-slot--1">
           <span class="visually-hidden">Enter vinyl code 1</span>
-          <input data-secret-code-input type="text" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="9" placeholder=" " spellcheck="false" />
+          <input data-secret-code-input type="text" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="4" placeholder=" " spellcheck="false" />
           <img data-secret-quarter data-src="assets/secret-card-page/assets/quarter%201.webp" alt="" aria-hidden="true" hidden />
         </label>
         <label class="secret-card-slot secret-card-slot--2">
           <span class="visually-hidden">Enter vinyl code 2</span>
-          <input data-secret-code-input type="text" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="9" placeholder=" " spellcheck="false" />
+          <input data-secret-code-input type="text" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="4" placeholder=" " spellcheck="false" />
           <img data-secret-quarter data-src="assets/secret-card-page/assets/quarter%202.webp" alt="" aria-hidden="true" hidden />
         </label>
         <label class="secret-card-slot secret-card-slot--3">
           <span class="visually-hidden">Enter vinyl code 3</span>
-          <input data-secret-code-input type="text" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="9" placeholder=" " spellcheck="false" />
+          <input data-secret-code-input type="text" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="4" placeholder=" " spellcheck="false" />
           <img data-secret-quarter data-src="assets/secret-card-page/assets/quarter%203.webp" alt="" aria-hidden="true" hidden />
         </label>
         <label class="secret-card-slot secret-card-slot--4">
           <span class="visually-hidden">Enter vinyl code 4</span>
-          <input data-secret-code-input type="text" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="9" placeholder=" " spellcheck="false" />
+          <input data-secret-code-input type="text" inputmode="text" autocomplete="off" autocapitalize="characters" maxlength="4" placeholder=" " spellcheck="false" />
           <img data-secret-quarter data-src="assets/secret-card-page/assets/quarter%204.webp" alt="" aria-hidden="true" hidden />
         </label>
       </form>

@@ -49,7 +49,6 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     'quarter_audio_1',
     'claw_open_sfx',
     'claw_close_sfx',
-    'fail',
     'prize_drop'
   ];
   const REWARD_ID_PATTERN = /^cm_reward_/;
@@ -73,7 +72,6 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     bounds: { left: 410, right: 2140 },
     speeds: { move: 640, return: 920, descend: 740, carriedSway: 12 },
     drop: { maxDropLen: 410, closeDelayMs: 260, openDelayMs: 310 },
-    grip: { perfectRadius: 34, grabRadius: 94, maxDepthError: 84 },
     chute: { x: 1264, y: 1168, w: 180, h: 130 }
   };
 
@@ -177,6 +175,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
       clawClosed: false,
       clawGrip: 0,
       mode: 'READY',
+      dropTarget: null,
       heldPrize: null,
       prizes: makePrizeField(),
       attempts: 0,
@@ -579,6 +578,47 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     return !finished && (state.mode === 'READY' || state.mode === 'MOVING');
   }
 
+  function availablePrizes(){
+    return state.prizes.filter(prize => !prize.grabbed && !prize.collected);
+  }
+
+  function repopulatePrizeField(){
+    state.prizes = makePrizeField();
+
+    // The normal field generator always returns prizes, but keep one directly
+    // under the carriage as a final safeguard if its configuration changes.
+    if (!state.prizes.length && PRIZE_TYPES.length){
+      const type = PRIZE_TYPES[0];
+      state.prizes.push(makePrize(0, type, state.carriageX - type.width / 2, 980));
+    }
+
+    return availablePrizes();
+  }
+
+  function selectNearestPrize(){
+    let prizes = availablePrizes();
+    if (!prizes.length) prizes = repopulatePrizeField();
+
+    let closest = prizes[0] || null;
+    let closestDx = Infinity;
+    for (const prize of prizes){
+      const dx = Math.abs((prize.x + prize.width / 2) - state.carriageX);
+      if (dx < closestDx){
+        closest = prize;
+        closestDx = dx;
+      }
+    }
+
+    state.dropTarget = closest;
+    return closest;
+  }
+
+  function retainedDropPrize(){
+    const target = state.dropTarget;
+    if (target && state.prizes.includes(target) && !target.grabbed && !target.collected) return target;
+    return selectNearestPrize();
+  }
+
   const CTRL = {
     mode(){
       return state.mode;
@@ -618,7 +658,8 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
       state.clawGrip = 0;
       state.grabResolved = false;
       state.prizeDelivered = false;
-      state.targetY = chooseDropDepth();
+      state.dropTarget = null;
+      state.targetY = chooseDropDepth(selectNearestPrize());
       state.attempts += 1;
       state.message = '';
       state.subMessage = '';
@@ -633,55 +674,20 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
   };
   window.GAME = CTRL;
 
-  function chooseDropDepth(){
-    let closest = null;
-    let closestDx = Infinity;
-    for (const prize of state.prizes){
-      if (prize.grabbed || prize.collected) continue;
-      const dx = Math.abs((prize.x + prize.width / 2) - state.carriageX);
-      if (dx < cfg.grip.grabRadius + 42 && dx < closestDx){
-        closest = prize;
-        closestDx = dx;
-      }
-    }
-
-    if (!closest) return cfg.drop.maxDropLen;
-    return clamp(closest.y + closest.height * 0.52 - CLAW_TIP_Y, 150, cfg.drop.maxDropLen);
+  function chooseDropDepth(target){
+    if (!target) return cfg.drop.maxDropLen;
+    return clamp(target.y + target.height * 0.52 - CLAW_TIP_Y, 150, cfg.drop.maxDropLen);
   }
 
   function tryGrabPrize(){
-    let target = null;
-    let bestScore = -Infinity;
-    const clawX = state.carriageX;
-    const clawY = CLAW_TIP_Y + state.dropLen;
-    for (const prize of state.prizes){
-      if (prize.grabbed || prize.collected) continue;
-      const centerX = prize.x + prize.width / 2;
-      const centerY = prize.y + prize.height / 2;
-      const dx = Math.abs(centerX - clawX);
-      const dy = Math.abs(centerY - clawY);
-      if (dx > cfg.grip.grabRadius || dy > cfg.grip.maxDepthError) continue;
-
-      const accuracy = 1 - clamp(dx / cfg.grip.grabRadius, 0, 1);
-      const depth = 1 - clamp(dy / cfg.grip.maxDepthError, 0, 1);
-      const pickup = accuracy * 0.7 + depth * 0.3 + prize.grip * 0.2;
-      if (pickup > bestScore){
-        bestScore = pickup;
-        target = prize;
-      }
-    }
-
-    if (!target || bestScore < 0.48){
-      state.shake = 0.18;
-      play('fail', 0.35);
-      announce('MISSED', 'WAIT FOR THE CLAW', 0.8);
-      return;
-    }
+    const target = retainedDropPrize();
+    if (!target) return null;
 
     target.grabbed = true;
     state.heldPrize = target;
     play('claw_close_sfx', 0.58);
     spawnParticles(target.x + target.width / 2, target.y + target.height / 2, 'rgb(249,244,216)', 10);
+    return target;
   }
 
   function deliverPrize(){
@@ -692,6 +698,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     prize.x = cfg.chute.x + 16;
     prize.y = cfg.chute.y - 54;
     state.heldPrize = null;
+    state.dropTarget = null;
     state.catches += 1;
     state.flash = 0.35;
     play('prize_drop', 0.55);
@@ -772,8 +779,8 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
       startReturnPhase(endedAt, false);
     } else if (mode === 'RETURNING'){
       state.dropLen = 0;
-      if (state.heldPrize) startDeliverPhase(endedAt, false);
-      else finishAttempt('MISSED', 'INSERT COIN TO RETRY');
+      if (!state.heldPrize) tryGrabPrize();
+      startDeliverPhase(endedAt, false);
       updateMotorByState();
     } else if (mode === 'DELIVERING'){
       state.carriageX = cfg.chute.x;

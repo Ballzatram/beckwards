@@ -9,7 +9,7 @@
   const quarters = slots.map((slot) => slot?.querySelector('[data-secret-quarter]'));
   const audio = Array.from(page.querySelectorAll('[data-secret-card-audio]'));
   const unlockKey = 'beckwardsStickyNoteUnlocked';
-  const validCodes = ['CMBWB301', 'CMBWB302', 'CMBWB303', 'CMBWB3014'];
+  const validCodes = ['B301', 'B302', 'B303', 'B304'];
   const usedCodes = new Set();
   let redirectTimer = null;
 
@@ -38,13 +38,16 @@
 
   const completeCard = () => {
     try {
+      window.localStorage?.setItem(unlockKey, 'true');
+    } catch (_) {}
+    try {
       window.sessionStorage?.setItem(unlockKey, 'true');
     } catch (_) {}
     document.body.classList.add('is-complete');
     setStatus('All four codes accepted. Opening the next page.');
     window.clearTimeout(redirectTimer);
     redirectTimer = window.setTimeout(() => {
-      window.location.href = '/sticky-note';
+      window.location.replace('/sticky-note');
     }, 900);
   };
 
@@ -86,8 +89,7 @@
       return;
     }
 
-    const canStillMatch = validCodes.some((code) => code.startsWith(value));
-    if (force || value.length >= 9 || (value.length >= 8 && !canStillMatch)) {
+    if (force || value.length >= 4) {
       shakeSlot(slot, 'Try another code');
       input.select();
     }

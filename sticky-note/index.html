@@ -8,11 +8,22 @@
   <meta name="description" content="Send Beckwards a custom sticky note request." />
   <script>
     (function () {
-      let unlocked = false;
+      const unlockKey = "beckwardsStickyNoteUnlocked";
+      let persistentUnlock = false;
+      let sessionUnlock = false;
       try {
-        unlocked = window.sessionStorage?.getItem("beckwardsStickyNoteUnlocked") === "true";
+        persistentUnlock = window.localStorage?.getItem(unlockKey) === "true";
       } catch (_) {}
-      if (!unlocked) {
+      try {
+        sessionUnlock = window.sessionStorage?.getItem(unlockKey) === "true";
+      } catch (_) {}
+      if (!persistentUnlock && sessionUnlock) {
+        try {
+          window.localStorage?.setItem(unlockKey, "true");
+        } catch (_) {}
+      }
+      window.__beckwardsStickyNoteUnlocked = persistentUnlock || sessionUnlock;
+      if (!window.__beckwardsStickyNoteUnlocked) {
         location.replace(location.origin + "/" + location.search + location.hash);
       }
     })();
@@ -48,7 +59,8 @@
         <div class="sticky-note-controls">
           <span class="sticky-note-count" data-sticky-note-count>0/45 WORDS</span>
           <button class="sticky-note-submit" data-sticky-note-submit type="submit">
-            <span data-sticky-note-submit-label>SEND NOTE</span><span aria-hidden="true">→</span>
+            <img class="sticky-note-submit-image" src="assets/sticky-note-page/Send%20button.png" width="160" height="65" alt="" aria-hidden="true" />
+            <span class="visually-hidden" data-sticky-note-submit-label>SEND NOTE</span>
           </button>
         </div>
         <p class="sticky-note-status" data-sticky-note-status role="status" aria-live="polite"></p>
