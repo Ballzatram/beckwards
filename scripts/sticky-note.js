@@ -108,7 +108,7 @@
       setStatus('NOTE SENT. THANK YOU.');
     } catch (_) {
       setEmailFallback(true);
-      setStatus('DIRECT SEND BLOCKED. TAP OPEN EMAIL.');
+      setStatus('DIRECT SEND BLOCKED. TAP SEND TO OPEN EMAIL.');
     } finally {
       if (submitButton) {
         submitButton.disabled = false;

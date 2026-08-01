@@ -29,7 +29,7 @@
       <img class="who-piece who-piece--photo who-piece--photo-left" src="assets/who-is-b3/picture%203.png" alt="B3000 robot portrait" />
       <img class="who-piece who-piece--photo who-piece--photo-bottom" src="assets/who-is-b3/picture%202.png" alt="B3000 robot in front of hills" />
       <img class="who-piece who-piece--photo who-piece--photo-right" src="assets/who-is-b3/picture%201.png" alt="B3000 robot standing beside Becket" />
-      <img class="who-piece who-piece--note" src="assets/who-is-b3/note.png" alt="Who is B3000? handwritten note by Becket" />
+      <img class="who-piece who-piece--note" src="assets/who-is-b3/updated%20Who%20is%20B3000.png" alt="Who is B3000? handwritten note by Becket" />
     </div>
 
     <a class="who-home-link" href="/" aria-label="Home">
@@ -41,6 +41,7 @@
         <div class="who-lens-content" data-who-lens-content></div>
       </div>
       <img class="who-magnifier__image" src="assets/who-is-b3/magnifying%20glass.png" alt="" aria-hidden="true" />
+      <span class="who-secret-callout">OPEN INFINITE JEST SECRET PAGE</span>
     </div>
   </main>
 
@@ -101,8 +102,8 @@
         magnifier.classList.toggle('is-reveal-active', active);
         magnifier.setAttribute('aria-disabled', active ? 'false' : 'true');
         if (active) {
-          magnifier.setAttribute('aria-label', 'Open the hidden Infinite Jest page');
-          magnifier.title = 'Open hidden Infinite Jest page';
+          magnifier.setAttribute('aria-label', 'Open Infinite Jest secret page');
+          magnifier.title = 'Open Infinite Jest secret page';
           return;
         }
         magnifier.setAttribute('aria-label', unlocked ? 'Drag the magnifying glass back over the hidden writing to open the Infinite Jest page' : 'Drag the magnifying glass to magnify the page and reveal hidden writing');
