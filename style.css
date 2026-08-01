@@ -2048,7 +2048,7 @@ body.sticky-note-page{
 .sticky-note-status{
   position:absolute;
   right:0;
-  top:calc(100% + clamp(88px, 5vw, 118px));
+  top:calc(100% + 20px);
   z-index:5;
   width:100%;
   margin:0;
@@ -2159,7 +2159,6 @@ body.sticky-note-page{
     width:132px;
   }
   .sticky-note-status{
-    top:calc(100% + 86px);
     font-size:11px;
   }
   .sticky-example--draw-label{
