@@ -28,7 +28,18 @@
     overflow:hidden;
     background:#2d2d2a;
     isolation:isolate;
-    touch-action:none;
+    touch-action:manipulation;
+  }
+  .arcade-scene::before{
+    content:"";
+    position:absolute;
+    inset:-28px;
+    z-index:0;
+    display:none;
+    background:url("assets/claw-machine/background.webp") center/cover no-repeat;
+    filter:blur(18px) brightness(.22) saturate(.8);
+    transform:scale(1.06);
+    pointer-events:none;
   }
   .arcade-frame{
     position:absolute;
@@ -38,6 +49,7 @@
     aspect-ratio:16 / 9;
     transform:translate(-50%, -50%);
     transform-origin:center;
+    z-index:1;
   }
   .arcade-bg,
   .arcade-prize-strip,
@@ -101,6 +113,14 @@
     text-indent:-999px;
     overflow:hidden;
   }
+  .arcade-brand-hit:focus-visible,
+  .arcade-handle-zone:focus-visible,
+  .arcade-button:focus-visible,
+  .arcade-coin-slot:focus-visible,
+  .arcade-mobile-drop:focus-visible{
+    outline:3px solid #ff311f;
+    outline-offset:4px;
+  }
   .arcade-status{
     position:absolute;
     left:50%;
@@ -131,6 +151,20 @@
     z-index:7;
     cursor:grab;
     touch-action:none;
+    outline:none;
+  }
+  .arcade-handle-zone::before,
+  .arcade-button::before,
+  .arcade-coin-slot::before{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:100%;
+    height:100%;
+    min-width:44px;
+    min-height:44px;
+    transform:translate(-50%, -50%);
   }
   .arcade-handle-zone:active{
     cursor:grabbing;
@@ -158,12 +192,6 @@
     cursor:pointer;
     touch-action:manipulation;
     filter:drop-shadow(0 3px 2px rgba(0,0,0,.7));
-  }
-  .arcade-button::before,
-  .arcade-coin-slot::before{
-    content:"";
-    position:absolute;
-    inset:-90%;
   }
   .arcade-button img{
     display:block;
@@ -234,6 +262,9 @@
     white-space:nowrap;
     border:0;
   }
+  .arcade-mobile-controls{
+    display:none;
+  }
   @keyframes arcadeBlink{
     0%,49%{ opacity:1; }
     50%,100%{ opacity:.35; }
@@ -252,24 +283,208 @@
       width:calc(100vh * 16 / 9);
     }
   }
-  @media (max-width:820px){
-    .arcade-frame{
-      width:max(128vw, calc(100vh * 16 / 9));
+  @media (max-width:820px) and (orientation:portrait){
+    .arcade-scene{
+      --arcade-mobile-frame-height:min(135vw, calc(100dvh - 190px));
+      --arcade-mobile-panel-height:161px;
+      --arcade-mobile-group-top:max(
+        env(safe-area-inset-top),
+        calc((100dvh - var(--arcade-mobile-frame-height) - var(--arcade-mobile-panel-height) - 18px) / 2)
+      );
     }
-    .arcade-status{
-      font-size:12px;
+    .arcade-scene::before{
+      display:block;
+    }
+    .arcade-frame{
+      left:50%;
+      top:var(--arcade-mobile-group-top);
+      width:calc(var(--arcade-mobile-frame-height) * 16 / 9);
+      transform:translateX(-50%);
+    }
+    .arcade-frame > .arcade-handle-zone,
+    .arcade-frame > .arcade-button{
+      visibility:hidden;
+      pointer-events:none;
+    }
+    .arcade-frame > .arcade-coin-slot{
+      pointer-events:none !important;
+    }
+    .arcade-frame > .arcade-status{
+      display:none;
+    }
+    .arcade-mobile-controls{
+      position:absolute;
+      left:50%;
+      top:calc(var(--arcade-mobile-group-top) + var(--arcade-mobile-frame-height) + 18px);
+      bottom:auto;
+      z-index:20;
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) 94px;
+      grid-template-rows:1fr auto;
+      gap:8px 14px;
+      width:min(92vw, 440px);
+      height:var(--arcade-mobile-panel-height);
+      min-height:0;
+      padding:12px 14px 10px;
+      border:2px solid #090504;
+      border-radius:8px;
+      background:
+        linear-gradient(180deg, rgba(116,42,27,.98), rgba(39,13,10,.98)),
+        #35120e;
+      box-shadow:
+        5px 6px 0 rgba(0,0,0,.82),
+        inset 0 0 0 2px rgba(179,84,47,.48),
+        inset 0 -18px 34px rgba(0,0,0,.34);
+      color:#ff311f;
+      transform:translateX(-50%);
+    }
+    .arcade-mobile-move{
+      min-width:0;
+    }
+    .arcade-mobile-label{
+      display:block;
+      margin:0 0 5px;
+      color:#ff311f;
+      font:900 12px/1 "Courier New", monospace;
+      letter-spacing:.12em;
+      text-align:center;
+      text-shadow:0 2px 0 #000;
+    }
+    .arcade-mobile-gate{
+      position:relative;
+      width:100%;
+      height:82px;
+      border:1px solid #120706;
+      border-radius:5px;
+      background:linear-gradient(180deg, #160a08, #31130f 56%, #090504);
+      box-shadow:inset 0 3px 8px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.08);
+      cursor:grab;
+      touch-action:none;
+      outline:none;
+    }
+    .arcade-mobile-gate::before{
+      content:"";
+      position:absolute;
+      left:12%;
+      right:12%;
+      bottom:14px;
+      height:10px;
+      border:1px solid #0b0504;
+      border-radius:999px;
+      background:#050303;
+      box-shadow:inset 0 2px 3px #000, 0 1px 0 rgba(255,255,255,.08);
+    }
+    .arcade-mobile-gate:active{
+      cursor:grabbing;
+    }
+    .arcade-mobile-gate:focus-visible{
+      outline:3px solid #ff311f;
+      outline-offset:3px;
+    }
+    .arcade-mobile-handle{
+      position:absolute;
+      left:50%;
+      bottom:5px;
+      z-index:2;
+      display:block;
+      width:38px;
+      height:auto;
+      transform:translateX(calc(-50% + var(--joy-x, 0px)));
+      filter:drop-shadow(0 4px 2px rgba(0,0,0,.72));
+      pointer-events:none;
+      user-select:none;
+      -webkit-user-drag:none;
+    }
+    .arcade-mobile-drop{
+      align-self:stretch;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      min-width:88px;
+      min-height:112px;
+      padding:0 5px 8px;
+      border:0;
+      border-radius:5px;
+      background:linear-gradient(180deg, rgba(19,8,6,.8), rgba(7,3,3,.92));
+      color:#ff311f;
+      cursor:pointer;
+      touch-action:manipulation;
+    }
+    .arcade-mobile-drop .arcade-mobile-label{
+      margin:7px 0 11px;
+    }
+    .arcade-mobile-drop-art{
+      position:relative;
+      display:grid;
+      place-items:center;
+      width:66px;
+      min-height:44px;
+    }
+    .arcade-mobile-drop img{
+      display:block;
+      width:66px;
+      height:auto;
+      filter:drop-shadow(0 4px 2px rgba(0,0,0,.75));
+      pointer-events:none;
+      user-select:none;
+      -webkit-user-drag:none;
+    }
+    .arcade-mobile-drop .arcade-button__pressed{
+      display:none;
+    }
+    .arcade-mobile-drop.is-pressed .arcade-button__idle{
+      display:none;
+    }
+    .arcade-mobile-drop.is-pressed .arcade-button__pressed{
+      display:block;
+      transform:translateY(4px);
+    }
+    .arcade-mobile-status{
+      grid-column:1 / -1;
+      min-height:15px;
+      margin:0;
+      color:#ff311f;
+      font:900 12px/1.2 "Courier New", monospace;
+      letter-spacing:.1em;
+      text-align:center;
+      text-shadow:0 2px 0 #000;
+    }
+    .arcade-mobile-status:empty::after{
+      content:"SLIDE TO AIM · TAP TO DROP";
+      opacity:.82;
+    }
+    .arcade-mobile-controls.is-coin-ready .arcade-mobile-status:empty::after{
+      content:"TAP RETRY FOR ANOTHER PRIZE";
     }
   }
-  @media (max-width:480px){
+  @media (max-width:820px) and (orientation:landscape){
     .arcade-frame{
-      left:52%;
-      width:max(190vw, calc(100vh * 16 / 9));
+      left:50%;
+      width:min(100vw, calc(100dvh * 16 / 9));
     }
-    .arcade-button{
-      width:3.75%;
+    .arcade-status{
+      left:60%;
+      background:rgba(0,0,0,.55);
     }
-    .arcade-handle-zone{
-      width:5.9%;
+  }
+  @media (max-width:380px) and (orientation:portrait){
+    .arcade-scene{
+      --arcade-mobile-panel-height:150px;
+    }
+    .arcade-mobile-controls{
+      grid-template-columns:minmax(0, 1fr) 88px;
+      gap:7px 10px;
+      width:94vw;
+      min-height:142px;
+      padding:10px 11px 8px;
+    }
+    .arcade-mobile-gate{
+      height:78px;
+    }
+    .arcade-mobile-drop{
+      min-width:82px;
+      min-height:106px;
     }
   }
   @media (prefers-reduced-motion: reduce){
@@ -303,16 +518,33 @@
       </div>
       <img class="arcade-front" src="assets/claw-machine/front%20layer.webp" alt="" aria-hidden="true" />
       <p class="arcade-status" id="arcade-status" role="status" aria-live="polite">ONE TRY</p>
-      <div class="arcade-control arcade-handle-zone" id="gate" aria-label="Joystick area">
-        <img class="arcade-handle" id="joy" src="assets/claw-machine/handle.png" alt="Joystick" role="slider" aria-valuemin="-1" aria-valuemax="1" aria-valuenow="0" />
+      <div class="arcade-control arcade-handle-zone" id="gate" data-arcade-joystick role="slider" tabindex="0" aria-label="Move claw left or right" aria-orientation="horizontal" aria-valuemin="-1" aria-valuemax="1" aria-valuenow="0" aria-valuetext="Centered">
+        <img class="arcade-handle" id="joy" data-arcade-knob src="assets/claw-machine/handle.png" alt="" aria-hidden="true" />
       </div>
-      <button type="button" class="arcade-control arcade-button" id="btn-drop" aria-label="Drop claw">
+      <button type="button" class="arcade-control arcade-button" id="btn-drop" data-arcade-drop aria-label="Drop claw">
         <img class="arcade-button__idle" src="assets/claw-machine/button%20unpressed.png" alt="" aria-hidden="true" />
         <img class="arcade-button__pressed" src="assets/claw-machine/button%20pressed.png" alt="" aria-hidden="true" />
       </button>
       <span class="arcade-coin-mouth" id="coin-mouth" aria-hidden="true"></span>
       <button type="button" class="arcade-control arcade-coin-slot" id="coin-slot" aria-label="Insert coin to retry" disabled></button>
     </div>
+
+    <section class="arcade-mobile-controls" data-arcade-mobile-controls aria-label="Claw machine controls">
+      <div class="arcade-mobile-move">
+        <span class="arcade-mobile-label" id="arcade-mobile-move-label">MOVE</span>
+        <div class="arcade-mobile-gate" data-arcade-joystick role="slider" tabindex="0" aria-labelledby="arcade-mobile-move-label" aria-orientation="horizontal" aria-valuemin="-1" aria-valuemax="1" aria-valuenow="0" aria-valuetext="Centered">
+          <img class="arcade-mobile-handle" data-arcade-knob src="assets/claw-machine/handle.png" alt="" aria-hidden="true" />
+        </div>
+      </div>
+      <button type="button" class="arcade-mobile-drop" data-arcade-drop aria-label="Drop claw">
+        <span class="arcade-mobile-label" data-arcade-mobile-action>DROP</span>
+        <span class="arcade-mobile-drop-art" aria-hidden="true">
+          <img class="arcade-button__idle" src="assets/claw-machine/button%20unpressed.png" alt="" />
+          <img class="arcade-button__pressed" src="assets/claw-machine/button%20pressed.png" alt="" />
+        </span>
+      </button>
+      <p class="arcade-mobile-status" data-arcade-status role="status" aria-live="polite"></p>
+    </section>
   </main>
 
   <div class="reward-modal" id="reward-modal" role="dialog" aria-modal="true" aria-label="Your reward" hidden>

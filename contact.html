@@ -99,6 +99,7 @@
 
       const copyEmail = async (tab) => {
         if (tab.dataset.copied === 'true') return;
+        const shouldMoveFocus = document.activeElement === tab;
         tab.dataset.copied = 'true';
         tab.classList.remove('is-dragging');
         tab.classList.add('is-removed');
@@ -107,6 +108,10 @@
         tab.style.pointerEvents = 'none';
         tab.tabIndex = -1;
         tab.setAttribute('aria-hidden', 'true');
+        if (shouldMoveFocus) {
+          const nextTab = tabs.find((candidate) => candidate !== tab && candidate.dataset.copied !== 'true');
+          nextTab?.focus({ preventScroll:true });
+        }
         playTearSound();
         try {
           if (navigator.clipboard?.writeText) {
@@ -148,10 +153,17 @@
           const pointerId = event.pointerId;
           const startX = event.clientX;
           const startY = event.clientY;
+          let lastX = startX;
+          let lastY = startY;
           const tabRect = tab.getBoundingClientRect();
           const offsetX = event.clientX - (tabRect.left + tabRect.width / 2);
           const offsetY = event.clientY - (tabRect.top + tabRect.height / 2);
-          const threshold = window.matchMedia('(max-width: 640px)').matches ? 96 : 140;
+          const threshold = window.matchMedia('(pointer: coarse)').matches ? 84 : window.matchMedia('(max-width: 640px)').matches ? 96 : 140;
+
+          const restoreTabPosition = () => {
+            if (tab.dataset.copied === 'true') return;
+            ['left', 'top', 'right', 'bottom'].forEach((property) => tab.style.removeProperty(property));
+          };
 
           tab.classList.add('is-dragging');
           tab.setPointerCapture?.(pointerId);
@@ -159,6 +171,8 @@
 
           const moveTab = (moveEvent) => {
             if (moveEvent.pointerId !== pointerId) return;
+            lastX = moveEvent.clientX;
+            lastY = moveEvent.clientY;
             const nextX = moveEvent.clientX - offsetX;
             const nextY = moveEvent.clientY - offsetY;
             setTabPosition(tab, nextX, nextY);
@@ -171,11 +185,16 @@
 
           const endDrag = (upEvent) => {
             if (upEvent.pointerId !== pointerId) return;
-            tab.releasePointerCapture?.(pointerId);
+            lastX = upEvent.clientX;
+            lastY = upEvent.clientY;
+            try { tab.releasePointerCapture?.(pointerId); } catch (_) {}
             tab.removeEventListener('pointermove', moveTab);
             tab.removeEventListener('pointerup', endDrag);
             tab.removeEventListener('pointercancel', cancelDrag);
             tab.classList.remove('is-dragging');
+            const distance = Math.hypot(lastX - startX, lastY - startY);
+            if (distance < 10) copyEmail(tab);
+            else if (distance < threshold) restoreTabPosition();
           };
 
           const cancelDrag = () => {
@@ -183,6 +202,8 @@
             tab.removeEventListener('pointerup', endDrag);
             tab.removeEventListener('pointercancel', cancelDrag);
             tab.classList.remove('is-dragging');
+            try { tab.releasePointerCapture?.(pointerId); } catch (_) {}
+            restoreTabPosition();
           };
 
           tab.addEventListener('pointermove', moveTab);
