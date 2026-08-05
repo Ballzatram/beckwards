@@ -6,11 +6,13 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
 
 (function(){
   const stage = document.getElementById('stage');
-  const status = document.getElementById('arcade-status');
+  const statuses = Array.from(document.querySelectorAll('[data-arcade-status], #arcade-status'));
   const coinSlot = document.getElementById('coin-slot');
   const coinMouth = document.getElementById('coin-mouth');
   const frame = document.getElementById('arcade-frame');
-  const dropButton = document.getElementById('btn-drop');
+  const dropButtons = Array.from(document.querySelectorAll('[data-arcade-drop]'));
+  const mobileControls = document.querySelector('[data-arcade-mobile-controls]');
+  const mobileActionLabels = Array.from(document.querySelectorAll('[data-arcade-mobile-action]'));
   const rewardModal = document.getElementById('reward-modal');
   const rewardPanel = document.getElementById('reward-panel');
   const rewardLink = document.getElementById('reward-link');
@@ -74,6 +76,19 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     drop: { maxDropLen: 410, closeDelayMs: 260, openDelayMs: 310 },
     chute: { x: 1264, y: 1168, w: 180, h: 130 }
   };
+
+  function movementBounds(){
+    const portraitPhone = window.matchMedia('(max-width: 820px) and (orientation: portrait)').matches;
+    const frameWidth = frame?.getBoundingClientRect().width || 0;
+    if (!portraitPhone || !frameWidth) return cfg.bounds;
+
+    const visibleWorldWidth = BASE_W * Math.min(1, window.innerWidth / frameWidth);
+    const edgeComfort = Math.min(140, visibleWorldWidth * 0.12);
+    return {
+      left:Math.max(cfg.bounds.left, (BASE_W - visibleWorldWidth) / 2 + edgeComfort),
+      right:Math.min(cfg.bounds.right, (BASE_W + visibleWorldWidth) / 2 - edgeComfort)
+    };
+  }
 
   function clamp(n, min, max){
     return Math.max(min, Math.min(max, n));
@@ -297,23 +312,41 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
   }
 
   function setStatus(text, done = false){
-    if (!status) return;
     const nextText = String(text || '');
     const nextDone = !!done;
     if (statusText === nextText && statusDone === nextDone) return;
     statusText = nextText;
     statusDone = nextDone;
-    status.textContent = nextText;
-    status.classList.toggle('is-done', nextDone);
+    statuses.forEach((status) => {
+      status.textContent = nextText;
+      status.classList.toggle('is-done', nextDone);
+    });
+  }
+
+  function syncCoinSlotAvailability(){
+    if (!coinSlot) return;
+    const usesSeparateMobileControls = window.matchMedia('(max-width: 820px) and (orientation: portrait)').matches;
+    const available = !!coinReady && !usesSeparateMobileControls;
+    coinSlot.disabled = !available;
+    coinSlot.tabIndex = available ? 0 : -1;
+    coinSlot.setAttribute('aria-disabled', String(!available));
   }
 
   function setCoinReady(ready){
     const nextReady = !!ready;
-    if (coinReady === nextReady) return;
+    if (coinReady === nextReady) {
+      syncCoinSlotAvailability();
+      return;
+    }
     coinReady = nextReady;
-    if (!coinSlot) return;
-    coinSlot.disabled = !nextReady;
-    coinSlot.setAttribute('aria-disabled', String(!nextReady));
+    syncCoinSlotAvailability();
+    mobileControls?.classList.toggle('is-coin-ready', nextReady);
+    mobileActionLabels.forEach((label) => {
+      label.textContent = nextReady ? 'RETRY' : 'DROP';
+    });
+    dropButtons.forEach((button) => {
+      button.setAttribute('aria-label', nextReady ? 'Insert coin to retry' : 'Drop claw');
+    });
   }
 
   function play(id, volume = 0.5){
@@ -347,7 +380,8 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     const isMobile = window.matchMedia('(max-width: 620px)').matches;
     const viewportW = window.innerWidth;
     const coinMaxW = isMobile ? 54 : 82;
-    const coinCount = isMobile ? 42 : 72;
+    const isShort = window.matchMedia('(max-height: 480px)').matches;
+    const coinCount = isShort ? 18 : isMobile ? 24 : 72;
     const maxX = Math.max(0, viewportW - coinMaxW);
     const minDrift = isMobile ? -44 : -110;
     const maxDrift = isMobile ? 44 : 110;
@@ -482,8 +516,10 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     const nextPressed = !!pressed;
     if (dropPressed === nextPressed) return;
     dropPressed = nextPressed;
-    dropButton?.classList.toggle('is-pressed', nextPressed);
-    dropButton?.setAttribute('aria-pressed', String(nextPressed));
+    dropButtons.forEach((button) => {
+      button.classList.toggle('is-pressed', nextPressed);
+      button.setAttribute('aria-pressed', String(nextPressed));
+    });
   }
 
   function updateDropButtonByState(){
@@ -819,8 +855,9 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     if (canMove() && state.vx !== 0){
       const prevX = state.carriageX;
       const manualDelta = clamp(state.vx * cfg.speeds.move * dt, -52, 52);
-      state.carriageX = clamp(state.carriageX + manualDelta, cfg.bounds.left, cfg.bounds.right);
-      if (prevX === state.carriageX && (state.carriageX === cfg.bounds.left || state.carriageX === cfg.bounds.right)){
+      const bounds = movementBounds();
+      state.carriageX = clamp(state.carriageX + manualDelta, bounds.left, bounds.right);
+      if (prevX === state.carriageX && (state.carriageX === bounds.left || state.carriageX === bounds.right)){
         state.vx = 0;
         state.mode = 'READY';
         updateMotorByState();
@@ -908,6 +945,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
       e.preventDefault();
       CTRL.moveRight();
     } else if (e.key === ' ' || e.key === 'Enter' || key === 's'){
+      if (e.target instanceof Element && e.target.closest('[data-arcade-drop]')) return;
       e.preventDefault();
       if (coinReady) {
         insertCoin();
@@ -928,6 +966,11 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
 
   function onResize(){
     renderer.resizeTo();
+    syncCoinSlotAvailability();
+    const bounds = movementBounds();
+    if (state.mode === 'READY' || state.mode === 'MOVING') {
+      state.carriageX = clamp(state.carriageX, bounds.left, bounds.right);
+    }
     drawOnce();
   }
   window.addEventListener('resize', onResize);

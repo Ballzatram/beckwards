@@ -36,7 +36,7 @@
       <img src="assets/who-is-b3/house%20drawing/house%20drawing.png" alt="" aria-hidden="true" />
     </a>
 
-    <div class="who-magnifier" data-who-magnifier role="button" tabindex="0" aria-disabled="true" aria-label="Drag the magnifying glass to magnify the page and reveal hidden writing">
+    <div class="who-magnifier" data-who-magnifier role="button" tabindex="0" aria-label="Drag the magnifying glass to magnify the page and reveal hidden writing">
       <div class="who-lens" data-who-lens aria-hidden="true">
         <div class="who-lens-content" data-who-lens-content></div>
       </div>
@@ -64,9 +64,12 @@
       let dragOffsetY = 0;
       let centerX = 0;
       let centerY = 0;
+      let centerRatioX = 0;
+      let centerRatioY = 0;
       let pointerStartX = 0;
       let pointerStartY = 0;
       let dragged = false;
+      let initialized = false;
 
       const clone = art.cloneNode(true);
       clone.removeAttribute('data-who-art');
@@ -100,7 +103,6 @@
       const setRevealActive = (active) => {
         revealActive = active;
         magnifier.classList.toggle('is-reveal-active', active);
-        magnifier.setAttribute('aria-disabled', active ? 'false' : 'true');
         if (active) {
           magnifier.setAttribute('aria-label', 'Open secret page');
           magnifier.title = 'Open secret page';
@@ -139,6 +141,8 @@
         const rect = magnifier.getBoundingClientRect();
         centerX = rect.left + rect.width / 2 - sceneRect.left;
         centerY = rect.top + rect.height / 2 - sceneRect.top;
+        centerRatioX = sceneRect.width ? centerX / sceneRect.width : 0;
+        centerRatioY = sceneRect.height ? centerY / sceneRect.height : 0;
       };
 
       const updateLens = () => {
@@ -159,12 +163,15 @@
         const marginY = rect.height * 0.18;
         centerX = clamp(x, -marginX, sceneRect.width + marginX);
         centerY = clamp(y, -marginY, sceneRect.height + marginY);
+        centerRatioX = sceneRect.width ? centerX / sceneRect.width : 0;
+        centerRatioY = sceneRect.height ? centerY / sceneRect.height : 0;
         magnifier.style.left = `${centerX}px`;
         magnifier.style.top = `${centerY}px`;
         updateLens();
       };
 
       const startDrag = (event) => {
+        if (event.isPrimary === false || (event.button !== undefined && event.button !== 0)) return;
         event.preventDefault();
         readCenter();
         pointerStartX = event.clientX;
@@ -173,7 +180,7 @@
         dragOffsetX = event.clientX - (sceneRect.left + centerX);
         dragOffsetY = event.clientY - (sceneRect.top + centerY);
         magnifier.classList.add('is-dragging');
-        magnifier.setPointerCapture?.(event.pointerId);
+        try { magnifier.setPointerCapture?.(event.pointerId); } catch (_) {}
         magnifier.focus?.({ preventScroll: true });
       };
 
@@ -189,7 +196,9 @@
       const stopDrag = (event) => {
         const shouldActivate = event?.type === 'pointerup' && !dragged && unlocked && revealActive;
         magnifier.classList.remove('is-dragging');
-        if (event?.pointerId != null) magnifier.releasePointerCapture?.(event.pointerId);
+        if (event?.pointerId != null) {
+          try { magnifier.releasePointerCapture?.(event.pointerId); } catch (_) {}
+        }
         if (shouldActivate) openSecretPage();
       };
 
@@ -223,13 +232,26 @@
       });
 
       window.addEventListener('resize', () => {
-        readCenter();
-        setCenter(centerX, centerY);
+        if (!initialized) return;
+        const xRatio = centerRatioX;
+        const yRatio = centerRatioY;
+        requestAnimationFrame(() => {
+          sceneRect = scene.getBoundingClientRect();
+          let nextX = sceneRect.width * xRatio;
+          let nextY = sceneRect.height * yRatio;
+          if (window.matchMedia('(orientation: landscape) and (max-height: 520px)').matches) {
+            const rect = magnifier.getBoundingClientRect();
+            nextX = clamp(nextX, rect.width / 2, sceneRect.width - rect.width / 2);
+            nextY = clamp(nextY, rect.height / 2, sceneRect.height - rect.height / 2);
+          }
+          setCenter(nextX, nextY);
+        });
       });
 
       requestAnimationFrame(() => {
         if (hasSessionUnlock()) setUnlocked();
         readCenter();
+        initialized = true;
         setCenter(centerX, centerY);
       });
     })();

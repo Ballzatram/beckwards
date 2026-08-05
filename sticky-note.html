@@ -54,14 +54,14 @@
         <img class="sticky-type-prompt" src="assets/sticky-note-page/Assets%20Option%201/type%20here.png" alt="" aria-hidden="true" />
         <label class="visually-hidden" for="sticky-note-message">Sticky note message</label>
         <input class="sticky-note-honey" data-sticky-note-honey type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" />
-        <input id="sticky-note-message" class="sticky-note-input" data-sticky-note-message type="text" name="message" autocomplete="off" maxlength="180" placeholder=" " spellcheck="true" />
+        <input id="sticky-note-message" class="sticky-note-input" data-sticky-note-message type="text" name="message" autocomplete="off" maxlength="180" placeholder=" " spellcheck="true" aria-describedby="sticky-note-count sticky-note-status" />
         <div class="sticky-note-controls">
-          <span class="sticky-note-count" data-sticky-note-count>0/45 WORDS</span>
+          <span class="sticky-note-count" id="sticky-note-count" data-sticky-note-count>0/45 WORDS</span>
           <button class="sticky-note-submit" data-sticky-note-submit type="submit">
             <img class="sticky-note-submit-image" src="assets/sticky-note-page/Send%20button.png" width="160" height="65" alt="" aria-hidden="true" />
             <span class="visually-hidden" data-sticky-note-submit-label>SEND NOTE</span>
           </button>
-          <p class="sticky-note-status" data-sticky-note-status role="status" aria-live="polite"></p>
+          <p class="sticky-note-status" id="sticky-note-status" data-sticky-note-status role="status" aria-live="polite"></p>
         </div>
       </form>
 
