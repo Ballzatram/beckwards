@@ -45,36 +45,49 @@
   </script>
 </head>
 <body class="sticky-note-page">
-  <main class="sticky-note-scene" aria-label="Custom sticky note request">
-    <div class="sticky-reference-frame">
-      <a class="sticky-question-link" href="/" aria-label="Return home">
-        <img class="sticky-question-header" src="assets/sticky-note-page/Assets%20Option%201/ask%20a%20question.png" alt="Ask a question... get a note" />
-      </a>
+  <main class="sticky-note-page-content">
+    <section class="sticky-note-scene" aria-label="Custom sticky note request">
+      <div class="sticky-reference-frame">
+        <a class="sticky-question-link" href="/" aria-label="Return home">
+          <img class="sticky-question-header" src="assets/sticky-note-page/Assets%20Option%201/ask%20a%20question.png" alt="Ask a question... get a note" />
+        </a>
 
-      <form class="sticky-note-form" data-sticky-note-form>
-        <img class="sticky-type-prompt" src="assets/sticky-note-page/Assets%20Option%201/type%20here.png" alt="" aria-hidden="true" />
-        <label class="visually-hidden" for="sticky-note-message">Sticky note message</label>
-        <input class="sticky-note-honey" data-sticky-note-honey type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" />
-        <input id="sticky-note-message" class="sticky-note-input" data-sticky-note-message type="text" name="message" autocomplete="off" maxlength="180" placeholder=" " spellcheck="true" aria-describedby="sticky-note-count sticky-note-status" />
-        <div class="sticky-note-controls">
-          <span class="sticky-note-count" id="sticky-note-count" data-sticky-note-count>0/45 WORDS</span>
-          <button class="sticky-note-submit" data-sticky-note-submit type="submit">
-            <img class="sticky-note-submit-image" src="assets/sticky-note-page/Send%20button.png" width="160" height="65" alt="" aria-hidden="true" />
-            <span class="visually-hidden" data-sticky-note-submit-label>SEND NOTE</span>
-          </button>
-          <p class="sticky-note-status" id="sticky-note-status" data-sticky-note-status role="status" aria-live="polite"></p>
-        </div>
-      </form>
+        <form class="sticky-note-form" data-sticky-note-form>
+          <img class="sticky-type-prompt" src="assets/sticky-note-page/Assets%20Option%201/type%20here.png" alt="" aria-hidden="true" />
+          <label class="visually-hidden" for="sticky-note-message">Sticky note message</label>
+          <input class="sticky-note-honey" data-sticky-note-honey type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <input id="sticky-note-message" class="sticky-note-input" data-sticky-note-message type="text" name="message" autocomplete="off" maxlength="180" placeholder=" " spellcheck="true" aria-describedby="sticky-note-count sticky-note-status" />
+          <div class="sticky-note-controls">
+            <span class="sticky-note-count" id="sticky-note-count" data-sticky-note-count>0/45 WORDS</span>
+            <button class="sticky-note-submit" data-sticky-note-submit type="submit">
+              <img class="sticky-note-submit-image" src="assets/sticky-note-page/Send%20button.png" width="160" height="65" alt="" aria-hidden="true" />
+              <span class="visually-hidden" data-sticky-note-submit-label>SEND NOTE</span>
+            </button>
+            <p class="sticky-note-status" id="sticky-note-status" data-sticky-note-status role="status" aria-live="polite"></p>
+          </div>
+        </form>
 
-      <section class="sticky-note-examples" aria-label="Example sticky notes">
-        <img class="sticky-example sticky-example--draw-label" src="assets/sticky-note-page/Assets%20Option%201/draw%20me%20a%20picture.png" alt="Draw me a picture" />
-        <img class="sticky-example sticky-example--draw-note" src="assets/sticky-note-page/Assets%20Option%201/b3%20doodle.png" alt="B3000 robot drawing" />
-        <img class="sticky-example sticky-example--oldest-label" src="assets/sticky-note-page/Assets%20Option%201/oldest%20song%20on%20the%20album.png" alt="Oldest song on the album?" />
-        <img class="sticky-example sticky-example--oldest-note" src="assets/sticky-note-page/Assets%20Option%201/_oldest_%20note.png" alt="A note answering the oldest song question" />
-        <img class="sticky-example sticky-example--drum-label" src="assets/sticky-note-page/Assets%20Option%201/drum%20recording%20process.png" alt="Drum recording process?" />
-        <img class="sticky-example sticky-example--drum-note" src="assets/sticky-note-page/Assets%20Option%201/_drum_%20note.png" alt="A handwritten note about the drum recording process" />
-      </section>
-    </div>
+        <section class="sticky-note-examples" aria-label="Example sticky notes">
+          <img class="sticky-example sticky-example--draw-label" src="assets/sticky-note-page/Assets%20Option%201/draw%20me%20a%20picture.png" alt="Draw me a picture" />
+          <img class="sticky-example sticky-example--draw-note" src="assets/sticky-note-page/Assets%20Option%201/b3%20doodle.png" alt="B3000 robot drawing" />
+          <img class="sticky-example sticky-example--oldest-label" src="assets/sticky-note-page/Assets%20Option%201/oldest%20song%20on%20the%20album.png" alt="Oldest song on the album?" />
+          <img class="sticky-example sticky-example--oldest-note" src="assets/sticky-note-page/Assets%20Option%201/_oldest_%20note.png" alt="A note answering the oldest song question" />
+          <img class="sticky-example sticky-example--drum-label" src="assets/sticky-note-page/Assets%20Option%201/drum%20recording%20process.png" alt="Drum recording process?" />
+          <img class="sticky-example sticky-example--drum-note" src="assets/sticky-note-page/Assets%20Option%201/_drum_%20note.png" alt="A handwritten note about the drum recording process" />
+        </section>
+      </div>
+    </section>
+
+    <section class="sticky-note-continuation" aria-labelledby="sticky-note-continuation-title">
+      <h2 class="visually-hidden" id="sticky-note-continuation-title">More questions answered with sticky notes</h2>
+      <div class="sticky-note-continuation-frame">
+        <img class="sticky-continuation-example sticky-continuation-example--visual" src="assets/sticky-note-page/sticky%20notes%20%28continuous%29/visual%20inspo%20for%20this%20album_.png" width="516" height="853" loading="lazy" decoding="async" alt="Visual inspiration for this album? Jan Svankmajer and Jiri Trnka were probably the two biggest influences. Other references include Neil Young record handwriting, Funny Games VHS covers, and Raymond Carver paperbacks for the house from The Call." />
+        <img class="sticky-continuation-example sticky-continuation-example--handwrite" src="assets/sticky-note-page/sticky%20notes%20%28continuous%29/do%20you%20handwrite%20your%20lyrics_.png" width="636" height="607" loading="lazy" decoding="async" alt="Do you handwrite your lyrics or type them? My childhood best friend's mom binds me a lyric book every year. This was the book I wrote all of Claw Machine in." />
+        <img class="sticky-continuation-example sticky-continuation-example--first" src="assets/sticky-note-page/sticky%20notes%20%28continuous%29/what%20comes%20first%2C%20lyrics%20or%20music.png" width="477" height="503" loading="lazy" decoding="async" alt="What comes first, lyrics or music? Nine times out of ten: music or instrumental, then melody or scatting, then lyrics, then vocals." />
+        <img class="sticky-continuation-example sticky-continuation-example--pad" src="assets/sticky-note-page/sticky%20notes%20%28continuous%29/howd%20you%20make%20the%20pad%20sound.png" width="505" height="547" loading="lazy" decoding="async" alt="How did you make the pad sound at the beginning of The Call? A Moog Matriarch in paraphonic mode with oscillators in different octaves, low resonance and cutoff, then attack and envelope adjusted to taste." />
+        <img class="sticky-continuation-example sticky-continuation-example--album" src="assets/sticky-note-page/sticky%20notes%20%28continuous%29/whats%20the%20next%20album.png" width="477" height="475" loading="lazy" decoding="async" alt="What's the next album? Album one: CM. Album two: TC. Album three: IS. Album four: AVWBI." />
+      </div>
+    </section>
   </main>
   <script src="scripts/sticky-note.js"></script>
 </body>
