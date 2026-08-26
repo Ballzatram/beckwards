@@ -1,0 +1,79 @@
+/* =========================================================
+   Sticky note gallery — music videos and live shows
+   ========================================================= */
+.sticky-note-music-show{
+  position:relative;
+  width:100%;
+  aspect-ratio:16 / 9;
+  overflow:hidden;
+  isolation:isolate;
+  background:url("../assets/shared/background.webp") center/100% 100% no-repeat;
+}
+
+.sticky-note-music-show-frame{
+  position:absolute;
+  inset:0;
+  margin:0;
+}
+
+.sticky-note-music-show-question,
+.sticky-note-music-show-answer{
+  position:absolute;
+  left:50%;
+  display:block;
+  height:auto;
+  user-select:none;
+  -webkit-user-drag:none;
+  transform:translateX(-50%);
+}
+
+.sticky-note-music-show-question{
+  top:7.87%;
+  z-index:2;
+  width:min(37.11%, 720px);
+}
+
+.sticky-note-music-show-answer{
+  top:19.68%;
+  z-index:1;
+  width:min(26.11%, 510px);
+  filter:drop-shadow(0 4px 5px rgba(0,0,0,.08));
+}
+
+@media (max-width:900px){
+  .sticky-note-music-show{
+    aspect-ratio:auto;
+    min-height:clamp(600px, 106vw, 820px);
+    background-position:center;
+    background-size:cover;
+  }
+
+  .sticky-note-music-show-frame{
+    position:relative;
+    inset:auto;
+    display:flex;
+    min-height:inherit;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    gap:clamp(24px, 6vw, 46px);
+    padding:clamp(64px, 12vw, 104px) 4vw clamp(88px, 16vw, 132px);
+  }
+
+  .sticky-note-music-show-question,
+  .sticky-note-music-show-answer{
+    position:relative;
+    left:auto;
+    top:auto;
+    flex:0 0 auto;
+    transform:none;
+  }
+
+  .sticky-note-music-show-question{
+    width:min(92vw, 570px);
+  }
+
+  .sticky-note-music-show-answer{
+    width:min(72vw, 401px);
+  }
+}
