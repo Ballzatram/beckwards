@@ -36,7 +36,7 @@
 .sticky-note-music-show-answer{
   top:19.68%;
   z-index:1;
-  width:min(26.11%, 510px);
+  width:min(20%, 401px);
   filter:drop-shadow(0 4px 5px rgba(0,0,0,.08));
 }
 
@@ -74,6 +74,6 @@
   }
 
   .sticky-note-music-show-answer{
-    width:min(72vw, 401px);
+    width:min(64vw, 360px);
   }
 }
