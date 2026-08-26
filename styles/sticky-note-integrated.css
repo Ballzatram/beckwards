@@ -1,0 +1,91 @@
+/* Integrate the new UK music/live-show Q&A into the existing continuation gallery. */
+.sticky-note-continuation{
+  aspect-ratio:auto;
+}
+
+.sticky-note-continuation-frame{
+  position:relative;
+  inset:auto;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:clamp(60px,7vw,100px) clamp(24px,4vw,54px);
+  width:100%;
+  padding:clamp(70px,8vw,110px) clamp(28px,4vw,64px) clamp(110px,10vw,150px);
+  box-sizing:border-box;
+}
+
+.sticky-continuation-example{
+  position:relative;
+  left:auto;
+  top:auto;
+  width:100%;
+  max-width:var(--sticky-natural-width);
+  justify-self:center;
+  align-self:start;
+}
+
+.sticky-continuation-example--visual{--sticky-natural-width:516px;grid-column:1;grid-row:1 / span 2}
+.sticky-continuation-example--handwrite{--sticky-natural-width:636px;grid-column:2;grid-row:1}
+.sticky-continuation-example--first{--sticky-natural-width:477px;grid-column:3;grid-row:1}
+.sticky-continuation-example--pad{--sticky-natural-width:505px;grid-column:2;grid-row:2}
+.sticky-continuation-example--album{--sticky-natural-width:477px;grid-column:3;grid-row:2}
+
+.sticky-continuation-example--music-show-question{
+  --sticky-natural-width:570px;
+  grid-column:1;
+  grid-row:3;
+  width:min(100%,570px);
+  align-self:end;
+}
+
+.sticky-continuation-example--music-show{
+  --sticky-natural-width:401px;
+  grid-column:1;
+  grid-row:4;
+  width:min(82%,401px);
+  margin-top:clamp(-40px,-3vw,-20px);
+}
+
+@media(max-width:1100px){
+  .sticky-note-continuation-frame{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .sticky-continuation-example--visual{grid-column:1;grid-row:1 / span 2}
+  .sticky-continuation-example--handwrite{grid-column:2;grid-row:1}
+  .sticky-continuation-example--first{grid-column:2;grid-row:2}
+  .sticky-continuation-example--pad{grid-column:1;grid-row:3}
+  .sticky-continuation-example--album{grid-column:2;grid-row:3}
+  .sticky-continuation-example--music-show-question{grid-column:1;grid-row:4}
+  .sticky-continuation-example--music-show{grid-column:1;grid-row:5;width:min(82%,401px)}
+}
+
+@media(max-width:700px){
+  .sticky-note-continuation-frame{
+    display:flex;
+    flex-direction:column;
+    gap:clamp(64px,17vw,104px);
+    padding:clamp(70px,18vw,112px) 0 clamp(100px,24vw,150px);
+  }
+  .sticky-continuation-example{
+    width:min(92vw,var(--sticky-natural-width));
+    max-width:none;
+    flex:0 0 auto;
+  }
+  .sticky-continuation-example--visual,
+  .sticky-continuation-example--first,
+  .sticky-continuation-example--album,
+  .sticky-continuation-example--music-show-question{
+    align-self:flex-start;
+    margin-left:3vw;
+  }
+  .sticky-continuation-example--handwrite,
+  .sticky-continuation-example--pad,
+  .sticky-continuation-example--music-show{
+    align-self:flex-end;
+    margin-right:2vw;
+  }
+  .sticky-continuation-example--music-show{
+    width:min(58vw,401px);
+    margin-top:-40px;
+  }
+}
