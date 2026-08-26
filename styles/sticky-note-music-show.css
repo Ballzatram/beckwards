@@ -12,15 +12,14 @@
 
 /*
  * The existing gallery is composed on a 2560px-wide reference canvas.
- * This pair follows that same scale: 570 / 2560 = 22.265625%.
- * Keeping the answer at 401 / 570 of the pair makes both images resize
- * together instead of drifting to different proportions at each breakpoint.
+ * Match the supplied mockup at the assets' natural sizes:
+ * question: 570 / 2560; handwritten note: 401 / 570 of the pair.
  */
 .sticky-note-music-show-frame{
   position:absolute;
-  top:7.847222%;
-  left:50%;
-  width:22.265625%;
+  top:7.87%;
+  left:52.75%;
+  width:min(22.265625%, 570px);
   margin:0;
   transform:translateX(-50%);
 }
@@ -44,7 +43,7 @@
   position:relative;
   z-index:1;
   width:70.350877%;
-  margin:-1.754386% auto 0;
+  margin:4.036491% auto 0;
   filter:drop-shadow(0 4px 5px rgba(0,0,0,.08));
 }
 
@@ -61,7 +60,7 @@
     position:relative;
     top:auto;
     left:auto;
-    width:min(92vw, 570px);
+    width:min(84vw, 570px);
     margin:0 auto;
     transform:none;
   }
