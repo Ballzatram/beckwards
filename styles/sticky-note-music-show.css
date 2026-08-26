@@ -10,33 +10,41 @@
   background:url("../assets/shared/background.webp") center/100% 100% no-repeat;
 }
 
+/*
+ * The existing gallery is composed on a 2560px-wide reference canvas.
+ * This pair follows that same scale: 570 / 2560 = 22.265625%.
+ * Keeping the answer at 401 / 570 of the pair makes both images resize
+ * together instead of drifting to different proportions at each breakpoint.
+ */
 .sticky-note-music-show-frame{
   position:absolute;
-  inset:0;
+  top:7.847222%;
+  left:50%;
+  width:22.265625%;
   margin:0;
+  transform:translateX(-50%);
 }
 
 .sticky-note-music-show-question,
 .sticky-note-music-show-answer{
-  position:absolute;
-  left:50%;
   display:block;
   height:auto;
+  pointer-events:none;
   user-select:none;
   -webkit-user-drag:none;
-  transform:translateX(-50%);
 }
 
 .sticky-note-music-show-question{
-  top:7.87%;
+  position:relative;
   z-index:2;
-  width:min(37.11%, 720px);
+  width:100%;
 }
 
 .sticky-note-music-show-answer{
-  top:19.68%;
+  position:relative;
   z-index:1;
-  width:min(20%, 401px);
+  width:70.350877%;
+  margin:-1.754386% auto 0;
   filter:drop-shadow(0 4px 5px rgba(0,0,0,.08));
 }
 
@@ -44,36 +52,17 @@
   .sticky-note-music-show{
     aspect-ratio:auto;
     min-height:clamp(600px, 106vw, 820px);
+    padding:clamp(64px, 12vw, 104px) 0 clamp(88px, 16vw, 132px);
     background-position:center;
     background-size:cover;
   }
 
   .sticky-note-music-show-frame{
     position:relative;
-    inset:auto;
-    display:flex;
-    min-height:inherit;
-    flex-direction:column;
-    align-items:center;
-    justify-content:flex-start;
-    gap:clamp(24px, 6vw, 46px);
-    padding:clamp(64px, 12vw, 104px) 4vw clamp(88px, 16vw, 132px);
-  }
-
-  .sticky-note-music-show-question,
-  .sticky-note-music-show-answer{
-    position:relative;
-    left:auto;
     top:auto;
-    flex:0 0 auto;
-    transform:none;
-  }
-
-  .sticky-note-music-show-question{
+    left:auto;
     width:min(92vw, 570px);
-  }
-
-  .sticky-note-music-show-answer{
-    width:min(64vw, 360px);
+    margin:0 auto;
+    transform:none;
   }
 }
