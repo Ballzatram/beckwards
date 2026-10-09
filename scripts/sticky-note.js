@@ -13,6 +13,7 @@
   const subject = 'Custom sticky note request';
   const endpoint = `https://formsubmit.co/ajax/${email}`;
   let useEmailFallback = false;
+  let sending = false;
 
   const getWords = (value) => value.trim().split(/\s+/).filter(Boolean);
 
@@ -59,6 +60,7 @@
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    if (sending) return;
     const message = messageInput.value.trim();
     if (!message) {
       setStatus('TYPE A QUESTION FIRST.');
@@ -75,6 +77,10 @@
       return;
     }
 
+    sending = true;
+    messageInput.readOnly = true;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 12000);
     if (submitButton) {
       submitButton.disabled = true;
       submitButton.setAttribute('aria-busy', 'true');
@@ -84,6 +90,7 @@
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
+        signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json'
@@ -98,8 +105,8 @@
         })
       });
       const result = await response.json().catch(() => ({}));
-      const rejected = result.success === false || result.success === 'false';
-      if (!response.ok || rejected) throw new Error(result.message || 'Submission failed');
+      const confirmed = result.success === true || result.success === 'true';
+      if (!response.ok || !confirmed) throw new Error(result.message || 'Submission not confirmed');
 
       form.reset();
       updateCount();
@@ -109,8 +116,11 @@
       setStatus('NOTE SENT. THANK YOU.');
     } catch (_) {
       setEmailFallback(true);
-      setStatus('DIRECT SEND BLOCKED. TAP SEND TO OPEN EMAIL.');
+      setStatus('SEND NOT CONFIRMED. YOUR NOTE IS STILL HERE. TAP SEND TO OPEN EMAIL.');
     } finally {
+      window.clearTimeout(timeout);
+      sending = false;
+      messageInput.readOnly = false;
       if (submitButton) {
         submitButton.disabled = false;
         submitButton.removeAttribute('aria-busy');

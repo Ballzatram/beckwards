@@ -77,7 +77,9 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     chute: { x: 1264, y: 1168, w: 180, h: 130 }
   };
 
-  function movementBounds(){
+  let movementLimits = cfg.bounds;
+
+  function measureMovementBounds(){
     const portraitPhone = window.matchMedia('(max-width: 820px) and (orientation: portrait)').matches;
     const frameWidth = frame?.getBoundingClientRect().width || 0;
     if (!portraitPhone || !frameWidth) return cfg.bounds;
@@ -208,6 +210,8 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
   }
 
   let state = makeInitialState();
+  state.mode = 'LOADING';
+  let ready = false;
   let phase = null;
   let last = performance.now();
   let rafId = 0;
@@ -222,6 +226,8 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
   let previousRewardFocus = null;
   let rewardCoinCleanupTimer = null;
   let winAudioRequested = false;
+  let suspendedAt = null;
+  dropButtons.forEach(button => { button.disabled = true; });
 
   function prepareWinAudio(){
     if (winAudioRequested) return;
@@ -230,7 +236,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
   }
 
   function wake(resetClock = true){
-    if (rafId) return;
+    if (rafId || document.hidden || !ready) return;
     if (resetClock) last = performance.now();
     rafId = requestAnimationFrame(step);
   }
@@ -481,7 +487,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
 
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
+    if (event.shiftKey && (document.activeElement === first || document.activeElement === rewardPanel)) {
       event.preventDefault();
       last.focus();
       return true;
@@ -553,6 +559,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
   function resetAttempt(){
     closeRewardModal(false);
     state = makeInitialState();
+    state.carriageX = clamp(state.carriageX, movementLimits.left, movementLimits.right);
     phase = null;
     finished = false;
     setCoinReady(false);
@@ -611,7 +618,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
   }
 
   function canMove(){
-    return !finished && (state.mode === 'READY' || state.mode === 'MOVING');
+    return ready && !finished && !isRewardOpen() && (state.mode === 'READY' || state.mode === 'MOVING');
   }
 
   function availablePrizes(){
@@ -680,13 +687,14 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
       wake();
     },
     stopMove(){
+      if (!ready) return;
       state.vx = 0;
       if (state.mode === 'MOVING') state.mode = 'READY';
       updateMotorByState();
       wake();
     },
     drop(){
-      if (finished || !(state.mode === 'READY' || state.mode === 'MOVING')) return;
+      if (!canMove()) return;
       prepareWinAudio();
       phase = null;
       state.vx = 0;
@@ -855,7 +863,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     if (canMove() && state.vx !== 0){
       const prevX = state.carriageX;
       const manualDelta = clamp(state.vx * cfg.speeds.move * dt, -52, 52);
-      const bounds = movementBounds();
+      const bounds = movementLimits;
       state.carriageX = clamp(state.carriageX + manualDelta, bounds.left, bounds.right);
       if (prevX === state.carriageX && (state.carriageX === bounds.left || state.carriageX === bounds.right)){
         state.vx = 0;
@@ -890,11 +898,12 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     zIndex:'3'
   });
   label.textContent = 'Loading... 0%';
+  label.setAttribute('role', 'status');
+  label.style.pointerEvents = 'auto';
   stage.style.position = 'absolute';
   stage.appendChild(label);
   const progress = (p)=>{
     label.textContent = `Loading... ${Math.round(p * 100)}%`;
-    if (p >= 1) label.remove();
   };
 
   let unlocked = false;
@@ -907,24 +916,36 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
   }
   ['pointerdown','touchstart','keydown'].forEach(ev => window.addEventListener(ev, unlockOnce, { capture:true }));
 
-  coinSlot?.addEventListener('pointerdown', (event) => {
+  coinSlot?.addEventListener('click', () => {
     if (!coinReady) return;
-    event.preventDefault();
     insertCoin();
-  }, { passive:false });
+  });
 
   rewardCloseButtons.forEach((button) => {
     button.addEventListener('click', () => closeRewardModal());
   });
 
-  document.addEventListener('visibilitychange', ()=>{
-    if (document.hidden) {
-      setMotor(false);
-    } else {
-      updateMotorByState();
-      if (hasActiveAnimation()) wake();
-    }
-  });
+  function suspend(){
+    CTRL.stopMove();
+    if (suspendedAt === null) suspendedAt = performance.now();
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = 0;
+    setMotor(false);
+    AudioBus.stopAll();
+  }
+
+  function resume(){
+    if (document.hidden) return;
+    if (suspendedAt !== null && phase) phase.startedAt += performance.now() - suspendedAt;
+    suspendedAt = null;
+    updateMotorByState();
+    if (hasActiveAnimation()) wake();
+  }
+
+  document.addEventListener('visibilitychange', () => document.hidden ? suspend() : resume());
+  window.addEventListener('pagehide', suspend);
+  window.addEventListener('pageshow', resume);
+  window.addEventListener('blur', () => CTRL.stopMove());
 
   window.addEventListener('keydown', (e)=>{
     if (e.repeat) return;
@@ -937,6 +958,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
       }
       return;
     }
+    if (e.target instanceof Element && e.target.closest('a, button, input, textarea, select, [contenteditable="true"]')) return;
     const key = e.key.toLowerCase();
     if (e.key === 'ArrowLeft' || key === 'a'){
       e.preventDefault();
@@ -951,7 +973,6 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
         insertCoin();
         return;
       }
-      setDropButtonPressed(true);
       CTRL.drop();
     }
   });
@@ -967,7 +988,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
   function onResize(){
     renderer.resizeTo();
     syncCoinSlotAvailability();
-    const bounds = movementBounds();
+    const bounds = movementLimits = measureMovementBounds();
     if (state.mode === 'READY' || state.mode === 'MOVING') {
       state.carriageX = clamp(state.carriageX, bounds.left, bounds.right);
     }
@@ -976,42 +997,36 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
   window.addEventListener('resize', onResize);
 
   async function init(){
-    const base = window.location.pathname.replace(/[^/]+$/, '');
-    const candidates = [
-      'assets/data/manifest.json',
-      './assets/data/manifest.json',
-      base + 'assets/data/manifest.json',
-      '/beckwards/assets/data/manifest.json'
-    ];
-    let ok = false;
-    let lastErr;
-    for (const url of candidates){
-      try {
-        await loader.loadManifest(url);
-        ok = true;
-        break;
-      } catch(e) {
-        lastErr = e;
-      }
-    }
-    if (!ok){
-      label.innerHTML = 'Error: manifest not found.';
-      console.error(lastErr);
+    state.mode = 'LOADING';
+    progress(0);
+    try {
+      await loader.loadManifest(new URL('../assets/data/manifest.json', import.meta.url).href);
+      loader.setVersion?.(loader.manifest?.meta?.version || '');
+      rewardItems = getManifestRewardItems();
+      // Optional sound readiness must never hold up the controls.
+      loader.loadAll(() => {}, { audioIds: ARCADE_AUDIO_IDS, concurrency: 3 }).catch(() => {});
+      await loader.loadAll(progress, {
+        imageIds: ARCADE_IMAGE_IDS,
+        concurrency: 6
+      });
+      if (ARCADE_IMAGE_IDS.some(id => !loader.img(id))) throw new Error('Game artwork could not be loaded');
+    } catch(e) {
+      state.mode = 'ERROR';
+      setStatus('LOAD FAILED');
+      label.textContent = 'The claw machine could not load. Check your connection. ';
+      const retry = document.createElement('button');
+      retry.type = 'button';
+      retry.textContent = 'Retry loading';
+      retry.addEventListener('click', init, { once: true });
+      label.appendChild(retry);
+      console.warn('[arcade load failed]', e.message);
       return;
     }
 
-    loader.setVersion?.(loader.manifest?.meta?.version || '');
-    rewardItems = getManifestRewardItems();
-    try {
-      await loader.loadAll(progress, {
-        imageIds: ARCADE_IMAGE_IDS,
-        audioIds: ARCADE_AUDIO_IDS,
-        concurrency: 6
-      });
-    } catch(e) {
-      console.error('[loader] unexpected error', e);
-    }
-
+    ready = true;
+    state.mode = 'READY';
+    label.remove();
+    dropButtons.forEach(button => { button.disabled = false; });
     onResize();
     setStatus('');
     setCoinReady(false);

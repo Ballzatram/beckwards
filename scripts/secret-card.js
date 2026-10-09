@@ -73,6 +73,7 @@
   };
 
   const validateInput = (input, force = false) => {
+    if (input.disabled) return;
     const value = normalizeCode(input.value);
     const slot = input.closest('.secret-card-slot');
     if (!value) return;
