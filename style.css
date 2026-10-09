@@ -2607,6 +2607,29 @@ body.poster-page{
   border:0;
 }
 
+.poster-status.has-copy-error{
+  width:min(90vw, 360px);
+  padding:10px 14px;
+  background:#eee8d9;
+  color:#231c17;
+  text-align:center;
+  pointer-events:auto;
+  user-select:text;
+}
+.poster-status.has-copy-error .poster-copied{
+  display:none;
+}
+.poster-status.has-copy-error .poster-status-text{
+  position:static;
+  width:auto;
+  height:auto;
+  margin:0;
+  overflow:visible;
+  clip:auto;
+  white-space:normal;
+  font:16px/1.4 Arial, sans-serif;
+}
+
 @media (max-width:820px){
   body.poster-page{
     overflow:auto;

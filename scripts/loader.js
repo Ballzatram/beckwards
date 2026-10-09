@@ -16,19 +16,17 @@ export const Loader = {
 
   async loadManifest(path = 'assets/data/manifest.json') {
     const url = this._withV(path);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
     let res;
     try {
-      res = await fetch(url, { cache: 'default' });
-    } catch (e) {
-      throw new Error(`Manifest request failed (${url}). Check the path and that it's being served.\n` + e);
-    }
-    if (!res.ok) {
-      throw new Error(`Manifest load failed (${res.status}) at ${url}`);
-    }
-    try {
+      res = await fetch(url, { cache: 'default', signal: controller.signal });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       this.manifest = await res.json();
     } catch (e) {
-      throw new Error(`Manifest JSON parse failed at ${url}\n` + e);
+      throw new Error(`Manifest request failed (${url}). Check the path and that it's being served.\n` + e);
+    } finally {
+      clearTimeout(timeout);
     }
     return this.manifest;
   },
@@ -59,12 +57,15 @@ export const Loader = {
     const tick = () => { done = Math.min(done + 1, total); onProgress(done / total); };
 
     const loadImage = (item) => new Promise((resolve) => {
+      if (this.images.has(item.id)) { tick(); resolve(); return; }
       const img = new Image();
       let finished = false;
       const finish = (loaded) => {
         if (finished) return;
         finished = true;
         window.clearTimeout(timeoutId);
+        img.onload = null;
+        img.onerror = null;
         if (loaded) this.images.set(item.id, img);
         tick();
         resolve();
@@ -88,10 +89,12 @@ export const Loader = {
     });
 
     const loadAudio = (item) => new Promise((resolve) => {
+      if (this.audio.has(item.id)) { tick(); resolve(); return; }
       try {
         const el = new Audio();
         el.preload = 'auto';
         el.loop = !!item.loop;
+        this.audio.set(item.id, el);
 
         const sources = Array.isArray(item.src) ? item.src : [item.src];
         if (!sources.length) {
@@ -110,13 +113,17 @@ export const Loader = {
         const finish = () => {
           if (finished) return;
           finished = true;
-          this.audio.set(item.id, el);
+          clearTimeout(timeoutId);
+          el.oncanplaythrough = null;
+          el.onloadedmetadata = null;
+          el.onerror = null;
           tick(); resolve();
         };
         el.oncanplaythrough = finish;
         el.onloadedmetadata = finish;
+        el.onerror = finish;
         // Safety fallback so we never hang
-        setTimeout(finish, 800);
+        const timeoutId = setTimeout(finish, 800);
         el.load();
       } catch (e) {
         console.warn('[audio load error]', item.id, e);

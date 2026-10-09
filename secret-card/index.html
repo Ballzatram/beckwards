@@ -31,6 +31,13 @@
   <link rel="icon" type="image/png" href="assets/thumbnails/1.png" />
   <link rel="preload" as="image" href="assets/shared/background.webp" fetchpriority="high" />
   <link rel="stylesheet" href="style.css" />
+  <script>
+    (function () {
+      if (!window.__beckwardsStickyNoteUnlocked && location.pathname.endsWith('.html')) {
+        location.replace(location.origin + '/secret-card' + location.search + location.hash);
+      }
+    })();
+  </script>
 </head>
 <body class="secret-card-page">
   <main class="secret-card-scene" data-secret-card-page aria-labelledby="secret-card-title">

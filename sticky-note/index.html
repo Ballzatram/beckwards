@@ -39,7 +39,7 @@
       } else if (cleanPath.endsWith(".html")) {
         cleanPath = cleanPath.slice(0, -".html".length);
       }
-      if (cleanPath !== location.pathname) {
+      if (window.__beckwardsStickyNoteUnlocked && cleanPath !== location.pathname) {
         location.replace(location.origin + cleanPath + location.search + location.hash);
       }
     })();

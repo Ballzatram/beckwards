@@ -84,7 +84,7 @@
     };
 
     const stop = (event) => {
-      if (activePointer != null && event.pointerId !== activePointer) return;
+      if (activePointer === null || event.pointerId !== activePointer) return;
       try { gate.releasePointerCapture(event.pointerId); } catch (_) {}
       reset();
     };
@@ -121,6 +121,10 @@
       reset();
     });
     gate.addEventListener('blur', reset);
+    window.addEventListener('blur', reset);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) reset();
+    });
   }
 
   function activateGameControl(){
@@ -133,7 +137,7 @@
 
   function setupDropButton(button){
     const press = (event) => {
-      if (event.isPrimary === false || (event.button !== undefined && event.button !== 0)) return;
+      if (button.disabled || (event.button !== undefined && event.button !== 0)) return;
       button.classList.add('is-pressed');
       button.setAttribute('aria-pressed', 'true');
     };
