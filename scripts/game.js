@@ -351,7 +351,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
       label.textContent = nextReady ? 'RETRY' : 'DROP';
     });
     dropButtons.forEach((button) => {
-      button.setAttribute('aria-label', nextReady ? 'Insert coin to retry' : 'Drop claw');
+      button.setAttribute('aria-label', nextReady ? 'Retry' : 'Drop claw');
     });
   }
 
@@ -550,7 +550,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     state.message = message;
     state.subMessage = subMessage;
     state.noticeTimer = 9999;
-    setStatus('INSERT COIN', true);
+    setStatus('', true);
     setDropButtonPressed(false);
     setCoinReady(true);
     updateMotorByState();
