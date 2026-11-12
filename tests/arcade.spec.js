@@ -83,7 +83,7 @@ test('optional stalled sound keeps the legacy arcade loading deadline bounded', 
     await route.abort();
   });
   try {
-    await page.goto('/arcade-legacy.html');
+    await page.goto('/arcade-legacy.html', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#stage')).not.toContainText('Loading', {
       timeout: 10000,
     });

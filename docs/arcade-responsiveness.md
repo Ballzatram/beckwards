@@ -16,6 +16,8 @@ The browser behavior of hidden versus clipped overflow is documented in [MDN's o
 
 The older `arcade-legacy.html` entry retains the loader's original 800ms optional-sound deadline, while Web Audio decoding continues independently. A stalled-audio regression reproduced a ten-second loading failure before this compatibility fix. The legacy entry also uses the same versioned audio imports and persistent gesture unlock; its game rules and controls are preserved.
 
+The stalled-audio test waits for DOM readiness rather than the full load event: Linux WebKit keeps that event pending for the intentionally held media requests. Its ten-second loading assertion and visible-canvas checks remain unchanged. This test setup failure was diagnosed from both CI runs; no test retry or product deadline increase was added.
+
 ## Audio
 
 The loader starts asynchronous fetch/decode of the motor, click, quarter and victory sounds during initialization, independently of artwork/control readiness. The shared AudioContext requests interactive latency and resumes from user gestures, including later gestures after interruptions. Buffered sources reuse decoded data instead of creating media players for each action. Loop ownership is idempotent; stopping a loop or hiding the page cancels pending playback as well as active sources. A late blur cannot restart a hidden game's motor. Effects missing their buffer are not replayed after the event; pending effects expire after 150ms. Fetch/decode waits are bounded at 12 seconds and resume waits at one second. Unsupported Web Audio environments retain a bounded media-element fallback.
