@@ -191,7 +191,7 @@ test('failed arcade artwork can be retried without reloading the page', async ({
 test('slow audio cannot block arcade controls', async ({ page }) => {
   let release;
   const gate = new Promise(resolve => { release = resolve; });
-  await page.route('**/*.wav*', async route => { await gate; await route.abort(); });
+  await page.route(/\.(wav|mp3)(\?|$)/, async route => { await gate; await route.abort(); });
   await page.goto('/arcade/');
   await expect.poll(() => page.evaluate(() => GAME.mode())).toBe('READY');
   await expect(page.locator('[data-arcade-drop]:visible')).toBeEnabled();

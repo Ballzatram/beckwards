@@ -14,6 +14,8 @@ For the mobile homepage change, run `npm run check:homepage` after `npm ci`. The
 
 ## Preservation
 
+Arcade responsiveness changes additionally require `npm run check:arcade` and `npm run test:audio` (also included in `test:static`). Both browser workflows enforce the new quality gate. See [arcade responsiveness](arcade-responsiveness.md) for the supported matrix, performance budgets and scoped coverage; repository-wide conformance gaps remain in the audit.
+
 Default branches and deployed services are not changed by preparing this branch. Runtime source changes, if any, are limited to documented regression fixes and must pass the existing tests. Do not run live research, mail, payment, model generation, customer data changes or production deployment as a standards check.
 
 ## Recorded local verification

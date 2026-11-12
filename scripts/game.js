@@ -1,7 +1,7 @@
 // scripts/game.js
-import { Loader } from './loader.js';
+import { Loader } from './loader.js?v=20261112-arcade';
 import { Renderer } from './renderer.js';
-import { AudioBus } from './audio.js';
+import { AudioBus } from './audio.js?v=20261112-arcade';
 import { CLAW_GEOMETRY } from './claw-geometry.js';
 
 (function(){
@@ -51,7 +51,8 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     'quarter_audio_1',
     'claw_open_sfx',
     'claw_close_sfx',
-    'prize_drop'
+    'prize_drop',
+    'win'
   ];
   const REWARD_ID_PATTERN = /^cm_reward_/;
   const REWARD_QUARTER_SRCS = [
@@ -215,7 +216,6 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
   let phase = null;
   let last = performance.now();
   let rafId = 0;
-  let motorOn = false;
   let finished = false;
   let coinReady = null;
   let statusText = null;
@@ -225,15 +225,8 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
   let rewardBag = [];
   let previousRewardFocus = null;
   let rewardCoinCleanupTimer = null;
-  let winAudioRequested = false;
   let suspendedAt = null;
   dropButtons.forEach(button => { button.disabled = true; });
-
-  function prepareWinAudio(){
-    if (winAudioRequested) return;
-    winAudioRequested = true;
-    loader.loadAll(() => {}, { audioIds:['win'], concurrency:1 }).catch(() => {});
-  }
 
   function wake(resetClock = true){
     if (rafId || document.hidden || !ready) return;
@@ -504,19 +497,17 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
   function setMotor(on){
     const motor = loader.snd('motor_loop');
     if (!motor) return;
-    if (on && !motorOn){
-      motorOn = true;
-      try { AudioBus.loop(motor, { volume: 0.18 }); } catch {}
-    } else if (!on && motorOn){
-      motorOn = false;
-      try { motor.pause(); motor.currentTime = 0; } catch {}
+    if (on){
+      AudioBus.loop(motor, { volume: 0.18 });
+    } else {
+      AudioBus.stopLoop(motor);
     }
   }
 
   function updateMotorByState(){
     const moving = state.vx !== 0 && !finished;
     const mechActive = ['DROPPING', 'CLOSING', 'RETURNING', 'DELIVERING', 'OPENING'].includes(state.mode);
-    setMotor(moving || mechActive);
+    setMotor(suspendedAt === null && !document.hidden && (moving || mechActive));
   }
 
   function setDropButtonPressed(pressed){
@@ -696,7 +687,6 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     },
     drop(){
       if (!canMove()) return;
-      prepareWinAudio();
       phase = null;
       state.vx = 0;
       state.clawClosed = false;
@@ -907,15 +897,8 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     label.textContent = `Loading... ${Math.round(p * 100)}%`;
   };
 
-  let unlocked = false;
-  function unlockOnce(){
-    if (unlocked) return;
-    unlocked = true;
-    const click = loader.snd('ui_click');
-    if (click) AudioBus.play(click, { volume: 0.01 });
-    ['pointerdown','touchstart','keydown'].forEach(ev => window.removeEventListener(ev, unlockOnce, true));
-  }
-  ['pointerdown','touchstart','keydown'].forEach(ev => window.addEventListener(ev, unlockOnce, { capture:true }));
+  const unlockAudio = () => { void AudioBus.unlock(); };
+  ['pointerdown','touchstart','keydown'].forEach(ev => window.addEventListener(ev, unlockAudio, { capture:true, passive:true }));
 
   coinSlot?.addEventListener('click', () => {
     if (!coinReady) return;
@@ -927,6 +910,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
   });
 
   function suspend(){
+    heldDirections.clear();
     CTRL.stopMove();
     if (suspendedAt === null) suspendedAt = performance.now();
     if (rafId) cancelAnimationFrame(rafId);
@@ -946,7 +930,17 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
   document.addEventListener('visibilitychange', () => document.hidden ? suspend() : resume());
   window.addEventListener('pagehide', suspend);
   window.addEventListener('pageshow', resume);
-  window.addEventListener('blur', () => CTRL.stopMove());
+  const heldDirections = new Map();
+  function applyKeyboardDirection(){
+    const direction = Array.from(heldDirections.values()).at(-1);
+    if (direction < 0) CTRL.moveLeft();
+    else if (direction > 0) CTRL.moveRight();
+    else CTRL.stopMove();
+  }
+  window.addEventListener('blur', () => {
+    heldDirections.clear();
+    CTRL.stopMove();
+  });
 
   window.addEventListener('keydown', (e)=>{
     if (e.repeat) return;
@@ -963,10 +957,12 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     const key = e.key.toLowerCase();
     if (e.key === 'ArrowLeft' || key === 'a'){
       e.preventDefault();
-      CTRL.moveLeft();
+      heldDirections.set(key, -1);
+      applyKeyboardDirection();
     } else if (e.key === 'ArrowRight' || key === 'd'){
       e.preventDefault();
-      CTRL.moveRight();
+      heldDirections.set(key, 1);
+      applyKeyboardDirection();
     } else if (e.key === ' ' || e.key === 'Enter' || key === 's'){
       if (e.target instanceof Element && e.target.closest('[data-arcade-drop]')) return;
       e.preventDefault();
@@ -980,9 +976,9 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
 
   window.addEventListener('keyup', (e)=>{
     const key = e.key.toLowerCase();
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || key === 'a' || key === 'd'){
+    if (heldDirections.delete(key)){
       e.preventDefault();
-      CTRL.stopMove();
+      applyKeyboardDirection();
     }
   });
 

@@ -8,8 +8,10 @@
     "lint:homepage": "eslint tests/mobile.spec.js eslint.config.mjs",
     "typecheck:homepage": "tsc --project tsconfig.homepage-tests.json",
     "check:homepage": "npm run format:homepage:check && npm run lint:homepage && npm run typecheck:homepage",
+    "check:arcade": "prettier --check scripts/audio.js scripts/arcade-controls.js scripts/arcade-types.d.ts tests/arcade-probe.d.ts tests/audio.test.mjs tests/arcade.spec.js tsconfig.arcade.json && eslint scripts/audio.js scripts/arcade-controls.js tests/audio.test.mjs tests/arcade.spec.js && tsc --project tsconfig.arcade.json",
     "test": "playwright test",
-    "test:static": "node --test tests/static.test.mjs tests/server-launcher.test.mjs",
+    "test:audio": "node --experimental-test-coverage --test-coverage-include=scripts/audio.js --test-coverage-lines=90 --test-coverage-branches=90 --test-coverage-functions=90 --test tests/audio.test.mjs",
+    "test:static": "node --test tests/static.test.mjs tests/server-launcher.test.mjs && npm run test:audio",
     "sync:pages": "node scripts/sync-pages.mjs",
     "check:pages": "node scripts/sync-pages.mjs --check",
     "serve": "node scripts/serve.mjs"

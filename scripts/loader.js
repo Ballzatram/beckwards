@@ -1,4 +1,5 @@
 // scripts/loader.js
+import { AudioBus } from './audio.js?v=20261112-arcade';
 // Robust asset loader that reads assets/data/manifest.json and preloads images + audio.
 // API:
 //   await Loader.loadManifest()       // reads JSON
@@ -92,7 +93,8 @@ export const Loader = {
       if (this.audio.has(item.id)) { tick(); resolve(); return; }
       try {
         const el = new Audio();
-        el.preload = 'auto';
+        // Web Audio owns fetching; do not also start a media-element request.
+        el.preload = 'none';
         el.loop = !!item.loop;
         this.audio.set(item.id, el);
 
@@ -108,23 +110,8 @@ export const Loader = {
           el.appendChild(s);
         });
 
-        // Consider audio ready once metadata is available or after small timeout.
-        let finished = false;
-        const finish = () => {
-          if (finished) return;
-          finished = true;
-          clearTimeout(timeoutId);
-          el.oncanplaythrough = null;
-          el.onloadedmetadata = null;
-          el.onerror = null;
-          tick(); resolve();
-        };
-        el.oncanplaythrough = finish;
-        el.onloadedmetadata = finish;
-        el.onerror = finish;
-        // Safety fallback so we never hang
-        const timeoutId = setTimeout(finish, 800);
-        el.load();
+        // Decode once in the shared interactive context, off the control path.
+        AudioBus.preload(el).then(() => { tick(); resolve(); });
       } catch (e) {
         console.warn('[audio load error]', item.id, e);
         tick(); resolve(); // soft-fail

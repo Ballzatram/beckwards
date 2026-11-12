@@ -4,7 +4,13 @@ import globals from 'globals';
 export default [
   js.configs.recommended,
   {
-    files: ['tests/mobile.spec.js'],
+    files: [
+      'tests/mobile.spec.js',
+      'tests/arcade.spec.js',
+      'tests/audio.test.mjs',
+      'scripts/arcade-controls.js',
+      'scripts/audio.js',
+    ],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
     rules: { eqeqeq: 'error' },
   },

@@ -1,7 +1,7 @@
 // scripts/game.js
-import { Loader } from './loader.js';
+import { Loader } from './loader.js?v=20261112-arcade';
 import { Renderer } from './renderer-legacy.js';
-import { AudioBus } from './audio.js';
+import { AudioBus } from './audio.js?v=20261112-arcade';
 
 (function(){
   const stage = document.getElementById('stage');
@@ -128,7 +128,7 @@ import { AudioBus } from './audio.js';
       try { AudioBus.loop ? AudioBus.loop(motor, { volume: 0.2 }) : motor.play(); } catch {}
     } else if (!on && motorOn){
       motorOn = false;
-      try { motor.pause(); motor.currentTime = 0; } catch {}
+      AudioBus.stopLoop(motor);
     }
   }
 
