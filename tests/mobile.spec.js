@@ -4,14 +4,13 @@ test.beforeEach(async ({ page }) => {
   await page.route('https://**/*', route => route.abort());
 });
 
-test('quarters follow a real touch drag, including after scrolling on a short phone', async ({ page, context, browserName, isMobile }) => {
+test('quarters follow a real touch drag without scrolling on a short phone', async ({ page, context, browserName, isMobile }) => {
   test.skip(browserName !== 'chromium' || !isMobile, 'Chromium touch-input protocol');
   await page.setViewportSize({ width: 390, height: 600 });
   await page.goto('/');
   const touch = await context.newCDPSession(page);
   for (const number of [4, 3, 2, 1]) {
     const coin = page.locator(`.home-coin--${number}`);
-    await coin.evaluate(element => element.scrollIntoView({ block: 'nearest' }));
     const from = await coin.boundingBox();
     const to = await page.locator('.home-slot__hotspot').boundingBox();
     const start = { x: from.x + from.width / 2, y: from.y + from.height / 2 };
@@ -31,9 +30,73 @@ test('quarters follow a real touch drag, including after scrolling on a short ph
         moved.y + moved.height / 2 - (held.y + held.height / 2 + end.y - start.y));
     }).toBeLessThan(2);
     await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-    if (number !== 1) await expect(coin).toHaveAttribute('data-deposited', 'true');
+    if (number !== 1) {
+      await expect(coin).toHaveAttribute('data-deposited', 'true');
+      expect(await page.evaluate(() => [scrollX, scrollY])).toEqual([0, 0]);
+    }
   }
   await expect(page).toHaveURL(/\/arcade\/?$/);
+});
+
+test('the homepage fits the visible screen even when browser chrome resizes it', async ({ page }) => {
+  await page.goto('/');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  for (const size of [
+    { width: 390, height: 844 }, { width: 390, height: 664 }, { width: 390, height: 500 },
+    { width: 320, height: 480 }, { width: 320, height: 568 }, { width: 360, height: 640 },
+    { width: 430, height: 740 }, { width: 768, height: 1024 },
+    { width: 568, height: 320 }, { width: 844, height: 390 }
+  ]) {
+    await page.setViewportSize(size);
+    const dimensions = await page.evaluate(() => ({
+      width: document.scrollingElement.scrollWidth,
+      height: document.scrollingElement.scrollHeight,
+      sceneHeight: document.querySelector('.home-scene').getBoundingClientRect().height
+    }));
+    expect(dimensions.width, JSON.stringify(size)).toBeLessThanOrEqual(size.width);
+    expect(dimensions.height, JSON.stringify(size)).toBeLessThanOrEqual(size.height);
+    // WebKit can round viewport units by a fraction of a CSS pixel.
+    expect(Math.abs(dimensions.sceneHeight - size.height), JSON.stringify(size)).toBeLessThan(1);
+    const controls = await page.locator('.home-coin, .home-label, .home-title, .home-slot, .home-secret-card-trigger').evaluateAll(elements => elements.map(element => {
+      const rect = element.getBoundingClientRect();
+      return { name: element.getAttribute('aria-label') || element.className,
+        left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom };
+    }));
+    for (const control of controls) {
+      expect(control.left, `${JSON.stringify(size)} ${control.name}`).toBeGreaterThanOrEqual(0);
+      expect(control.right, `${JSON.stringify(size)} ${control.name}`).toBeLessThanOrEqual(size.width);
+      expect(control.top, `${JSON.stringify(size)} ${control.name}`).toBeGreaterThanOrEqual(0);
+      expect(control.bottom, `${JSON.stringify(size)} ${control.name}`).toBeLessThanOrEqual(size.height);
+    }
+    const overlaps = await page.locator('.home-label, .home-title, .home-insert, .home-slot, .home-coin-status').evaluateAll(elements => {
+      const boxes = elements.map(element => ({ name: element.className, rect: element.getBoundingClientRect() }));
+      return boxes.flatMap((a, index) => boxes.slice(index + 1).filter(b =>
+        a.rect.left < b.rect.right && a.rect.right > b.rect.left && a.rect.top < b.rect.bottom && a.rect.bottom > b.rect.top
+      ).map(b => `${a.name} overlaps ${b.name}`));
+    });
+    expect(overlaps, JSON.stringify(size)).toEqual([]);
+  }
+});
+
+test('a background finger swipe cannot scroll the homepage or disrupt a later coin drag', async ({ page, context, browserName, isMobile }) => {
+  test.skip(browserName !== 'chromium' || !isMobile, 'Chromium touch-input protocol');
+  await page.setViewportSize({ width: 390, height: 600 });
+  await page.goto('/');
+  const touch = await context.newCDPSession(page);
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 5, y: 420 }] });
+  for (let y = 400; y >= 200; y -= 20) {
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 5, y }] });
+  }
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  expect(await page.evaluate(() => [scrollX, scrollY, document.querySelector('.home-scene').getBoundingClientRect().top])).toEqual([0, 0, 0]);
+  const coin = page.locator('.home-coin--4');
+  const from = await coin.boundingBox();
+  const target = await page.locator('.home-slot__hotspot').boundingBox();
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: from.x + from.width / 2, y: from.y + from.height / 2 }] });
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: target.x + target.width / 2, y: target.y + target.height / 2 }] });
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await expect(coin).toHaveAttribute('data-deposited', 'true');
+  expect(await page.evaluate(() => [scrollX, scrollY])).toEqual([0, 0]);
 });
 
 test('tapping or clicking each quarter once opens the arcade', async ({ page, isMobile }) => {
