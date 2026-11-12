@@ -28,3 +28,5 @@ Final review corrections also cover trusted revision availability and pre-push/p
 The browser check now verifies the fourth deposit through successful arcade navigation rather than reading transient homepage elements after they may already be removed. Earlier deposits retain their exact state/count assertions; application code and timing are unchanged.
 
 This repository has no custom scanner bootstrap files; default detectors and an empty fingerprint list are intentional. No custom bootstrap detector is claimed.
+
+The activation/navigation test now uses Playwright locator input in the supported reduced-motion mode, allowing normal scroll/actionability/hit testing rather than stale coordinates on floating targets. Fifteen repeated desktop/phone/WebKit activations passed. Animated real-touch and mouse-drag tests still run in normal-motion mode; no application input code, delays, retries or skips changed. The final navigation assertion remains required. The verification document is UTF-8 and CI checks every tracked Markdown file to prevent Pages renderer failures.

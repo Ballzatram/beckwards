@@ -1,4 +1,4 @@
-# Merge verification — 2026-11-12
+# Merge verification â€” 2026-11-12
 
 Candidate: https://github.com/Ballzatram/beckwards/pull/12. Base revision: `206d3e3faed0d7919e2e91386acff30810262105`.
 Machine-readable evidence: [standards evidence](evidence/standards-2026-11-12.json).

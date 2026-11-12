@@ -37,13 +37,16 @@ test('quarters follow a real touch drag, including after scrolling on a short ph
 });
 
 test('tapping or clicking each quarter once opens the arcade', async ({ page, isMobile }) => {
+  // This test covers activation/navigation in the supported reduced-motion
+  // mode; the drag tests above and in site.spec.js retain animated input.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   for (let number = 1; number <= 4; number++) {
     const coin = page.locator(`.home-coin--${number}`);
-    await coin.evaluate(element => element.scrollIntoView({ block: 'nearest' }));
-    const rect = await coin.boundingBox();
-    if (isMobile) await page.touchscreen.tap(rect.x + rect.width / 2, rect.y + rect.height / 2);
-    else await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height / 2);
+    // Locator input waits for scrolling, a stable target and hit testing. Raw
+    // coordinates can land on another control while WebKit scrolls the page.
+    if (isMobile) await coin.tap();
+    else await coin.click();
     if (number < 4) {
       await expect(coin).toHaveAttribute('data-deposited', 'true');
       await expect(page.locator('#coin-status')).toHaveText(`${number}/4`);
