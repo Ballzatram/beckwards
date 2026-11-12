@@ -55,3 +55,9 @@ Native-platform and product-specific checks that were not executed remain pendin
 ## Merge-time evidence
 
 See [merge verification](merge-verification.md) for measured performance, hosted enforcement, source preservation and current coverage evidence. Residual failures/pending reviews above remain explicit; merging the adoption controls is not a conformance certificate.
+
+## Homepage scroll regression — 2026-11-12
+
+Before the fix, the phone regression measured a 700px document in a 664px viewport and a real touch swipe moved the page by 100px. The homepage now fits the dynamic viewport, prevents pan/overscroll, and preserves pinch zoom. No page copy, elements, dependencies or application JavaScript changed. Compact portrait spacing keeps the existing controls visible.
+
+Local verification: 7 static tests and 62 browser tests passed (4 inapplicable Chromium touch-protocol cases skipped on desktop/WebKit). Tests cover ten viewport sizes/height changes, zero scroll after a background finger swipe, subsequent coin dragging, deposits/navigation, existing routes and failure paths. The structural audit, page synchronization check and dependency audit passed. Physical iPhone/Android hardware was not used. The repository-wide formatter still reports the existing 32-file formatting gap under CODE-01; it is not waived or remediated by this functional change. Full-history secret scanning and the final Engineering Standards gate run on the committed candidate before merge.
