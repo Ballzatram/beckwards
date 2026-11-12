@@ -346,7 +346,13 @@ body.home-reference.is-dragging-coin{
   animation-delay:var(--float-delay, 0s);
   touch-action:none;
   user-select:none;
+  -webkit-user-select:none;
+  -webkit-touch-callout:none;
   filter:drop-shadow(0 5px 3px rgba(0,0,0,.36));
+}
+.home-coin img{
+  pointer-events:none;
+  -webkit-user-drag:none;
 }
 .home-coin:hover,
 .home-coin:focus-visible{
@@ -361,6 +367,7 @@ body.home-reference.is-dragging-coin{
 .home-coin.is-deposited{
   pointer-events:none;
   animation:homeCoinDeposit .32s ease-in forwards;
+  transition:left .24s ease-in, top .24s ease-in;
 }
 .home-coin--1{ --coin-left:8.3%; --coin-top:23.8%; --float-delay:-.8s; }
 .home-coin--2{ --coin-left:88.1%; --coin-top:19.1%; --float-delay:-2.4s; --float-speed:6.4s; }
@@ -684,6 +691,10 @@ body.secret-card-page{
   .home-coin,
   .home-insert{
     animation:none;
+  }
+  .home-coin.is-deposited{
+    opacity:0;
+    transition:none;
   }
   .secret-card-panel,
   .secret-card-slot img{
@@ -2723,6 +2734,22 @@ body.poster-page{
     height:100dvh;
     min-height:0;
   }
+  .home-title{ top:10%; width:min(42vw, 360px); }
+  .home-slot-wrap{ top:55%; width:clamp(80px, 12vw, 110px); }
+  .home-insert{ width:100%; margin-bottom:4px; }
+  .home-coin-status{ margin-top:3px; font-size:12px; }
+  .home-label--music{ width:116px; left:25%; top:36%; }
+  .home-label--who{ width:195px; left:76%; top:35%; }
+  .home-label--store{ width:110px; left:21%; top:57%; }
+  .home-label--live{ width:70px; left:76%; top:57%; }
+  .home-label--socials{ width:144px; left:27%; top:79%; }
+  .home-label--contact{ width:140px; left:76%; top:80%; }
+  .home-coin{ width:58px; }
+  .home-coin--1{ --coin-left:7%; --coin-top:27%; }
+  .home-coin--2{ --coin-left:93%; --coin-top:27%; }
+  .home-coin--3{ --coin-left:93%; --coin-top:79%; }
+  .home-coin--4{ --coin-left:7%; --coin-top:79%; }
+  .home-secret-card-trigger{ left:53%; top:88%; width:90px; }
   body.who-page{
     overflow:hidden;
   }
