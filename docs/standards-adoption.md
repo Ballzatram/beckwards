@@ -19,3 +19,7 @@ Default branches and deployed services are not changed by preparing this branch.
 Existing static checks and 58 desktop/phone browser checks passed; two existing browser cases were skipped. npm audit reports zero known dependency vulnerabilities. The development-server command uses portable python rather than the Windows Store python3 alias. Application behavior code is unchanged.
 
 See docs/audit.md for unresolved controls. A structural pass is not full conformance.
+
+## Final candidate checks
+
+See [merge verification](merge-verification.md) for current gates, commands and actual performance/coverage measurements. This supersedes the initial local-only/native-pending notes above. See .standards.json for the executable command register. Hosted feature restrictions and remaining conformance work remain explicit.
