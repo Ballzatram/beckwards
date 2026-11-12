@@ -1,6 +1,6 @@
 # Engineering standards adoption
 
-Owner: Ballzatram. Policy: 1.0.0. Baseline source revision: `206d3e3faed0d7919e2e91386acff30810262105`.
+Owner: Ballzatram. Policy: 1.0.1. Baseline source revision: `206d3e3faed0d7919e2e91386acff30810262105`.
 
 Static music site with generated route copies, browser interactions and a claw-machine game. Existing static and Playwright tests remain authoritative.
 
@@ -9,6 +9,8 @@ Static music site with generated route copies, browser interactions and a claw-m
 Run `uv run --project .engineering --locked python .engineering/tools/audit.py .` for structural prerequisites. Existing native test/build commands are retained in README and the workflows. `.github/workflows/engineering.yml` adds a consistent, read-only verification gate; it never deploys or uses production secrets. Review `docs/audit.md` for controls requiring manual evidence.
 
 The command register includes existing syntax/compile checks where no full static type checker exists; these are not equivalent to strict typing. Legacy formatter/type/coverage gaps remain explicit, not silently waived. No approved exceptions have been invented. Source import/native platform requirements and hosted protections must be reviewed separately.
+
+For the mobile homepage change, run `npm run check:homepage` after `npm ci`. The gate enforces scoped formatting, ESLint and strict JavaScript checking of the mobile regression tests in both native/browser CI jobs. See [JavaScript checks and migration](javascript-migration.md) for the exact boundary. The global formatter command remains in the register and still reports the separate legacy formatting backlog.
 
 ## Preservation
 

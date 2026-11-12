@@ -3,13 +3,32 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "format:homepage": "prettier --write style.css tests/mobile.spec.js eslint.config.mjs tsconfig.homepage-tests.json .prettierrc.json package.json .standards.json",
+    "format:homepage:check": "prettier --check style.css tests/mobile.spec.js eslint.config.mjs tsconfig.homepage-tests.json .prettierrc.json package.json .standards.json",
+    "lint:homepage": "eslint tests/mobile.spec.js eslint.config.mjs",
+    "typecheck:homepage": "tsc --project tsconfig.homepage-tests.json",
+    "check:homepage": "npm run format:homepage:check && npm run lint:homepage && npm run typecheck:homepage",
     "test": "playwright test",
     "test:static": "node --test tests/static.test.mjs tests/server-launcher.test.mjs",
     "sync:pages": "node scripts/sync-pages.mjs",
     "check:pages": "node scripts/sync-pages.mjs --check",
     "serve": "node scripts/serve.mjs"
   },
+  "overrides": {
+    "eslint": {
+      "minimatch": "11.0.8"
+    },
+    "@eslint/config-array": {
+      "minimatch": "11.0.8"
+    }
+  },
   "devDependencies": {
-    "@playwright/test": "1.58.2"
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.58.2",
+    "@types/node": "24.19.2",
+    "eslint": "10.14.0",
+    "globals": "17.14.0",
+    "prettier": "3.10.0",
+    "typescript": "6.0.3"
   }
 }

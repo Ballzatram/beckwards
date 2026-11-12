@@ -6,11 +6,9 @@
   "repository": "Ballzatram/beckwards",
   "risk_tier": "standard",
   "lifecycle": "active",
-  "profiles": [
-    "typescript",
-    "web"
-  ],
+  "profiles": ["typescript", "web"],
   "commands": {
+    "homepage_quality": "npm run check:homepage",
     "format": "npx --yes prettier@3.10.0 --check \"*.html\" \"**/*.css\" \"**/*.js\"",
     "lint": "uv run --project .engineering --locked python .engineering/tools/audit.py .",
     "types": "npm run test:static",
