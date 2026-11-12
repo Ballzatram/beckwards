@@ -324,7 +324,8 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     statusText = nextText;
     statusDone = nextDone;
     statuses.forEach((status) => {
-      status.textContent = nextText;
+      const isMobileStatus = status.closest('[data-arcade-mobile-controls]');
+      status.textContent = nextDone && isMobileStatus ? '' : nextText;
       status.classList.toggle('is-done', nextDone);
     });
   }
@@ -550,7 +551,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     state.message = message;
     state.subMessage = subMessage;
     state.noticeTimer = 9999;
-    setStatus('', true);
+    setStatus('INSERT COIN', true);
     setDropButtonPressed(false);
     setCoinReady(true);
     updateMotorByState();
