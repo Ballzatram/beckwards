@@ -1,160 +1,186 @@
-// scripts/arcade-controls.js
-
+// Input updates the game immediately; knob/ARIA writes are batched per frame.
 (() => {
-  const gates = Array.from(document.querySelectorAll('[data-arcade-joystick]'));
-  const buttons = Array.from(document.querySelectorAll('[data-arcade-drop]'));
-  if (!gates.length || !buttons.length) return;
+  const gates = document.querySelectorAll('[data-arcade-joystick]');
+  const buttons = document.querySelectorAll('[data-arcade-drop]');
+  const ENGAGE = 0.12;
+  const RELEASE = 0.06;
 
-  const MOVE_THRESHOLD = 0.34;
-
-  function clamp(number, min, max){
+  /** @param {number} number @param {number} min @param {number} max */
+  function clamp(number, min, max) {
     return Math.max(min, Math.min(max, number));
   }
 
-  function directionFromRatio(ratio){
-    if (ratio <= -MOVE_THRESHOLD) return -1;
-    if (ratio >= MOVE_THRESHOLD) return 1;
-    return 0;
-  }
+  /** @param {HTMLElement} gate */
+  function setupGate(gate) {
+    if (!gate.querySelector('[data-arcade-knob]')) return;
+    const mobile = gate.classList.contains('arcade-mobile-gate');
+    /** @type {number | null} */
+    let pointer = null;
+    /** @type {{ center: number, left: number, right: number } | null} */
+    let geometry = null;
+    let ratio = 0;
+    let direction = 0;
+    let paint = 0;
+    /** @type {Set<string>} */
+    const keys = new Set();
 
-  function applyGameDirection(direction){
-    if (direction < 0) window.GAME?.moveLeft();
-    else if (direction > 0) window.GAME?.moveRight();
-    else window.GAME?.stopMove();
-  }
-
-  function setupGate(gate){
-    const knob = gate.querySelector('[data-arcade-knob]');
-    if (!knob) return;
-
-    let dragging = false;
-    let activePointer = null;
-    let lastDirection = 0;
-
-    const setAriaValue = (ratio) => {
-      const rounded = Number(ratio.toFixed(2));
-      gate.setAttribute('aria-valuenow', String(rounded));
-      gate.setAttribute('aria-valuetext', rounded < 0 ? 'Moving left' : rounded > 0 ? 'Moving right' : 'Centered');
-    };
-
-    const applyDirection = (ratio) => {
-      const direction = directionFromRatio(ratio);
-      if (direction === lastDirection) return;
-      applyGameDirection(direction);
-      lastDirection = direction;
-    };
-
-    const setRatio = (ratio) => {
+    function measure() {
       const rect = gate.getBoundingClientRect();
-      const leftTravel = Math.max(18, rect.width * (gate.classList.contains('arcade-mobile-gate') ? 0.32 : 0.14));
-      const rightTravel = Math.max(24, rect.width * (gate.classList.contains('arcade-mobile-gate') ? 0.32 : 0.22));
-      const clampedRatio = clamp(ratio, -1, 1);
-      const travel = clampedRatio < 0 ? leftTravel : rightTravel;
-      gate.style.setProperty('--joy-x', `${(clampedRatio * travel).toFixed(2)}px`);
-      setAriaValue(clampedRatio);
-      return clampedRatio;
-    };
+      return {
+        center: rect.left + rect.width * (mobile ? 0.5 : 0.58),
+        left: Math.max(18, rect.width * (mobile ? 0.32 : 0.14)),
+        right: Math.max(24, rect.width * (mobile ? 0.32 : 0.22)),
+      };
+    }
 
-    const setKnob = (clientX) => {
-      const rect = gate.getBoundingClientRect();
-      const leftTravel = Math.max(18, rect.width * (gate.classList.contains('arcade-mobile-gate') ? 0.32 : 0.14));
-      const rightTravel = Math.max(24, rect.width * (gate.classList.contains('arcade-mobile-gate') ? 0.32 : 0.22));
-      const centerRatio = gate.classList.contains('arcade-mobile-gate') ? 0.5 : 0.58;
-      const centerX = rect.left + (rect.width * centerRatio);
-      const offset = clamp(clientX - centerX, -leftTravel, rightTravel);
-      const ratio = offset < 0 ? offset / leftTravel : offset / rightTravel;
+    function render() {
+      paint = 0;
+      const travel = geometry
+        ? ratio < 0
+          ? geometry.left
+          : geometry.right
+        : 0;
+      gate.style.setProperty('--joy-x', `${(ratio * travel).toFixed(2)}px`);
+      gate.setAttribute('aria-valuenow', String(Number(ratio.toFixed(2))));
+      gate.setAttribute(
+        'aria-valuetext',
+        direction < 0
+          ? 'Moving left'
+          : direction > 0
+            ? 'Moving right'
+            : 'Centered',
+      );
+    }
 
-      gate.style.setProperty('--joy-x', `${offset.toFixed(2)}px`);
-      setAriaValue(ratio);
-      return ratio;
-    };
+    /** @param {number} value */
+    function apply(value) {
+      ratio = clamp(value, -1, 1);
+      const next =
+        ratio >= ENGAGE
+          ? 1
+          : ratio <= -ENGAGE
+            ? -1
+            : direction === 1 && ratio > RELEASE
+              ? 1
+              : direction === -1 && ratio < -RELEASE
+                ? -1
+                : 0;
+      const game = window.GAME;
+      // A boundary, loading phase or drop can reject movement. Do not latch it.
+      if (next !== direction || (next && game?.mode() === 'READY')) {
+        if (next < 0) game?.moveLeft();
+        else if (next > 0) game?.moveRight();
+        else game?.stopMove();
+      }
+      direction = game?.mode() === 'MOVING' ? next : 0;
+      if (!paint) paint = requestAnimationFrame(render);
+    }
 
-    const reset = () => {
-      dragging = false;
-      activePointer = null;
-      lastDirection = 0;
-      setRatio(0);
+    function reset() {
+      const previous = pointer;
+      pointer = null;
+      keys.clear();
+      ratio = direction = 0;
+      if (paint) cancelAnimationFrame(paint);
+      render();
+      geometry = null;
       window.GAME?.stopMove();
-    };
+      if (previous !== null && gate.hasPointerCapture(previous))
+        gate.releasePointerCapture(previous);
+    }
 
-    const move = (event) => {
-      if (!dragging || event.pointerId !== activePointer) return;
+    /** @param {PointerEvent} event */
+    function move(event) {
+      if (event.pointerId !== pointer || !geometry) return;
       event.preventDefault();
-      applyDirection(setKnob(event.clientX));
-    };
+      const offset = event.clientX - geometry.center;
+      apply(offset / (offset < 0 ? geometry.left : geometry.right));
+    }
 
-    const stop = (event) => {
-      if (activePointer === null || event.pointerId !== activePointer) return;
-      try { gate.releasePointerCapture(event.pointerId); } catch (_) {}
-      reset();
-    };
+    gate.addEventListener(
+      'pointerdown',
+      (event) => {
+        if (pointer !== null || event.isPrimary === false || event.button !== 0)
+          return;
+        if (!['READY', 'MOVING'].includes(window.GAME?.mode() || '')) return;
+        event.preventDefault();
+        keys.clear();
+        geometry = measure();
+        pointer = event.pointerId;
+        gate.focus({ preventScroll: true });
+        try {
+          gate.setPointerCapture(pointer);
+        } catch (error) {
+          // Window listeners below also cover browsers losing capture mid-gesture.
+          if (!(
+            error instanceof DOMException && error.name === 'NotFoundError'
+          ))
+            console.warn('[joystick capture]', error);
+        }
+        move(event);
+      },
+      { passive: false },
+    );
 
-    const start = (event) => {
-      if (event.isPrimary === false || (event.button !== undefined && event.button !== 0)) return;
-      event.preventDefault();
-      dragging = true;
-      activePointer = event.pointerId;
-      gate.focus?.({ preventScroll:true });
-      try { gate.setPointerCapture(event.pointerId); } catch (_) {}
-      move(event);
-    };
-
-    gate.addEventListener('pointerdown', start, { passive:false });
-    gate.addEventListener('pointermove', move, { passive:false });
-    gate.addEventListener('pointerup', stop, { passive:false });
-    gate.addEventListener('pointercancel', stop, { passive:false });
-    gate.addEventListener('lostpointercapture', () => {
-      if (dragging) reset();
+    window.addEventListener('pointermove', move, { passive: false });
+    for (const type of /** @type {const} */ (['pointerup', 'pointercancel'])) {
+      window.addEventListener(type, (event) => {
+        if (pointer === event.pointerId) reset();
+      });
+    }
+    gate.addEventListener('lostpointercapture', (event) => {
+      if (pointer === event.pointerId) reset();
     });
-    gate.addEventListener('keydown', (event) => {
+
+    /** @param {KeyboardEvent} event @param {boolean} down */
+    function key(event, down) {
       if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
       event.preventDefault();
       event.stopPropagation();
-      const ratio = event.key === 'ArrowLeft' ? -1 : 1;
-      setRatio(ratio);
-      applyDirection(ratio);
-    });
-    gate.addEventListener('keyup', (event) => {
-      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
-      event.preventDefault();
-      event.stopPropagation();
-      reset();
-    });
+      if (pointer !== null || (down && event.repeat)) return;
+      if (down) keys.add(event.key);
+      else keys.delete(event.key);
+      const last = Array.from(keys).at(-1);
+      geometry ||= measure();
+      apply(last === 'ArrowLeft' ? -1 : last === 'ArrowRight' ? 1 : 0);
+    }
+    gate.addEventListener('keydown', (event) => key(event, true));
+    gate.addEventListener('keyup', (event) => key(event, false));
     gate.addEventListener('blur', reset);
     window.addEventListener('blur', reset);
+    window.addEventListener('resize', reset);
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) reset();
     });
   }
 
-  function activateGameControl(){
-    if (window.GAME?.mode?.() === 'DONE') {
-      window.GAME?.insertCoin();
-      return;
-    }
-    window.GAME?.drop();
+  function activateGameControl() {
+    if (window.GAME?.mode() === 'DONE') window.GAME.insertCoin();
+    else window.GAME?.drop();
   }
 
-  function setupDropButton(button){
-    const press = (event) => {
-      if (button.disabled || (event.button !== undefined && event.button !== 0)) return;
-      button.classList.add('is-pressed');
-      button.setAttribute('aria-pressed', 'true');
-    };
-
+  /** @param {HTMLButtonElement} button */
+  function setupDropButton(button) {
     const release = () => {
-      if (['DROPPING', 'CLOSING'].includes(window.GAME?.mode?.() || '')) return;
+      if (['DROPPING', 'CLOSING'].includes(window.GAME?.mode() || '')) return;
       button.classList.remove('is-pressed');
       button.setAttribute('aria-pressed', 'false');
     };
-
-    button.addEventListener('pointerdown', press);
-    button.addEventListener('pointerup', release);
-    button.addEventListener('pointerleave', release);
-    button.addEventListener('pointercancel', release);
+    button.addEventListener('pointerdown', (event) => {
+      if (button.disabled || event.button !== 0) return;
+      button.classList.add('is-pressed');
+      button.setAttribute('aria-pressed', 'true');
+    });
+    window.addEventListener('pointerup', release);
+    window.addEventListener('pointercancel', release);
+    window.addEventListener('blur', release);
     button.addEventListener('click', activateGameControl);
   }
 
-  gates.forEach(setupGate);
-  buttons.forEach(setupDropButton);
+  gates.forEach((gate) => {
+    if (gate instanceof HTMLElement) setupGate(gate);
+  });
+  buttons.forEach((button) => {
+    if (button instanceof HTMLButtonElement) setupDropButton(button);
+  });
 })();

@@ -1,4 +1,5 @@
 // scripts/loader.js
+import { AudioBus } from './audio.js?v=20261112-arcade';
 // Robust asset loader that reads assets/data/manifest.json and preloads images + audio.
 // API:
 //   await Loader.loadManifest()       // reads JSON
@@ -90,16 +91,25 @@ export const Loader = {
 
     const loadAudio = (item) => new Promise((resolve) => {
       if (this.audio.has(item.id)) { tick(); resolve(); return; }
+      let finished = false;
+      let timeoutId;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeoutId);
+        tick(); resolve();
+      };
       try {
         const el = new Audio();
-        el.preload = 'auto';
+        // Web Audio owns fetching; do not also start a media-element request.
+        el.preload = 'none';
         el.loop = !!item.loop;
         this.audio.set(item.id, el);
 
         const sources = Array.isArray(item.src) ? item.src : [item.src];
         if (!sources.length) {
           console.warn('[audio missing src]', item.id);
-          tick(); return resolve();
+          return finish();
         }
 
         sources.forEach(src => {
@@ -108,26 +118,16 @@ export const Loader = {
           el.appendChild(s);
         });
 
-        // Consider audio ready once metadata is available or after small timeout.
-        let finished = false;
-        const finish = () => {
-          if (finished) return;
-          finished = true;
-          clearTimeout(timeoutId);
-          el.oncanplaythrough = null;
-          el.onloadedmetadata = null;
-          el.onerror = null;
-          tick(); resolve();
-        };
-        el.oncanplaythrough = finish;
-        el.onloadedmetadata = finish;
-        el.onerror = finish;
-        // Safety fallback so we never hang
-        const timeoutId = setTimeout(finish, 800);
-        el.load();
+        // Preserve the legacy loader's 800ms ceiling; decoding can continue in
+        // the background without holding callers that also await artwork.
+        timeoutId = setTimeout(finish, 800);
+        AudioBus.preload(el).then(finish, error => {
+          console.warn('[audio preload error]', item.id, error);
+          finish();
+        });
       } catch (e) {
         console.warn('[audio load error]', item.id, e);
-        tick(); resolve(); // soft-fail
+        finish(); // soft-fail
       }
     });
 

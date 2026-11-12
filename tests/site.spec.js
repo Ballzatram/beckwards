@@ -127,7 +127,7 @@ test('note form confirms success and sends only once', async ({ page }) => {
 test('arcade ignores early input until assets are ready', async ({ page }) => {
   let finishRequest;
   const gate = new Promise(resolve => { finishRequest = resolve; });
-  await page.route('**/assets/data/manifest.json', async route => { await gate; await route.continue(); });
+  await page.route('**/assets/data/manifest.json*', async route => { await gate; await route.continue(); });
   await page.goto('/arcade/');
   await expect.poll(() => page.evaluate(() => Boolean(window.GAME))).toBe(true);
   await page.evaluate(() => { GAME.moveRight(); GAME.drop(); });
@@ -191,7 +191,7 @@ test('failed arcade artwork can be retried without reloading the page', async ({
 test('slow audio cannot block arcade controls', async ({ page }) => {
   let release;
   const gate = new Promise(resolve => { release = resolve; });
-  await page.route('**/*.wav*', async route => { await gate; await route.abort(); });
+  await page.route(/\.(wav|mp3)(\?|$)/, async route => { await gate; await route.abort(); });
   await page.goto('/arcade/');
   await expect.poll(() => page.evaluate(() => GAME.mode())).toBe('READY');
   await expect(page.locator('[data-arcade-drop]:visible')).toBeEnabled();

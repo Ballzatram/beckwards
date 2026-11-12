@@ -64,6 +64,7 @@ jobs:
         version: 0.13.7
     - run: npm ci
     - run: npm run check:homepage
+    - run: npm run check:arcade
     - run: npx playwright install --with-deps chromium webkit
     - run: npm run test:static
     - run: npm test

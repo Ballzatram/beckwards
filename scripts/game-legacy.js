@@ -1,7 +1,7 @@
 // scripts/game.js
-import { Loader } from './loader.js';
+import { Loader } from './loader.js?v=20261112-arcade';
 import { Renderer } from './renderer-legacy.js';
-import { AudioBus } from './audio.js';
+import { AudioBus } from './audio.js?v=20261112-arcade';
 
 (function(){
   const stage = document.getElementById('stage');
@@ -128,7 +128,7 @@ import { AudioBus } from './audio.js';
       try { AudioBus.loop ? AudioBus.loop(motor, { volume: 0.2 }) : motor.play(); } catch {}
     } else if (!on && motorOn){
       motorOn = false;
-      try { motor.pause(); motor.currentTime = 0; } catch {}
+      AudioBus.stopLoop(motor);
     }
   }
 
@@ -443,15 +443,8 @@ import { AudioBus } from './audio.js';
   stage.appendChild(label);
   const progress = (p)=>{ label.textContent = `Loading... ${Math.round(p*100)}%`; if (p>=1) label.remove(); };
 
-  let unlocked = false;
-  function unlockOnce(){
-    if (unlocked) return;
-    unlocked = true;
-    const click = loader.snd('ui_click');
-    if (click) AudioBus.play(click, { volume: 0.01 });
-    ['pointerdown','touchstart','keydown'].forEach(ev=>window.removeEventListener(ev, unlockOnce, true));
-  }
-  ['pointerdown','touchstart','keydown'].forEach(ev=>window.addEventListener(ev, unlockOnce, { capture:true }));
+  const unlockAudio = () => { void AudioBus.unlock(); };
+  ['pointerdown','touchstart','keydown'].forEach(ev=>window.addEventListener(ev, unlockAudio, { capture:true, passive:true }));
 
   document.addEventListener('visibilitychange', ()=>{
     if (document.hidden) setMotor(false);
