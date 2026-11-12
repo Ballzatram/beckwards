@@ -26,6 +26,10 @@ The [interactive latency hint](https://developer.mozilla.org/en-US/docs/Web/API/
 
 Victory audio starts in its own preload job during initialization and is checked again on Drop to recover an earlier failure. It cannot queue behind stalled motor/click/quarter requests. A paused-clock regression holds every other sound indefinitely and verifies that victory loading still starts before controls become ready.
 
+The preload probe observes the independent victory request while time is paused, then resumes time before requiring artwork readiness. A post-merge Linux WebKit run exposed an intermittent LOADING result with the clock frozen throughout image completion, despite the independent Pages run passing the same source. The probe retains both assertions and their deadlines; no automatic retry was enabled.
+
+A required claw image is explicitly held until the victory request is observed, and the game must still report LOADING at that point. The image is then released, time resumed and READY required. This verifies startup ordering without relying on artwork completing at a particular wall-clock speed.
+
 The victory clip now uses a 192kbps stereo MP3: **238,464 bytes**, down from **2,848,778 bytes** (91.6% smaller). The original WAV is retained. The four initial audio assets total **990,224 bytes** and have an enforced **1,000,000-byte** transfer budget. MP3 encoding adds normal codec frame padding; the decoded clip measured 9.936s versus the 9.891s source. No music, volume, page copy or page elements were added.
 
 Source SHA-256: `d8452cf03b549cd2f4d9fe44bbe83046f0736cad9188378e2a63d6376508b66c`. MP3 SHA-256: `4ee4b5dfb60953015e8c8b6c0a1d18e4ecefefefb7164ca68033542cc38a01df`. Encoding used the official PyPI `lameenc==1.9.0` Windows wheel in an ignored, local tooling directory: 48kHz stereo, 24-bit PCM converted to signed 16-bit little endian, bitrate 192, quality 2. The encoder is not an application/build dependency.

@@ -54,6 +54,10 @@ test('victory audio starts loading even while all other sounds are stalled', asy
   const held = new Promise((resolve) => {
     release = () => resolve(undefined);
   });
+  let releaseArtwork = () => {};
+  const artworkHeld = new Promise((resolve) => {
+    releaseArtwork = () => resolve(undefined);
+  });
   let victoryRequested = false;
   page.on('request', (request) => {
     if (request.url().includes('prize%20victory.mp3')) victoryRequested = true;
@@ -62,11 +66,24 @@ test('victory audio starts loading even while all other sounds are stalled', asy
     await held;
     await route.abort();
   });
+  await page.route('**/claw%20open.png*', async (route) => {
+    await artworkHeld;
+    await route.continue();
+  });
   try {
-    await readyArcade(page);
+    await page.goto('/arcade/', { waitUntil: 'domcontentloaded' });
     // No audio-loading deadline has advanced; unrelated sounds cannot gate win.
-    expect(victoryRequested).toBe(true);
+    await expect.poll(() => victoryRequested).toBe(true);
+    expect(await page.evaluate(() => window.GAME?.mode())).toBe('LOADING');
+    // Artwork readiness must not depend on a frozen browser clock (WebKit can
+    // defer image completion). The independent request was already observed.
+    releaseArtwork();
+    await page.clock.resume();
+    await expect
+      .poll(() => page.evaluate(() => window.GAME?.mode()))
+      .toBe('READY');
   } finally {
+    releaseArtwork();
     release();
   }
 });
