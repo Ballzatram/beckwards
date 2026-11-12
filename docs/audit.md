@@ -2,11 +2,11 @@
 
 Overall: **not-conforming — initial adoption implemented; review and legacy gaps remain**. No approved waivers have been invented.
 
-- Framework: 1.0.0
+- Framework: 1.0.1
 - Automated assessment: Codex, updated 2026-11-12; owner authorized merge; independent product/operations review remains pending
 - Owner: Ballzatram
 - Baseline revision: `206d3e3faed0d7919e2e91386acff30810262105`
-- Profiles: other-languages, web
+- Profiles: typescript, web
 - Risk: standard
 
 | Control | Status | Evidence / remaining work |
