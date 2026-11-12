@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "framework_version": "1.0.1",
+  "framework_source": ".engineering",
+  "owner": "Ballzatram",
+  "repository": "Ballzatram/beckwards",
+  "risk_tier": "standard",
+  "lifecycle": "active",
+  "profiles": [
+    "typescript",
+    "web"
+  ],
+  "commands": {
+    "format": "npx --yes prettier@3.10.0 --check \"*.html\" \"**/*.css\" \"**/*.js\"",
+    "lint": "uv run --project .engineering --locked python .engineering/tools/audit.py .",
+    "types": "npm run test:static",
+    "test": "npm run test:static && npm test",
+    "build": "npm run check:pages",
+    "security": "python .engineering/tools/secret_scan.py"
+  },
+  "components": [
+    {
+      "path": ".",
+      "profile": "typescript",
+      "dependency_manifest": "package.json",
+      "lockfile": "package-lock.json"
+    }
+  ]
+}

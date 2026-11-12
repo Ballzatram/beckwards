@@ -44,3 +44,7 @@ FormSubmit account to be working.
 
 GitHub Actions runs these checks on pull requests and before deploying `master`
 to GitHub Pages. A failed check blocks that workflow's deployment.
+
+## Engineering standards
+
+This project references Engineering Standards 1.0.1 through `.standards.json` and the pinned `.engineering/` snapshot. See [adoption and verification](docs/standards-adoption.md) and [control assessment](docs/audit.md). Structural checks are not a full conformance claim.
