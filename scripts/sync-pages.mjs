@@ -7,6 +7,7 @@ const check = process.argv.includes('--check');
 const pages = (await readdir(root, { withFileTypes: true }))
   .filter(entry => entry.isDirectory() && !entry.name.startsWith('.'));
 const outputs = new Map([['home.html', await readFile(path.join(root, 'index.html'), 'utf8')]]);
+const normalize = text => text.replace(/\r\n/g, '\n');
 
 for (const page of pages) {
   let source;
@@ -16,13 +17,13 @@ for (const page of pages) {
     if (error.code === 'ENOENT') continue;
     throw error;
   }
-  outputs.set(`${page.name}/index.html`, source.replace('<head>', '<head>\n  <base href="/" />'));
+  outputs.set(`${page.name}/index.html`, normalize(source).replace('<head>', '<head>\n  <base href="/" />'));
 }
 
 let stale = 0;
 for (const [file, content] of outputs) {
   const destination = path.join(root, file);
-  if (await readFile(destination, 'utf8').catch(() => '') === content) continue;
+  if (normalize(await readFile(destination, 'utf8').catch(() => '')) === normalize(content)) continue;
   if (check) {
     console.error(`Page is out of sync: ${file}. Run npm run sync:pages.`);
     stale += 1;
