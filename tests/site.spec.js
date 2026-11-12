@@ -127,7 +127,7 @@ test('note form confirms success and sends only once', async ({ page }) => {
 test('arcade ignores early input until assets are ready', async ({ page }) => {
   let finishRequest;
   const gate = new Promise(resolve => { finishRequest = resolve; });
-  await page.route('**/assets/data/manifest.json', async route => { await gate; await route.continue(); });
+  await page.route('**/assets/data/manifest.json*', async route => { await gate; await route.continue(); });
   await page.goto('/arcade/');
   await expect.poll(() => page.evaluate(() => Boolean(window.GAME))).toBe(true);
   await page.evaluate(() => { GAME.moveRight(); GAME.drop(); });

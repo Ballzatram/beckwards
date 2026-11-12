@@ -91,6 +91,14 @@ export const Loader = {
 
     const loadAudio = (item) => new Promise((resolve) => {
       if (this.audio.has(item.id)) { tick(); resolve(); return; }
+      let finished = false;
+      let timeoutId;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeoutId);
+        tick(); resolve();
+      };
       try {
         const el = new Audio();
         // Web Audio owns fetching; do not also start a media-element request.
@@ -101,7 +109,7 @@ export const Loader = {
         const sources = Array.isArray(item.src) ? item.src : [item.src];
         if (!sources.length) {
           console.warn('[audio missing src]', item.id);
-          tick(); return resolve();
+          return finish();
         }
 
         sources.forEach(src => {
@@ -110,11 +118,16 @@ export const Loader = {
           el.appendChild(s);
         });
 
-        // Decode once in the shared interactive context, off the control path.
-        AudioBus.preload(el).then(() => { tick(); resolve(); });
+        // Preserve the legacy loader's 800ms ceiling; decoding can continue in
+        // the background without holding callers that also await artwork.
+        timeoutId = setTimeout(finish, 800);
+        AudioBus.preload(el).then(finish, error => {
+          console.warn('[audio preload error]', item.id, error);
+          finish();
+        });
       } catch (e) {
         console.warn('[audio load error]', item.id, e);
-        tick(); resolve(); // soft-fail
+        finish(); // soft-fail
       }
     });
 

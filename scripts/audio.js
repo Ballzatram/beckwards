@@ -202,9 +202,10 @@ export function createAudioBus(options = {}) {
             cleanup();
           };
           media.onerror = stop;
-          void media.play().catch(stop);
+          if (!loop) expiry = setTimeout(stop, 150);
+          void media.play().then(() => clearTimeout(expiry), stop);
         }
-        clearTimeout(expiry);
+        if (ctx) clearTimeout(expiry);
       } catch (error) {
         console.warn('[audio playback failed]', error);
         stop();

@@ -51,8 +51,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     'quarter_audio_1',
     'claw_open_sfx',
     'claw_close_sfx',
-    'prize_drop',
-    'win'
+    'prize_drop'
   ];
   const REWARD_ID_PATTERN = /^cm_reward_/;
   const REWARD_QUARTER_SRCS = [
@@ -227,6 +226,18 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
   let rewardCoinCleanupTimer = null;
   let suspendedAt = null;
   dropButtons.forEach(button => { button.disabled = true; });
+
+  function prepareWinAudio(){
+    const win = loader.snd('win');
+    if (win) {
+      void AudioBus.preload(win);
+      return;
+    }
+    // Victory is independent of the pool for other optional sounds. Retry on
+    // Drop as well, so a failed initial request can recover before delivery.
+    loader.loadAll(() => {}, { audioIds:['win'], concurrency:1 })
+      .catch(error => console.warn('[victory audio preload failed]', error));
+  }
 
   function wake(resetClock = true){
     if (rafId || document.hidden || !ready) return;
@@ -687,6 +698,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     },
     drop(){
       if (!canMove()) return;
+      prepareWinAudio();
       phase = null;
       state.vx = 0;
       state.clawClosed = false;
@@ -997,11 +1009,15 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     state.mode = 'LOADING';
     progress(0);
     try {
-      await loader.loadManifest(new URL('../assets/data/manifest.json', import.meta.url).href);
+      const manifestUrl = new URL('../assets/data/manifest.json', import.meta.url);
+      manifestUrl.search = new URL(import.meta.url).search;
+      await loader.loadManifest(manifestUrl.href);
       loader.setVersion?.(loader.manifest?.meta?.version || '');
       rewardItems = getManifestRewardItems();
       // Optional sound readiness must never hold up the controls.
-      loader.loadAll(() => {}, { audioIds: ARCADE_AUDIO_IDS, concurrency: 3 }).catch(() => {});
+      prepareWinAudio();
+      loader.loadAll(() => {}, { audioIds: ARCADE_AUDIO_IDS, concurrency: 3 })
+        .catch(error => console.warn('[arcade audio preload failed]', error));
       await loader.loadAll(progress, {
         imageIds: ARCADE_IMAGE_IDS,
         concurrency: 6

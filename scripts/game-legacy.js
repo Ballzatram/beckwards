@@ -443,15 +443,8 @@ import { AudioBus } from './audio.js?v=20261112-arcade';
   stage.appendChild(label);
   const progress = (p)=>{ label.textContent = `Loading... ${Math.round(p*100)}%`; if (p>=1) label.remove(); };
 
-  let unlocked = false;
-  function unlockOnce(){
-    if (unlocked) return;
-    unlocked = true;
-    const click = loader.snd('ui_click');
-    if (click) AudioBus.play(click, { volume: 0.01 });
-    ['pointerdown','touchstart','keydown'].forEach(ev=>window.removeEventListener(ev, unlockOnce, true));
-  }
-  ['pointerdown','touchstart','keydown'].forEach(ev=>window.addEventListener(ev, unlockOnce, { capture:true }));
+  const unlockAudio = () => { void AudioBus.unlock(); };
+  ['pointerdown','touchstart','keydown'].forEach(ev=>window.addEventListener(ev, unlockAudio, { capture:true, passive:true }));
 
   document.addEventListener('visibilitychange', ()=>{
     if (document.hidden) setMotor(false);

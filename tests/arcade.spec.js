@@ -41,6 +41,59 @@ test.beforeEach(async ({ page }) => {
   await page.route('https://**/*', (route) => route.abort());
 });
 
+test('victory audio starts loading even while all other sounds are stalled', async ({
+  page,
+}) => {
+  test.skip(
+    !(await page.evaluate(() => typeof AudioContext !== 'undefined')),
+    'This browser build has no Web Audio API; media fallback is covered separately',
+  );
+  await page.clock.install({ time: new Date('2026-11-12T12:00:00Z') });
+  await page.clock.pauseAt(new Date('2026-11-12T12:01:00Z'));
+  let release = () => {};
+  const held = new Promise((resolve) => {
+    release = () => resolve(undefined);
+  });
+  let victoryRequested = false;
+  page.on('request', (request) => {
+    if (request.url().includes('prize%20victory.mp3')) victoryRequested = true;
+  });
+  await page.route(/\.wav(\?|$)/, async (route) => {
+    await held;
+    await route.abort();
+  });
+  try {
+    await readyArcade(page);
+    // No audio-loading deadline has advanced; unrelated sounds cannot gate win.
+    expect(victoryRequested).toBe(true);
+  } finally {
+    release();
+  }
+});
+
+test('optional stalled sound keeps the legacy arcade loading deadline bounded', async ({
+  page,
+}) => {
+  let release = () => {};
+  const held = new Promise((resolve) => {
+    release = () => resolve(undefined);
+  });
+  await page.route(/\.(wav|mp3)(\?|$)/, async (route) => {
+    await held;
+    await route.abort();
+  });
+  try {
+    await page.goto('/arcade-legacy.html');
+    await expect(page.locator('#stage')).not.toContainText('Loading', {
+      timeout: 10000,
+    });
+    await expect(page.locator('#stage')).not.toContainText('Error');
+    await expect(page.locator('#stage canvas')).toBeVisible();
+  } finally {
+    release();
+  }
+});
+
 test('bringing mobile controls into focus keeps the cabinet stationary', async ({
   page,
 }) => {

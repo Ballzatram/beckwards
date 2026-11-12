@@ -333,3 +333,33 @@ test('media fallback plays, stops and contains denied playback without Web Audio
   };
   assert.equal(await bus.preload(element), false);
 });
+
+test('media fallback discards an effect whose playback startup stalls', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  let pauses = 0;
+  let finish = () => {};
+  const media = {
+    volume: 1,
+    loop: false,
+    onended: null,
+    onerror: null,
+    pause() {
+      pauses++;
+    },
+    play: () =>
+      new Promise((resolve) => {
+        finish = () => resolve(undefined);
+      }),
+    cloneNode() {
+      return { ...media };
+    },
+  };
+  const bus = createAudioBus({ createContext: () => null });
+  bus.play(/** @type {HTMLMediaElement} */ (/** @type {unknown} */ (media)));
+  t.mock.timers.tick(150);
+  assert.equal(pauses, 1);
+  finish();
+  await new Promise((resolve) => setImmediate(resolve));
+  bus.stopAll();
+  assert.equal(pauses, 1);
+});
