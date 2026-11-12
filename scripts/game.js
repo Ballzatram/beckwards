@@ -324,7 +324,8 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     statusText = nextText;
     statusDone = nextDone;
     statuses.forEach((status) => {
-      status.textContent = nextText;
+      const isMobileStatus = status.closest('[data-arcade-mobile-controls]');
+      status.textContent = nextDone && isMobileStatus ? '' : nextText;
       status.classList.toggle('is-done', nextDone);
     });
   }
@@ -351,7 +352,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
       label.textContent = nextReady ? 'RETRY' : 'DROP';
     });
     dropButtons.forEach((button) => {
-      button.setAttribute('aria-label', nextReady ? 'Insert coin to retry' : 'Drop claw');
+      button.setAttribute('aria-label', nextReady ? 'Retry' : 'Drop claw');
     });
   }
 

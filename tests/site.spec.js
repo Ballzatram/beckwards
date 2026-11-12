@@ -157,6 +157,14 @@ test('arcade completes a grab, opens a reward, and retries', async ({ page }) =>
   await page.keyboard.press('Shift+Tab');
   await expect(page.getByRole('button', { name: 'Back', exact: true })).toBeFocused();
   await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await expect(page.locator('[data-arcade-status]')).toBeEmpty();
+  await expect(page.locator('#arcade-status')).toHaveText('INSERT COIN');
+  await expect(button).toHaveAttribute('aria-label', 'Retry');
+  const mobileControls = page.locator('[data-arcade-mobile-controls]');
+  if (await mobileControls.isVisible()) {
+    expect(await mobileControls.locator('[data-arcade-status]').evaluate(status =>
+      getComputedStyle(status, '::after').content)).toBe('none');
+  }
   await button.click();
   await expect.poll(() => page.evaluate(() => GAME.mode())).toBe('READY');
 });
