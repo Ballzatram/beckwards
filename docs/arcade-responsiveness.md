@@ -8,7 +8,7 @@ The joystick engages at 12% travel rather than 34%, with a 6% release threshold 
 
 Regression evidence: the original implementation failed the small-deflection, capture-failure and overlapping-arrow tests. The fixed implementation moves the rendered claw in both directions at 15% deflection within 34ms of simulated 60Hz time. The clock is explicitly paused between measurements; `clock.install()` alone was insufficient and produced a false reversal failure. These are deterministic rendering checks, not physical input-to-display latency measurements.
 
-Budgets enforced by tests: one layout measurement for a 60-event gesture burst; movement changes during the input event; visible movement/reversal within two simulated frames; centered controls and stopped movement immediately after release/cancel. Native Android touch-protocol checks cover repeated grabs, reversals, cancellation and zero page scroll. Desktop mouse, keyboard and iPhone WebKit pointer checks cover the same critical control behavior. The existing dirty-region renderer, DPR cap and idle animation-frame shutdown remain in place; game speeds, claw geometry, prize rules and visuals are preserved.
+Budgets enforced by tests: one layout measurement for a 60-event gesture burst; movement changes during the input event; visible movement/reversal within two simulated frames; centered controls and stopped movement immediately after release/cancel. Native Android touch-protocol checks cover repeated grabs, reversals, cancellation and zero page scroll. Desktop mouse, keyboard and iPhone WebKit pointer checks cover the same critical control behavior. The DPR cap and idle animation-frame shutdown remain in place. The moving canvas now clears completely and draws directly from original images; game speeds, claw geometry and prize rules are preserved.
 
 The mobile cabinet also moved 50px when the browser brought the slider into focus, despite the document itself staying at scrollY=0. The scene now uses overflow clipping (with the existing hidden fallback), preventing internal focus scrolling. A regression checks both the scene scroll offset and unchanged control bounds on a 390×664 viewport; all visible controls still fit the viewport.
 
@@ -42,4 +42,14 @@ Run `npm run check:homepage`, `npm run check:arcade`, `npm run test:static`, `np
 
 No runtime dependencies, deployment permissions or security gates changed. The removed mobile INSERT COIN prompt stays removed; existing Drop, Retry and reward journeys remain regression requirements.
 
-The game, controls, loader, manifest and shared audio imports use one release query version. A warm browser exposed an old AudioBus paired with updated game code during local verification; versioned entry points and matching dependency URLs prevent mixed module APIs or a stale manifest referring to the larger WAV after release.
+Changed runtime modules use release query versions. The rendering correction versions the game, renderer and manifest together; unchanged audio, loader and input modules retain their existing compatible versions. This prevents a cached old renderer from surviving the correction without downloading unchanged sound assets again.
+
+## Rendering correction after the iPhone report
+
+The owner's screenshot showed repeated joystick images and a rod without its claw. Earlier checks sampled a row through the rod and verified input state; that did not prove the complete claw or clean compositing. The physical iPhone GPU failure was not reproduced directly in the available desktop engines.
+
+The replacement removes hidden canvas sprite copies and crops the original claw images directly. Every active frame clears the entire moving canvas, with static cabinet art remaining in the DOM. Returning from background or a restored drawing context redraws even an idle claw. The moving joystick image uses its layout position, without a transform or CSS drop-shadow filter; image size, travel, controls and copy remain unchanged. Canvas paint containment is removed so it does not constrain repaint invalidation.
+
+Related historical WebKit reports document [canvas-to-canvas failures](https://bugs.webkit.org/show_bug.cgi?id=207128) and [drop-shadow repaint trails](https://bugs.webkit.org/show_bug.cgi?id=202472). These explain the paths avoided here; they do not establish the exact bug/version on the owner's phone.
+
+New checks inspect both the head and arms, excluding the rod. They simulate unavailable intermediate canvas surfaces, restored main-canvas pixels and background pixel loss. All three failed before the correction. Eight left/right sweeps must return the joystick to the same resting bitmap after each release; a viewport resize must keep the full claw visible. Screenshots are attached to the browser results. These are visual/resource-recovery regressions, not a claim of physical iPhone verification.

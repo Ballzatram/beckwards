@@ -70,6 +70,14 @@ Scope: the homepage stylesheet and mobile regression tests from `389338a6b40ced5
 
 A deliberate fixed-height mutation (`760px !important`) failed the viewport test with an 84px height mismatch at 390×844; the stylesheet was restored before the clean test run. Local verification passed: frozen npm installation; `npm run check:homepage`; 7 static tests; 62 browser tests (4 inapplicable Chromium touch-protocol cases skipped); page synchronization; and the structural audit. The npm audit reports zero vulnerabilities after applying the starter's exact minimatch overrides. Full-history scanning and final-head CI remain merge requirements. No production deployment is performed as a standards check.
 
+## Mobile rendering correction — 2026-11-12
+
+The owner's iPhone screenshot invalidated the earlier visual assurance: joystick images trailed and the claw was missing while its rod remained. Earlier movement checks sampled the rod, not the head/arms, and did not establish correct device compositing. The physical iPhone GPU defect has not been reproduced directly in the available engines; historical WebKit canvas-copy/filter reports are supporting context, not proof of that device's exact failure.
+
+The correction removes intermediate canvas sprite copies, paints from original images, clears the complete moving layer, redraws on context restoration/foreground return, and moves the existing joystick image without its transform/drop-shadow filter. Canvas paint containment is removed. The original art, layout, input/audio mechanics and copy remain. Game/renderer release URLs invalidate cached old code.
+
+Three resource-loss regressions failed before the fix and pass afterward. The new tests require both claw head and arms, exercise idle restoration/background pixel loss, compare the resting joystick bitmap after eight sweeps and retain claw visibility after resize. Local verification passed 100 browser checks (8 documented platform skips), including 12 rendering cases, plus 19 static/audio checks, scoped lint/format/strict checking and route synchronization. The renderer and new tests now participate in strict checkJs; the global formatting backlog is 27 legacy files. Full-application coverage, independent manual/accessibility review and direct physical-device verification remain open. Final-head CI and source scanning remain merge requirements.
+
 ## Arcade responsiveness — 2026-11-12
 
 Review follow-up preserves the older arcade entry's 800ms optional-sound deadline, starts victory preloading independently of the other sounds, retries its preparation on Drop and versions the main manifest with the game release. Stalled-audio regressions reproduced both loading problems before the fixes. The final 90-case local run before this follow-up passed 83 with 7 explicit platform skips; the expanded arcade suite and final-head CI provide the subsequent compatibility evidence.

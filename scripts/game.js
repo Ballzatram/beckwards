@@ -1,6 +1,6 @@
 // scripts/game.js
 import { Loader } from './loader.js?v=20261112-arcade';
-import { Renderer } from './renderer.js';
+import { Renderer } from './renderer.js?v=20261112-rendering';
 import { AudioBus } from './audio.js?v=20261112-arcade';
 import { CLAW_GEOMETRY } from './claw-geometry.js';
 
@@ -935,6 +935,7 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     if (document.hidden) return;
     if (suspendedAt !== null && phase) phase.startedAt += performance.now() - suspendedAt;
     suspendedAt = null;
+    if (ready) onResize();
     updateMotorByState();
     if (hasActiveAnimation()) wake();
   }
@@ -1004,6 +1005,10 @@ import { CLAW_GEOMETRY } from './claw-geometry.js';
     drawOnce();
   }
   window.addEventListener('resize', onResize);
+  canvas.addEventListener('contextrestored', () => {
+    onResize();
+    if (hasActiveAnimation()) wake();
+  });
 
   async function init(){
     state.mode = 'LOADING';

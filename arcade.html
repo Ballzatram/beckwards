@@ -82,7 +82,6 @@
     width:100%;
     height:100%;
     image-rendering:auto;
-    contain:strict;
   }
   .arcade-front{
     left:9.9609375%;
@@ -172,12 +171,9 @@
   }
   .arcade-handle{
     position:absolute;
-    left:58%;
+    left:calc(40.4% + var(--joy-x, 0px));
     bottom:0;
     width:35.2%;
-    transform:translate(calc(-50% + var(--joy-x, 0px)), 0);
-    transform-origin:50% 90%;
-    filter:drop-shadow(0 3px 2px rgba(0,0,0,.7));
     pointer-events:none;
     user-select:none;
     -webkit-user-drag:none;
@@ -384,14 +380,12 @@
     }
     .arcade-mobile-handle{
       position:absolute;
-      left:50%;
+      left:calc(50% - 19px + var(--joy-x, 0px));
       bottom:5px;
       z-index:2;
       display:block;
       width:38px;
       height:auto;
-      transform:translateX(calc(-50% + var(--joy-x, 0px)));
-      filter:drop-shadow(0 4px 2px rgba(0,0,0,.72));
       pointer-events:none;
       user-select:none;
       -webkit-user-drag:none;
@@ -564,7 +558,7 @@
     </section>
   </div>
 
-  <script type="module" src="scripts/game.js?v=20261112-arcade"></script>
+  <script type="module" src="scripts/game.js?v=20261112-rendering"></script>
   <script type="module" src="scripts/arcade-controls.js?v=20261112-arcade"></script>
 </body>
 </html>
