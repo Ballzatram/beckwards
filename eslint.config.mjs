@@ -7,9 +7,11 @@ export default [
     files: [
       'tests/mobile.spec.js',
       'tests/arcade.spec.js',
+      'tests/rendering.spec.js',
       'tests/audio.test.mjs',
       'scripts/arcade-controls.js',
       'scripts/audio.js',
+      'scripts/renderer.js',
     ],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
     rules: { eqeqeq: 'error' },

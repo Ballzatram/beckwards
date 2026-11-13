@@ -4,8 +4,10 @@
     "tests/arcade-probe.d.ts",
     "scripts/arcade-types.d.ts",
     "scripts/arcade-controls.js",
+    "scripts/renderer.js",
     "scripts/audio.js",
     "tests/arcade.spec.js",
+    "tests/rendering.spec.js",
     "tests/audio.test.mjs"
   ]
 }
